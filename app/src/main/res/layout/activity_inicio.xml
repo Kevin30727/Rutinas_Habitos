@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_app">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:paddingBottom="120dp">
+
+            <!-- 1. Encabezado Superior -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="¡Hola, Sofía! ✨"
+                        android:textColor="@color/neutral"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tu ritmo de hoy se siente ligero y constante."
+                        android:textColor="#8D909F"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔥 14 DÍAS"
+                    android:textColor="@color/neutral"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="10dp"
+                    android:background="@drawable/bg_racha_dias" />
+            </LinearLayout>
+
+            <!-- 2. Tarjeta Hoy florece -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:orientation="horizontal"
+                android:padding="20dp"
+                android:elevation="2dp"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="16dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="HOY FLORECE"
+                        android:textColor="#4CA977"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="4 de 6 hábitos listos"
+                        android:textColor="@color/neutral"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Llevas el 68% de tus metas diarias cumplidas con calma."
+                        android:textColor="#8D909F"
+                        android:textSize="13sp"
+                        android:layout_marginTop="8dp"/>
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:progress="68"
+                        app:indicatorSize="80dp"
+                        app:trackThickness="8dp"
+                        app:indicatorColor="@color/primary"
+                        app:trackColor="@color/background_app"
+                        app:trackCornerRadius="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="68%"
+                        android:textColor="@color/neutral"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- 3. Calendario Dinámico -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp"
+                    android:paddingHorizontal="4dp">
+
+                    <TextView
+                        android:id="@+id/tv_mes_semana"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Mes, Semana"
+                        android:textColor="@color/neutral"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/tv_indicador_hoy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="HOY ES..."
+                        android:textColor="#4CA977"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="7">
+                    <!-- Los IDs de los días están listos para tu Java -->
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_1" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/tv_letra_dia_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="L" android:textColor="#8D909F" android:textSize="12sp" />
+                            <TextView android:id="@+id/tv_num_dia_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_2" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/tv_letra_dia_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="M" android:textColor="#8D909F" android:textSize="12sp" />
+                            <TextView android:id="@+id/tv_num_dia_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_3" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/tv_letra_dia_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="M" android:textColor="#8D909F" android:textSize="12sp" />
+                            <TextView android:id="@+id/tv_num_dia_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_4" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/tv_letra_dia_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="J" android:textColor="#8D909F" android:textSize="12sp" />
+                            <TextView android:id="@+id/tv_num_dia_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_5" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/tv_letra_dia_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="V" android:textColor="#8D909F" android:textSize="12sp" />
+                            <TextView android:id="@+id/tv_num_dia_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_6" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/tv_letra_dia_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="S" android:textColor="#8D909F" android:textSize="12sp" />
+                            <TextView android:id="@+id/tv_num_dia_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_7" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/tv_letra_dia_7" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="D" android:textColor="#8D909F" android:textSize="12sp" />
+                            <TextView android:id="@+id/tv_num_dia_7" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Título: Hábitos de hoy -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="4dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Hábitos de hoy"
+                    android:textColor="@color/neutral"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4 DE 6"
+                    android:textColor="#8D909F"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1" />
+            </LinearLayout>
+
+            <!-- 4. Hábito Completo (Meditación) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:elevation="2dp"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_circulo"
+                    android:src="@drawable/ic_check"
+                    android:padding="12dp"
+                    app:tint="@color/neutral" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Meditación matutina"
+                        android:textColor="#8D909F"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:id="@+id/tv_meditacion_titulo"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10 min completados"
+                        android:textColor="#8D909F"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hecho"
+                    android:textColor="@color/neutral"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="8dp"
+                    android:background="@drawable/bg_tarjeta_redondeada"
+                    android:backgroundTint="@color/background_app"/>
+            </LinearLayout>
+
+            <!-- 5. Hábito Agua (Progreso) -->
+            <!-- 5. Hábito Agua (Progreso) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:elevation="2dp"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_boton_circular"
+                        android:src="@drawable/ic_check"
+                        android:padding="14dp"
+                        app:tint="@color/neutral" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Beber 2L de agua"
+                            android:textColor="@color/neutral"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_texto_agua"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="6 de 8 vasos"
+                            android:textColor="#8D909F"
+                            android:textSize="14sp"
+                            android:layout_marginTop="2dp"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/btn_agua_menos"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:text="-"
+                            android:textColor="@color/neutral"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/bg_boton_circular"
+                            android:backgroundTint="@color/background_app"/>
+
+                        <TextView
+                            android:id="@+id/btn_agua_mas"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:text="+"
+                            android:textColor="@color/neutral"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:background="@drawable/bg_boton_circular"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/pb_agua"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp"
+                    android:layout_marginTop="16dp"
+                    android:max="8"
+                    android:progress="6"
+                    android:progressDrawable="@drawable/bg_racha_dias"
+                    android:progressTint="@color/tertiary" />
+            </LinearLayout>
+
+            <!-- 6. Hábito Pendiente (Lectura) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:elevation="2dp"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_circulo_inactivo"
+                    android:src="@drawable/ic_check"
+                    android:padding="12dp"
+                    app:tint="@color/neutral" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Lectura consciente"
+                        android:textColor="@color/neutral"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="20 páginas meta"
+                        android:textColor="#8D909F"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pendiente"
+                    android:textColor="@color/neutral"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="8dp"
+                    android:background="@drawable/bg_etiqueta_pendiente" />
+            </LinearLayout>
+
+            <!-- 7. Hábito Pendiente (Paseo) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:elevation="2dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_circulo_inactivo"
+                    android:src="@drawable/ic_check"
+                    android:padding="12dp"
+                    app:tint="@color/neutral" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Paseo al aire libre"
+                        android:textColor="@color/neutral"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="30 minutos de aire puro"
+                        android:textColor="#8D909F"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pendiente"
+                    android:textColor="@color/neutral"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="8dp"
+                    android:background="@drawable/bg_racha_dias" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Botón Flotante e Inferior -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_nuevo_habito"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/primary"
+        android:src="@drawable/ic_add"
+        app:tint="@color/neutral"
+        app:borderWidth="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/barra_inferior"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Barra inferior flotante -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/barra_inferior"
+        style="@style/Widget.MaterialComponents.BottomNavigationView"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/bg_menu_flotante"
+        app:itemIconTint="@color/estado_menu"
+        app:itemTextColor="@color/estado_menu"
+        app:itemActiveIndicatorStyle="@null"
+        app:labelVisibilityMode="labeled"
+        app:itemIconSize="24dp"
+        app:menu="@menu/menu_principal"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

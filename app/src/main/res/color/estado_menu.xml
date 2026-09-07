@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Color cuando la pestaña está seleccionada (Oscuro) -->
+    <item android:color="@color/neutral" android:state_checked="true" />
+
+    <!-- Color cuando la pestaña NO está seleccionada (Gris) -->
+    <item android:color="#A0A4B8" />
+</selector>

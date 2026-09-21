@@ -17,51 +17,98 @@ import java.util.Locale;
 
 public class CalendarioActivity extends AppCompatActivity {
 
+    private Calendar calendarioActual;
+    private final Locale idioma = new Locale("es", "ES");
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendario);
 
-        generarCalendarioMes();
+        // Inicializar el calendario en el mes actual
+        calendarioActual = Calendar.getInstance();
 
-        // Configurar navegación
-        BottomNavigationView bottomNav = findViewById(R.id.barra_inferior);
-        if (bottomNav != null) {
-            bottomNav.setSelectedItemId(R.id.nav_calendario);
-            bottomNav.setOnItemSelectedListener(item -> {
-                int itemId = item.getItemId();
-                if (itemId == R.id.nav_inicio) {
-                    Intent intent = new Intent(getApplicationContext(), InicioActivity.class);
-                    startActivity(intent);
-                    overridePendingTransition(0, 0);
-                    finish();
-                    return true;
-                } else if (itemId == R.id.nav_calendario) {
-                    return true;
-                }
-                return false;
+        generarCalendarioMes();
+        configurarBotonesNavegacionMes();
+        configurarSelectoresVista();
+        configurarNavegacionInferior();
+    }
+
+    private void configurarBotonesNavegacionMes() {
+        android.widget.ImageView btnAnterior = findViewById(R.id.btn_mes_anterior);
+        android.widget.ImageView btnSiguiente = findViewById(R.id.btn_mes_siguiente);
+
+        // ... (el resto del código se mantiene igual)
+        if (btnAnterior != null) {
+            btnAnterior.setOnClickListener(v -> {
+                calendarioActual.add(Calendar.MONTH, -1);
+                generarCalendarioMes();
+            });
+        }
+
+        if (btnSiguiente != null) {
+            btnSiguiente.setOnClickListener(v -> {
+                calendarioActual.add(Calendar.MONTH, 1);
+                generarCalendarioMes();
             });
         }
     }
 
-    private void generarCalendarioMes() {
-        Calendar cal = Calendar.getInstance();
-        Locale idioma = new Locale("es", "ES");
+    private void configurarSelectoresVista() {
+        TextView btnMes = findViewById(R.id.btn_vista_mes);
+        TextView btnSemana = findViewById(R.id.btn_vista_semana);
+        TextView btnDia = findViewById(R.id.btn_vista_dia);
 
+        View.OnClickListener selectorListener = v -> {
+            // Resetear estilos de todos
+            resetearEstiloBoton(btnMes);
+            resetearEstiloBoton(btnSemana);
+            resetearEstiloBoton(btnDia);
+
+            // Aplicar estilo activo al seleccionado
+            TextView seleccionado = (TextView) v;
+            seleccionado.setBackgroundResource(R.drawable.bg_selector_activo);
+            seleccionado.setTextColor(Color.parseColor("#2D3142"));
+            seleccionado.setTypeface(null, android.graphics.Typeface.BOLD);
+
+            // Nota: Aquí iría la lógica para cambiar la vista (ej. ocultar el GridLayout y mostrar una lista)
+        };
+
+        if (btnMes != null) btnMes.setOnClickListener(selectorListener);
+        if (btnSemana != null) btnSemana.setOnClickListener(selectorListener);
+        if (btnDia != null) btnDia.setOnClickListener(selectorListener);
+    }
+
+    private void resetearEstiloBoton(TextView btn) {
+        if (btn != null) {
+            btn.setBackground(null);
+            btn.setTextColor(Color.parseColor("#8D909F"));
+            btn.setTypeface(null, android.graphics.Typeface.NORMAL);
+        }
+    }
+
+    private void generarCalendarioMes() {
         TextView tvMesCalendario = findViewById(R.id.tv_mes_calendario);
         SimpleDateFormat formatoMesAnio = new SimpleDateFormat("MMMM\nyyyy", idioma);
-        String textoMes = formatoMesAnio.format(cal.getTime());
+        String textoMes = formatoMesAnio.format(calendarioActual.getTime());
         textoMes = textoMes.substring(0, 1).toUpperCase() + textoMes.substring(1);
 
         if (tvMesCalendario != null) {
             tvMesCalendario.setText(textoMes);
         }
 
-        int diaHoy = cal.get(Calendar.DAY_OF_MONTH);
-        int diasEnMes = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        // Obtener el día actual real (para resaltarlo solo si estamos en el mes y año correctos)
+        Calendar hoyReal = Calendar.getInstance();
+        boolean esMesActual = (hoyReal.get(Calendar.YEAR) == calendarioActual.get(Calendar.YEAR) &&
+                hoyReal.get(Calendar.MONTH) == calendarioActual.get(Calendar.MONTH));
+        int diaHoyReal = hoyReal.get(Calendar.DAY_OF_MONTH);
 
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-        int primerDiaSemana = cal.get(Calendar.DAY_OF_WEEK);
+        // Variables para armar la cuadrícula del mes que se está visualizando
+        int diasEnMes = calendarioActual.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+        Calendar calClon = (Calendar) calendarioActual.clone();
+        calClon.set(Calendar.DAY_OF_MONTH, 1);
+        int primerDiaSemana = calClon.get(Calendar.DAY_OF_WEEK);
 
         int espaciosVacios = primerDiaSemana - 2;
         if (espaciosVacios < 0) {
@@ -100,6 +147,7 @@ public class CalendarioActivity extends AppCompatActivity {
                 int dia = i - espaciosVacios + 1;
                 tvNum.setText(String.valueOf(dia));
 
+                // Simulación de datos (se mantendrá estática hasta tener base de datos)
                 if (dia % 4 == 0) {
                     punto.setBackgroundResource(R.drawable.bg_punto_pendiente);
                 } else if (dia % 3 == 0) {
@@ -108,7 +156,8 @@ public class CalendarioActivity extends AppCompatActivity {
                     punto.setBackgroundResource(R.drawable.bg_punto_completo);
                 }
 
-                if (dia == diaHoy) {
+                // Resaltar si es exactamente HOY
+                if (esMesActual && dia == diaHoyReal) {
                     tvNum.setBackgroundResource(R.drawable.bg_dia_seleccionado_calendario);
                     tvNum.setTypeface(null, android.graphics.Typeface.BOLD);
                 }
@@ -120,6 +169,26 @@ public class CalendarioActivity extends AppCompatActivity {
             celda.addView(tvNum);
             celda.addView(punto);
             grid.addView(celda);
+        }
+    }
+
+    private void configurarNavegacionInferior() {
+        BottomNavigationView bottomNav = findViewById(R.id.barra_inferior);
+        if (bottomNav != null) {
+            bottomNav.setSelectedItemId(R.id.nav_calendario);
+            bottomNav.setOnItemSelectedListener(item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_inicio) {
+                    Intent intent = new Intent(getApplicationContext(), InicioActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+                    finish();
+                    return true;
+                } else if (itemId == R.id.nav_calendario) {
+                    return true;
+                }
+                return false;
+            });
         }
     }
 }

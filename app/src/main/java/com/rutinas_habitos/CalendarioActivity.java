@@ -1,11 +1,13 @@
 package com.rutinas_habitos;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.GridLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,7 +27,6 @@ public class CalendarioActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendario);
 
-        // Inicializar el calendario en el mes actual
         calendarioActual = Calendar.getInstance();
 
         generarCalendarioMes();
@@ -35,10 +36,9 @@ public class CalendarioActivity extends AppCompatActivity {
     }
 
     private void configurarBotonesNavegacionMes() {
-        android.widget.ImageView btnAnterior = findViewById(R.id.btn_mes_anterior);
-        android.widget.ImageView btnSiguiente = findViewById(R.id.btn_mes_siguiente);
+        ImageView btnAnterior = findViewById(R.id.btn_mes_anterior);
+        ImageView btnSiguiente = findViewById(R.id.btn_mes_siguiente);
 
-        // ... (el resto del código se mantiene igual)
         if (btnAnterior != null) {
             btnAnterior.setOnClickListener(v -> {
                 calendarioActual.add(Calendar.MONTH, -1);
@@ -60,18 +60,16 @@ public class CalendarioActivity extends AppCompatActivity {
         TextView btnDia = findViewById(R.id.btn_vista_dia);
 
         View.OnClickListener selectorListener = v -> {
-            // Resetear estilos de todos
             resetearEstiloBoton(btnMes);
             resetearEstiloBoton(btnSemana);
             resetearEstiloBoton(btnDia);
 
-            // Aplicar estilo activo al seleccionado
             TextView seleccionado = (TextView) v;
-            seleccionado.setBackgroundResource(R.drawable.bg_selector_activo);
+            // Usamos la base reutilizable y la teñimos de verde pastel
+            seleccionado.setBackgroundResource(R.drawable.bg_tarjeta_redondeada);
+            seleccionado.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#B8E0D2")));
             seleccionado.setTextColor(Color.parseColor("#2D3142"));
             seleccionado.setTypeface(null, android.graphics.Typeface.BOLD);
-
-            // Nota: Aquí iría la lógica para cambiar la vista (ej. ocultar el GridLayout y mostrar una lista)
         };
 
         if (btnMes != null) btnMes.setOnClickListener(selectorListener);
@@ -82,6 +80,7 @@ public class CalendarioActivity extends AppCompatActivity {
     private void resetearEstiloBoton(TextView btn) {
         if (btn != null) {
             btn.setBackground(null);
+            btn.setBackgroundTintList(null); // Limpiamos cualquier tinte previo
             btn.setTextColor(Color.parseColor("#8D909F"));
             btn.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
@@ -97,13 +96,11 @@ public class CalendarioActivity extends AppCompatActivity {
             tvMesCalendario.setText(textoMes);
         }
 
-        // Obtener el día actual real (para resaltarlo solo si estamos en el mes y año correctos)
         Calendar hoyReal = Calendar.getInstance();
         boolean esMesActual = (hoyReal.get(Calendar.YEAR) == calendarioActual.get(Calendar.YEAR) &&
                 hoyReal.get(Calendar.MONTH) == calendarioActual.get(Calendar.MONTH));
         int diaHoyReal = hoyReal.get(Calendar.DAY_OF_MONTH);
 
-        // Variables para armar la cuadrícula del mes que se está visualizando
         int diasEnMes = calendarioActual.getActualMaximum(Calendar.DAY_OF_MONTH);
 
         Calendar calClon = (Calendar) calendarioActual.clone();
@@ -147,7 +144,7 @@ public class CalendarioActivity extends AppCompatActivity {
                 int dia = i - espaciosVacios + 1;
                 tvNum.setText(String.valueOf(dia));
 
-                // Simulación de datos (se mantendrá estática hasta tener base de datos)
+                // Estos sí los mantuvimos en la lista de drawables
                 if (dia % 4 == 0) {
                     punto.setBackgroundResource(R.drawable.bg_punto_pendiente);
                 } else if (dia % 3 == 0) {
@@ -156,6 +153,10 @@ public class CalendarioActivity extends AppCompatActivity {
                     punto.setBackgroundResource(R.drawable.bg_punto_completo);
                 }
 
+                // Día seleccionado: base universal circular con tinte morado pastel
+                if (esMesActual && dia == diaHoyReal) {
+                    tvNum.setBackgroundResource(R.drawable.bg_circulo);
+                    tvNum.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#E2DDF8")));
                 // Resaltar si es exactamente HOY
                 if (esMesActual && dia == diaHoyReal) {
                     tvNum.setBackgroundResource(R.drawable.bg_dia_seleccionado_calendario);
@@ -180,6 +181,12 @@ public class CalendarioActivity extends AppCompatActivity {
                 int itemId = item.getItemId();
                 if (itemId == R.id.nav_inicio) {
                     Intent intent = new Intent(getApplicationContext(), InicioActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+                    finish();
+                    return true;
+                } else if (itemId == R.id.nav_perfil) {
+                    Intent intent = new Intent(getApplicationContext(), PerfilActivity.class);
                     startActivity(intent);
                     overridePendingTransition(0, 0);
                     finish();

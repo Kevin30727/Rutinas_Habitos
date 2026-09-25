@@ -88,8 +88,10 @@
                         android:id="@+id/btn_mes_anterior"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
-                        android:background="@drawable/bg_ripple_flecha"
-                        android:src="@drawable/ic_flecha_izq"
+                        android:background="@drawable/bg_circulo"
+                        android:backgroundTint="#F6F5FA"
+                        android:src="@drawable/ic_flecha"
+                        android:rotation="180"
                         android:padding="6dp"
                         android:clickable="true"
                         android:focusable="true"/>
@@ -110,8 +112,9 @@
                         android:id="@+id/btn_mes_siguiente"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
-                        android:background="@drawable/bg_ripple_flecha"
-                        android:src="@drawable/ic_flecha_der"
+                        android:background="@drawable/bg_circulo"
+                        android:backgroundTint="#F6F5FA"
+                        android:src="@drawable/ic_flecha"
                         android:padding="6dp"
                         android:clickable="true"
                         android:focusable="true"/>
@@ -134,7 +137,8 @@
                         android:textStyle="bold"
                         android:paddingHorizontal="12dp"
                         android:paddingVertical="6dp"
-                        android:background="@drawable/bg_selector_activo"/>
+                        android:background="@drawable/bg_tarjeta_redondeada"
+                        android:backgroundTint="#B8E0D2"/>
 
                     <TextView
                         android:id="@+id/btn_vista_semana"
@@ -250,7 +254,8 @@
                     android:textStyle="bold"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="6dp"
-                    android:background="@drawable/bg_etiqueta_excelente" />
+                    android:background="@drawable/bg_tarjeta_redondeada"
+                    android:backgroundTint="#B8E0D2" />
             </LinearLayout>
 
             <!-- 6. Tarjeta de Hábitos Diarios -->
@@ -288,7 +293,7 @@
                 </LinearLayout>
 
                 <!-- Ítem 1 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_item_habito" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_tarjeta_redondeada" android:backgroundTint="#F6F5FA" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
                     <ImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_circulo" android:src="@drawable/ic_check" android:padding="8dp" app:tint="@color/neutral" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Despertar temprano" android:textColor="@color/neutral" android:textSize="14sp" android:textStyle="bold" />
@@ -298,7 +303,7 @@
                 </LinearLayout>
 
                 <!-- Ítem 2 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_item_habito" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_tarjeta_redondeada" android:backgroundTint="#F6F5FA" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
                     <ImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_circulo" android:src="@drawable/ic_check" android:padding="8dp" app:tint="@color/neutral" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Desayuno saludable" android:textColor="@color/neutral" android:textSize="14sp" android:textStyle="bold" />
@@ -308,7 +313,7 @@
                 </LinearLayout>
 
                 <!-- Ítem 3 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_item_habito" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_tarjeta_redondeada" android:backgroundTint="#F6F5FA" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
                     <ImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_circulo" android:src="@drawable/ic_check" android:padding="8dp" app:tint="@color/neutral" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pausa activa" android:textColor="@color/neutral" android:textSize="14sp" android:textStyle="bold" />
@@ -318,7 +323,7 @@
                 </LinearLayout>
 
                 <!-- Ítem 4 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_item_habito" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_tarjeta_redondeada" android:backgroundTint="#F6F5FA" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp">
                     <ImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_circulo" android:src="@drawable/ic_check" android:padding="8dp" app:tint="@color/neutral" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lectura de noche" android:textColor="@color/neutral" android:textSize="14sp" android:textStyle="bold" />

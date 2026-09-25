@@ -176,43 +176,43 @@
                     android:weightSum="7">
                     <!-- Los IDs de los días están listos para tu Java -->
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
-                        <LinearLayout android:id="@+id/bg_dia_1" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_1" android:layout_width="44dp" android:layout_height="60dp" android:background="@android:color/transparent" android:orientation="vertical" android:gravity="center">
                             <TextView android:id="@+id/tv_letra_dia_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="L" android:textColor="#8D909F" android:textSize="12sp" />
                             <TextView android:id="@+id/tv_num_dia_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
-                        <LinearLayout android:id="@+id/bg_dia_2" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_2" android:layout_width="44dp" android:layout_height="60dp" android:background="@android:color/transparent" android:orientation="vertical" android:gravity="center">
                             <TextView android:id="@+id/tv_letra_dia_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="M" android:textColor="#8D909F" android:textSize="12sp" />
                             <TextView android:id="@+id/tv_num_dia_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
-                        <LinearLayout android:id="@+id/bg_dia_3" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_3" android:layout_width="44dp" android:layout_height="60dp" android:background="@android:color/transparent" android:orientation="vertical" android:gravity="center">
                             <TextView android:id="@+id/tv_letra_dia_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="M" android:textColor="#8D909F" android:textSize="12sp" />
                             <TextView android:id="@+id/tv_num_dia_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
-                        <LinearLayout android:id="@+id/bg_dia_4" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_4" android:layout_width="44dp" android:layout_height="60dp" android:background="@android:color/transparent" android:orientation="vertical" android:gravity="center">
                             <TextView android:id="@+id/tv_letra_dia_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="J" android:textColor="#8D909F" android:textSize="12sp" />
                             <TextView android:id="@+id/tv_num_dia_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
-                        <LinearLayout android:id="@+id/bg_dia_5" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_5" android:layout_width="44dp" android:layout_height="60dp" android:background="@android:color/transparent" android:orientation="vertical" android:gravity="center">
                             <TextView android:id="@+id/tv_letra_dia_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="V" android:textColor="#8D909F" android:textSize="12sp" />
                             <TextView android:id="@+id/tv_num_dia_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
-                        <LinearLayout android:id="@+id/bg_dia_6" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_6" android:layout_width="44dp" android:layout_height="60dp" android:background="@android:color/transparent" android:orientation="vertical" android:gravity="center">
                             <TextView android:id="@+id/tv_letra_dia_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="S" android:textColor="#8D909F" android:textSize="12sp" />
                             <TextView android:id="@+id/tv_num_dia_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
-                        <LinearLayout android:id="@+id/bg_dia_7" android:layout_width="44dp" android:layout_height="60dp" android:background="@drawable/bg_dia_normal" android:orientation="vertical" android:gravity="center">
+                        <LinearLayout android:id="@+id/bg_dia_7" android:layout_width="44dp" android:layout_height="60dp" android:background="@android:color/transparent" android:orientation="vertical" android:gravity="center">
                             <TextView android:id="@+id/tv_letra_dia_7" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="D" android:textColor="#8D909F" android:textSize="12sp" />
                             <TextView android:id="@+id/tv_num_dia_7" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="@color/neutral" android:textSize="16sp" android:textStyle="bold" />
                         </LinearLayout>
@@ -326,7 +326,8 @@
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:background="@drawable/bg_boton_circular"
+                        android:background="@drawable/bg_circulo"
+                        android:backgroundTint="#F2F4F8"
                         android:src="@drawable/ic_check"
                         android:padding="14dp"
                         app:tint="@color/neutral" />
@@ -372,8 +373,8 @@
                             android:textStyle="bold"
                             android:gravity="center"
                             android:layout_marginEnd="8dp"
-                            android:background="@drawable/bg_boton_circular"
-                            android:backgroundTint="@color/background_app"/>
+                            android:background="@drawable/bg_circulo"
+                            android:backgroundTint="#F2F4F8" />
 
                         <TextView
                             android:id="@+id/btn_agua_mas"
@@ -384,7 +385,8 @@
                             android:textSize="20sp"
                             android:textStyle="bold"
                             android:gravity="center"
-                            android:background="@drawable/bg_boton_circular"/>
+                            android:background="@drawable/bg_circulo"
+                            android:backgroundTint="#F2F4F8"/>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -414,7 +416,8 @@
                 <ImageView
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:background="@drawable/bg_circulo_inactivo"
+                    android:background="@drawable/bg_circulo"
+                    android:backgroundTint="#F6F5FA"
                     android:src="@drawable/ic_check"
                     android:padding="12dp"
                     app:tint="@color/neutral" />
@@ -453,7 +456,8 @@
                     android:textStyle="bold"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
-                    android:background="@drawable/bg_etiqueta_pendiente" />
+                    android:background="@drawable/bg_tarjeta_redondeada"
+                    android:backgroundTint="#FFF0F5" />
             </LinearLayout>
 
             <!-- 7. Hábito Pendiente (Paseo) -->
@@ -469,7 +473,8 @@
                 <ImageView
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:background="@drawable/bg_circulo_inactivo"
+                    android:background="@drawable/bg_circulo"
+                    android:backgroundTint="#F6F5FA"
                     android:src="@drawable/ic_check"
                     android:padding="12dp"
                     app:tint="@color/neutral" />

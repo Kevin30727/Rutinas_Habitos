@@ -33,7 +33,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="@drawable/bg_tarjeta_redondeada"
-                    android:src="@drawable/ic_check"
+                    android:src="@drawable/ic_calendario"
                     android:padding="8dp"/>
 
                 <LinearLayout
@@ -84,33 +84,40 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="&lt;"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/neutral"
-                        android:padding="8dp"/>
+                    <ImageView
+                        android:id="@+id/btn_mes_anterior"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_circulo"
+                        android:backgroundTint="#F6F5FA"
+                        android:src="@drawable/ic_flecha"
+                        android:rotation="180"
+                        android:padding="6dp"
+                        android:clickable="true"
+                        android:focusable="true"/>
 
                     <TextView
                         android:id="@+id/tv_mes_calendario"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:text="Septiembre\n2026"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/neutral"
-                        android:layout_marginHorizontal="8dp"/>
+                        android:layout_marginHorizontal="4dp"
+                        android:gravity="center"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="&gt;"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/neutral"
-                        android:padding="8dp"/>
+                    <ImageView
+                        android:id="@+id/btn_mes_siguiente"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_circulo"
+                        android:backgroundTint="#F6F5FA"
+                        android:src="@drawable/ic_flecha"
+                        android:padding="6dp"
+                        android:clickable="true"
+                        android:focusable="true"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -121,6 +128,7 @@
                     android:orientation="horizontal">
 
                     <TextView
+                        android:id="@+id/btn_vista_mes"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Mes"
@@ -129,25 +137,30 @@
                         android:textStyle="bold"
                         android:paddingHorizontal="12dp"
                         android:paddingVertical="6dp"
-                        android:background="@drawable/bg_selector_activo"/>
+                        android:background="@drawable/bg_tarjeta_redondeada"
+                        android:backgroundTint="#B8E0D2"/>
 
                     <TextView
+                        android:id="@+id/btn_vista_semana"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Semana"
                         android:textSize="12sp"
                         android:textColor="#8D909F"
                         android:paddingHorizontal="12dp"
-                        android:paddingVertical="6dp"/>
+                        android:paddingVertical="6dp"
+                        android:background="@null"/>
 
                     <TextView
+                        android:id="@+id/btn_vista_dia"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Día"
                         android:textSize="12sp"
                         android:textColor="#8D909F"
                         android:paddingHorizontal="12dp"
-                        android:paddingVertical="6dp"/>
+                        android:paddingVertical="6dp"
+                        android:background="@null"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -241,7 +254,8 @@
                     android:textStyle="bold"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="6dp"
-                    android:background="@drawable/bg_etiqueta_excelente" />
+                    android:background="@drawable/bg_tarjeta_redondeada"
+                    android:backgroundTint="#B8E0D2" />
             </LinearLayout>
 
             <!-- 6. Tarjeta de Hábitos Diarios -->
@@ -279,7 +293,7 @@
                 </LinearLayout>
 
                 <!-- Ítem 1 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_item_habito" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_tarjeta_redondeada" android:backgroundTint="#F6F5FA" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
                     <ImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_circulo" android:src="@drawable/ic_check" android:padding="8dp" app:tint="@color/neutral" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Despertar temprano" android:textColor="@color/neutral" android:textSize="14sp" android:textStyle="bold" />
@@ -289,7 +303,7 @@
                 </LinearLayout>
 
                 <!-- Ítem 2 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_item_habito" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_tarjeta_redondeada" android:backgroundTint="#F6F5FA" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
                     <ImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_circulo" android:src="@drawable/ic_check" android:padding="8dp" app:tint="@color/neutral" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Desayuno saludable" android:textColor="@color/neutral" android:textSize="14sp" android:textStyle="bold" />
@@ -299,7 +313,7 @@
                 </LinearLayout>
 
                 <!-- Ítem 3 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_item_habito" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_tarjeta_redondeada" android:backgroundTint="#F6F5FA" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
                     <ImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_circulo" android:src="@drawable/ic_check" android:padding="8dp" app:tint="@color/neutral" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pausa activa" android:textColor="@color/neutral" android:textSize="14sp" android:textStyle="bold" />
@@ -309,7 +323,7 @@
                 </LinearLayout>
 
                 <!-- Ítem 4 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_item_habito" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_tarjeta_redondeada" android:backgroundTint="#F6F5FA" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp">
                     <ImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_circulo" android:src="@drawable/ic_check" android:padding="8dp" app:tint="@color/neutral" />
                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lectura de noche" android:textColor="@color/neutral" android:textSize="14sp" android:textStyle="bold" />

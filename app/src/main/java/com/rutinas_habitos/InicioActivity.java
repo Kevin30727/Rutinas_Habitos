@@ -1,6 +1,7 @@
 package com.rutinas_habitos;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
@@ -32,25 +33,7 @@ public class InicioActivity extends AppCompatActivity {
         }
 
         configurarBotonesAgua();
-
-        // Configurar navegación
-        BottomNavigationView bottomNav = findViewById(R.id.barra_inferior);
-        if (bottomNav != null) {
-            bottomNav.setSelectedItemId(R.id.nav_inicio);
-            bottomNav.setOnItemSelectedListener(item -> {
-                int itemId = item.getItemId();
-                if (itemId == R.id.nav_calendario) {
-                    Intent intent = new Intent(getApplicationContext(), CalendarioActivity.class);
-                    startActivity(intent);
-                    overridePendingTransition(0, 0);
-                    finish();
-                    return true;
-                } else if (itemId == R.id.nav_inicio) {
-                    return true;
-                }
-                return false;
-            });
-        }
+        configurarNavegacionInferior();
     }
 
     private void configurarBotonesAgua() {
@@ -136,12 +119,40 @@ public class InicioActivity extends AppCompatActivity {
                     hoy.get(Calendar.DAY_OF_YEAR) == iterador.get(Calendar.DAY_OF_YEAR));
 
             if (esHoy && bgDia != null && tvLetra != null) {
-                bgDia.setBackgroundResource(R.drawable.bg_dia_activo);
+                // Base reutilizable teñida dinámicamente
+                bgDia.setBackgroundResource(R.drawable.bg_tarjeta_redondeada);
+                bgDia.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#B8E0D2")));
                 tvLetra.setTextColor(Color.parseColor("#2D3142"));
                 tvLetra.setTypeface(null, android.graphics.Typeface.BOLD);
             }
 
             iterador.add(Calendar.DAY_OF_MONTH, 1);
+        }
+    }
+
+    private void configurarNavegacionInferior() {
+        BottomNavigationView bottomNav = findViewById(R.id.barra_inferior);
+        if (bottomNav != null) {
+            bottomNav.setSelectedItemId(R.id.nav_inicio);
+            bottomNav.setOnItemSelectedListener(item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.nav_calendario) {
+                    Intent intent = new Intent(getApplicationContext(), CalendarioActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+                    finish();
+                    return true;
+                } else if (itemId == R.id.nav_perfil) {
+                    Intent intent = new Intent(getApplicationContext(), PerfilActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+                    finish();
+                    return true;
+                } else if (itemId == R.id.nav_inicio) {
+                    return true;
+                }
+                return false;
+            });
         }
     }
 }

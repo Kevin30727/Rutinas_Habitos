@@ -157,6 +157,9 @@ public class CalendarioActivity extends AppCompatActivity {
                 if (esMesActual && dia == diaHoyReal) {
                     tvNum.setBackgroundResource(R.drawable.bg_circulo);
                     tvNum.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#E2DDF8")));
+                // Resaltar si es exactamente HOY
+                if (esMesActual && dia == diaHoyReal) {
+                    tvNum.setBackgroundResource(R.drawable.bg_dia_seleccionado_calendario);
                     tvNum.setTypeface(null, android.graphics.Typeface.BOLD);
                 }
             } else {

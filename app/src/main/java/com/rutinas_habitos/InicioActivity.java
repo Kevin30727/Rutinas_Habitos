@@ -1,6 +1,7 @@
 package com.rutinas_habitos;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
@@ -343,7 +344,8 @@ public class InicioActivity extends AppCompatActivity {
                     hoy.get(Calendar.DAY_OF_YEAR) == iterador.get(Calendar.DAY_OF_YEAR));
 
             if (esHoy && bgDia != null && tvLetra != null) {
-                bgDia.setBackgroundResource(R.drawable.bg_dia_activo);
+                bgDia.setBackgroundResource(R.drawable.bg_tarjeta_redondeada);
+                bgDia.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#B8E0D2")));
                 tvLetra.setTextColor(Color.parseColor("#2D3142"));
                 tvLetra.setTypeface(null, android.graphics.Typeface.BOLD);
             }

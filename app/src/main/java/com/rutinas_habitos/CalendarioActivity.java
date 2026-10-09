@@ -1,11 +1,13 @@
 package com.rutinas_habitos;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.GridLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,12 +43,13 @@ public class CalendarioActivity extends AppCompatActivity {
         actualizarCabeceraFecha(calActual.get(Calendar.DAY_OF_MONTH));
         generarCalendarioMes();
         setupControlesMes();
+        configurarSelectoresVista();
         setupNavegacion();
     }
 
     private void setupControlesMes() {
-        TextView btnAnterior = findViewById(R.id.btn_mes_anterior);
-        TextView btnSiguiente = findViewById(R.id.btn_mes_siguiente);
+        View btnAnterior = findViewById(R.id.btn_mes_anterior);
+        View btnSiguiente = findViewById(R.id.btn_mes_siguiente);
 
         if (btnAnterior != null) {
             btnAnterior.setOnClickListener(v -> {
@@ -64,6 +67,37 @@ public class CalendarioActivity extends AppCompatActivity {
                 actualizarCabeceraFecha(diaSeleccionadoActual);
                 generarCalendarioMes();
             });
+        }
+    }
+
+    private void configurarSelectoresVista() {
+        TextView btnMes = findViewById(R.id.btn_vista_mes);
+        TextView btnSemana = findViewById(R.id.btn_vista_semana);
+        TextView btnDia = findViewById(R.id.btn_vista_dia);
+
+        View.OnClickListener selectorListener = v -> {
+            resetearEstiloBoton(btnMes);
+            resetearEstiloBoton(btnSemana);
+            resetearEstiloBoton(btnDia);
+
+            TextView seleccionado = (TextView) v;
+            seleccionado.setBackgroundResource(R.drawable.bg_tarjeta_redondeada);
+            seleccionado.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#B8E0D2")));
+            seleccionado.setTextColor(Color.parseColor("#2D3142"));
+            seleccionado.setTypeface(null, android.graphics.Typeface.BOLD);
+        };
+
+        if (btnMes != null) btnMes.setOnClickListener(selectorListener);
+        if (btnSemana != null) btnSemana.setOnClickListener(selectorListener);
+        if (btnDia != null) btnDia.setOnClickListener(selectorListener);
+    }
+
+    private void resetearEstiloBoton(TextView btn) {
+        if (btn != null) {
+            btn.setBackground(null);
+            btn.setBackgroundTintList(null);
+            btn.setTextColor(Color.parseColor("#8D909F"));
+            btn.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
     }
 

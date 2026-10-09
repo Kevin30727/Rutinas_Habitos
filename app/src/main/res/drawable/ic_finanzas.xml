@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Piggy bank / finanzas icon -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#2D3142"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M19,11c0,-3.87 -3.13,-7 -7,-7 -1.6,0 -3.07,0.54 -4.24,1.44L5.5,4.5 4,6l1.24,1.24C4.46,8.41 4,9.9 4,11.5c0,3.31 2.35,6.07 5.5,6.79V20h3v-1.71c0.5,-0.1 0.98,-0.27 1.45,-0.49l2.05,2.05 1.5,-1.5 -1.78,-1.78C17.65,15.28 19,13.29 19,11z M12,7v2 M9,12h6" />
+</vector>

@@ -35,6 +35,7 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/tv_saludo_usuario"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="¡Hola, Sofía! ✨"
@@ -132,6 +133,66 @@
                         android:textSize="16sp"
                         android:textStyle="bold" />
                 </FrameLayout>
+            </LinearLayout>
+
+            <!-- Banner del Panda Zen Acompañante -->
+            <LinearLayout
+                android:id="@+id/card_banner_panda"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_destacada_menta"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="24dp">
+
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/bg_circulo"
+                    android:backgroundTint="@color/white"
+                    android:src="@drawable/ic_panda"
+                    android:padding="6dp"
+                    android:contentDescription="Avatar Panda" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PANDA ZEN · ASISTENTE 🐼"
+                        android:textColor="@color/green_soft"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="¿Necesitas una nueva rutina amable?"
+                        android:textColor="@color/neutral"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Toca aquí para conversar con tu asistente local."
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_chevron_right"
+                    android:contentDescription="Ir" />
             </LinearLayout>
 
             <!-- 3. Calendario Dinámico -->
@@ -510,6 +571,14 @@
                     android:paddingVertical="8dp"
                     android:background="@drawable/bg_racha_dias" />
             </LinearLayout>
+
+            <!-- Contenedor Dinámico para Hábitos desde SQLite -->
+            <LinearLayout
+                android:id="@+id/ll_habitos_dinamicos_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp" />
 
         </LinearLayout>
     </ScrollView>

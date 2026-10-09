@@ -13,6 +13,10 @@
         android:icon="@drawable/ic_calendario"
         android:title="Calendario" />
     <item
+        android:id="@+id/nav_finanzas"
+        android:icon="@drawable/ic_finanzas"
+        android:title="Finanzas" />
+    <item
         android:id="@+id/nav_perfil"
         android:icon="@drawable/ic_perfil"
         android:title="Perfil" />

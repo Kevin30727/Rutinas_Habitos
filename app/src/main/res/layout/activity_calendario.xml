@@ -85,10 +85,11 @@
                     android:gravity="center_vertical">
 
                     <TextView
+                        android:id="@+id/btn_mes_anterior"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="&lt;"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="@color/neutral"
                         android:padding="8dp"/>
@@ -104,10 +105,11 @@
                         android:layout_marginHorizontal="8dp"/>
 
                     <TextView
+                        android:id="@+id/btn_mes_siguiente"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="&gt;"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="@color/neutral"
                         android:padding="8dp"/>

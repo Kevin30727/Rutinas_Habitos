@@ -63,6 +63,26 @@ public class AsistentePandaActivity extends AppCompatActivity {
         if (btnSaltar != null) {
             btnSaltar.setOnClickListener(v -> irAInicio());
         }
+
+        // Cargar GIF animado para el avatar del Panda si está presente en res/drawable
+        ImageView ivAvatarPanda = findViewById(R.id.iv_avatar_panda);
+        if (ivAvatarPanda != null) {
+            int gifId = getResources().getIdentifier("panda_animado", "drawable", getPackageName());
+            if (gifId == 0) {
+                gifId = getResources().getIdentifier("asistente_panda", "drawable", getPackageName());
+            }
+            if (gifId == 0) {
+                gifId = getResources().getIdentifier("panda_gif", "drawable", getPackageName());
+            }
+
+            if (gifId != 0) {
+                com.bumptech.glide.Glide.with(this)
+                        .asGif()
+                        .load(gifId)
+                        .fitCenter()
+                        .into(ivAvatarPanda);
+            }
+        }
     }
 
     private void setupListeners() {

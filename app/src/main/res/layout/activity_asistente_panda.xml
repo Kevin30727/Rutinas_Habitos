@@ -99,9 +99,11 @@
 
                     <ImageView
                         android:id="@+id/iv_avatar_panda"
-                        android:layout_width="72dp"
-                        android:layout_height="72dp"
+                        android:layout_width="85dp"
+                        android:layout_height="85dp"
                         android:layout_gravity="center"
+                        android:scaleType="fitCenter"
+                        android:adjustViewBounds="true"
                         android:src="@drawable/ic_panda"
                         android:contentDescription="Avatar Panda" />
                 </FrameLayout>

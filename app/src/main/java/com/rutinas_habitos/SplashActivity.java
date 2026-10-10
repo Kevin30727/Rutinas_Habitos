@@ -26,7 +26,7 @@ public class SplashActivity extends AppCompatActivity {
                 Glide.with(this)
                         .asGif()
                         .load(gifResourceId)
-                        .fitCenter()
+                        .centerCrop()
                         .into(ivSplashGif);
             }
         } catch (Exception e) {

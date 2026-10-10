@@ -9,12 +9,13 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -23,12 +24,18 @@ import java.util.Locale;
 
 public class InicioActivity extends AppCompatActivity {
 
-    private int vasosActuales = 6;
-    private final int vasosMaximos = 8;
-
     private DatabaseHelper dbHelper;
     private SessionManager sessionManager;
+
     private LinearLayout llHabitosDinamicosContainer;
+    private LinearLayout llEstadoVacioHabitos;
+
+    // Métricas dinámicas superiores
+    private TextView tvHabitosListosResumen;
+    private TextView tvDescripcionResumen;
+    private CircularProgressIndicator cpiHoyFlorece;
+    private TextView tvPorcentajeHoy;
+    private TextView tvContadorHabitosBadge;
 
     private static final int[] IDS_NUM_DIA = {
             R.id.tv_num_dia_1, R.id.tv_num_dia_2, R.id.tv_num_dia_3,
@@ -51,12 +58,25 @@ public class InicioActivity extends AppCompatActivity {
         dbHelper = DatabaseHelper.getInstance(this);
         sessionManager = new SessionManager(this);
 
-        llHabitosDinamicosContainer = findViewById(R.id.ll_habitos_dinamicos_container);
+        initViews();
+        setupPandaAvatars();
+        configurarCalendario();
+        configurarNavegacion();
 
         long userId = sessionManager.getUserId();
-        if (userId <= 0) {
-            userId = 1;
-        }
+        if (userId <= 0) userId = 1;
+        cargarHabitosDesdeSQLite(userId);
+    }
+
+    private void initViews() {
+        llHabitosDinamicosContainer = findViewById(R.id.ll_habitos_dinamicos_container);
+        llEstadoVacioHabitos = findViewById(R.id.ll_estado_vacio_habitos);
+
+        tvHabitosListosResumen = findViewById(R.id.tv_habitos_listos_resumen);
+        tvDescripcionResumen = findViewById(R.id.tv_descripcion_resumen);
+        cpiHoyFlorece = findViewById(R.id.cpi_hoy_florece);
+        tvPorcentajeHoy = findViewById(R.id.tv_porcentaje_hoy);
+        tvContadorHabitosBadge = findViewById(R.id.tv_contador_habitos_badge);
 
         // Saludo personalizado
         TextView tvSaludo = findViewById(R.id.tv_saludo_usuario);
@@ -73,11 +93,10 @@ public class InicioActivity extends AppCompatActivity {
             });
         }
 
-        // Mascota persistente Panda Chibi (rompe la cuarta pared sobre el BottomNavigationView)
+        // Mascota persistente Panda Chibi (apoyando patas sobre el BottomNavigationView)
         ImageView ivPandaChibiNav = findViewById(R.id.iv_panda_chibi_nav);
         if (ivPandaChibiNav != null) {
             ivPandaChibiNav.setOnClickListener(v -> {
-                // Microinteracción táctil orgánica: efecto squish & bounce
                 v.animate().scaleX(1.18f).scaleY(0.85f).setDuration(120).withEndAction(() -> {
                     v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).withEndAction(() -> {
                         Intent intent = new Intent(InicioActivity.this, AsistentePandaActivity.class);
@@ -95,20 +114,32 @@ public class InicioActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+    }
 
-        configurarCalendario();
+    /**
+     * Carga el GIF animado del Panda si el usuario lo colocó en res/drawable
+     */
+    private void setupPandaAvatars() {
+        int gifId = getResources().getIdentifier("panda_animado", "drawable", getPackageName());
+        if (gifId == 0) gifId = getResources().getIdentifier("asistente_panda", "drawable", getPackageName());
+        if (gifId == 0) gifId = getResources().getIdentifier("panda_gif", "drawable", getPackageName());
 
-        TextView tvMeditacion = findViewById(R.id.tv_meditacion_titulo);
-        if (tvMeditacion != null) {
-            tvMeditacion.setPaintFlags(tvMeditacion.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        if (gifId != 0) {
+            ImageView ivPandaChibiNav = findViewById(R.id.iv_panda_chibi_nav);
+            if (ivPandaChibiNav != null) {
+                Glide.with(this).asGif().load(gifId).fitCenter().into(ivPandaChibiNav);
+            }
+
+            ImageView ivBannerAvatar = findViewById(R.id.iv_banner_panda_avatar);
+            if (ivBannerAvatar != null) {
+                Glide.with(this).asGif().load(gifId).fitCenter().into(ivBannerAvatar);
+            }
+
+            ImageView ivPandaVacio = findViewById(R.id.iv_panda_vacio);
+            if (ivPandaVacio != null) {
+                Glide.with(this).asGif().load(gifId).fitCenter().into(ivPandaVacio);
+            }
         }
-
-        // Cargar progreso de agua desde SQLite
-        vasosActuales = dbHelper.obtenerVasosAgua(userId);
-        configurarBotonesAgua(userId);
-
-        configurarNavegacion();
-        cargarHabitosDesdeSQLite(userId);
     }
 
     @Override
@@ -117,13 +148,12 @@ public class InicioActivity extends AppCompatActivity {
         long userId = sessionManager.getUserId();
         if (userId <= 0) userId = 1;
 
-        // Actualizar saludo por si cambió el perfil
         TextView tvSaludo = findViewById(R.id.tv_saludo_usuario);
         if (tvSaludo != null) {
             tvSaludo.setText("¡Hola, " + sessionManager.getUserName() + "! ✨");
         }
 
-        // Recargar hábitos
+        setupPandaAvatars();
         cargarHabitosDesdeSQLite(userId);
     }
 
@@ -133,20 +163,23 @@ public class InicioActivity extends AppCompatActivity {
             bottomNav.setSelectedItemId(R.id.nav_inicio);
             bottomNav.setOnItemSelectedListener(item -> {
                 int itemId = item.getItemId();
-                if (itemId == R.id.nav_calendario) {
-                    startActivity(new Intent(this, CalendarioActivity.class));
+                if (itemId == R.id.nav_habitos) {
+                    startActivity(new Intent(InicioActivity.this, HabitosActivity.class));
+                    overridePendingTransition(0, 0);
                     finish();
                     return true;
-                } else if (itemId == R.id.nav_habitos) {
-                    startActivity(new Intent(this, HabitosActivity.class));
+                } else if (itemId == R.id.nav_calendario) {
+                    startActivity(new Intent(InicioActivity.this, CalendarioActivity.class));
+                    overridePendingTransition(0, 0);
                     finish();
                     return true;
                 } else if (itemId == R.id.nav_perfil) {
-                    startActivity(new Intent(this, PerfilActivity.class));
+                    startActivity(new Intent(InicioActivity.this, PerfilActivity.class));
+                    overridePendingTransition(0, 0);
                     finish();
                     return true;
                 } else if (itemId == R.id.nav_finanzas) {
-                    Toast.makeText(this, "💰 El módulo de Finanzas Conscientes estará disponible próximamente 🌱", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "El módulo de Finanzas Conscientes estará disponible próximamente 🌸", Toast.LENGTH_SHORT).show();
                     return false;
                 } else if (itemId == R.id.nav_inicio) {
                     return true;
@@ -156,67 +189,65 @@ public class InicioActivity extends AppCompatActivity {
         }
     }
 
-    private void configurarBotonesAgua(long userId) {
-        TextView btnMenos = findViewById(R.id.btn_agua_menos);
-        TextView btnMas = findViewById(R.id.btn_agua_mas);
-        TextView tvTextoAgua = findViewById(R.id.tv_texto_agua);
-        ProgressBar pbAgua = findViewById(R.id.pb_agua);
-
-        actualizarVistaAgua(tvTextoAgua, pbAgua);
-
-        if (btnMenos != null) {
-            btnMenos.setOnClickListener(v -> {
-                if (vasosActuales > 0) {
-                    vasosActuales--;
-                    dbHelper.actualizarVasosAgua(userId, vasosActuales);
-                    actualizarVistaAgua(tvTextoAgua, pbAgua);
-                }
-            });
-        }
-
-        if (btnMas != null) {
-            btnMas.setOnClickListener(v -> {
-                if (vasosActuales < vasosMaximos) {
-                    vasosActuales++;
-                    dbHelper.actualizarVasosAgua(userId, vasosActuales);
-                    actualizarVistaAgua(tvTextoAgua, pbAgua);
-                }
-            });
-        }
-    }
-
-    private void actualizarVistaAgua(TextView tvTextoAgua, ProgressBar pbAgua) {
-        if (tvTextoAgua != null) {
-            tvTextoAgua.setText(vasosActuales + " de " + vasosMaximos + " vasos");
-        }
-        if (pbAgua != null) {
-            pbAgua.setProgress(vasosActuales);
-        }
-    }
-
+    /**
+     * Carga de hábitos dinámica desde SQLite (Cero datos estáticos).
+     * Calcula métricas reales y actualiza las tarjetas superiores.
+     */
     private void cargarHabitosDesdeSQLite(long userId) {
         if (llHabitosDinamicosContainer == null) return;
         llHabitosDinamicosContainer.removeAllViews();
 
         List<Habito> habitos = dbHelper.obtenerHabitosPorUsuario(userId);
-        if (habitos.isEmpty()) return;
 
-        // Renderizar hábitos creados dinámicamente
+        if (habitos.isEmpty()) {
+            if (llEstadoVacioHabitos != null) llEstadoVacioHabitos.setVisibility(View.VISIBLE);
+            actualizarResumenSuperior(0, 0);
+            return;
+        }
+
+        if (llEstadoVacioHabitos != null) llEstadoVacioHabitos.setVisibility(View.GONE);
+
+        int completados = 0;
         for (Habito h : habitos) {
-            // Evitar duplicar los que ya están fijos en el XML inicial si coinciden por nombre
-            if ("Meditación matutina".equalsIgnoreCase(h.getNombre()) ||
-                "Beber 2L de agua".equalsIgnoreCase(h.getNombre()) ||
-                "Lectura consciente".equalsIgnoreCase(h.getNombre()) ||
-                "Paseo al aire libre".equalsIgnoreCase(h.getNombre())) {
-                continue;
-            }
-
-            View tarjeta = crearVistaHabito(h);
+            if (h.isCompletadoHoy()) completados++;
+            View tarjeta = crearVistaHabito(h, userId);
             llHabitosDinamicosContainer.addView(tarjeta);
+        }
+
+        actualizarResumenSuperior(completados, habitos.size());
+    }
+
+    private void actualizarResumenSuperior(int completados, int total) {
+        if (tvHabitosListosResumen != null) {
+            tvHabitosListosResumen.setText(completados + " de " + total + " hábitos listos");
+        }
+
+        int porcentaje = total == 0 ? 0 : (completados * 100) / total;
+
+        if (cpiHoyFlorece != null) {
+            cpiHoyFlorece.setProgress(porcentaje);
+        }
+
+        if (tvPorcentajeHoy != null) {
+            tvPorcentajeHoy.setText(porcentaje + "%");
+        }
+
+        if (tvContadorHabitosBadge != null) {
+            tvContadorHabitosBadge.setText(completados + " DE " + total);
+        }
+
+        if (tvDescripcionResumen != null) {
+            if (total == 0) {
+                tvDescripcionResumen.setText("Aún no tienes hábitos registrados hoy.");
+            } else if (porcentaje == 100) {
+                tvDescripcionResumen.setText("¡Día pleno! Has completado todas tus metas con serenidad 🌱✨");
+            } else {
+                tvDescripcionResumen.setText("Llevas el " + porcentaje + "% de tus metas diarias cumplidas con calma.");
+            }
         }
     }
 
-    private View crearVistaHabito(Habito h) {
+    private View crearVistaHabito(Habito h, long userId) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setBackgroundResource(R.drawable.bg_tarjeta_redondeada);
@@ -227,10 +258,10 @@ public class InicioActivity extends AppCompatActivity {
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, 0, 0, dpToPx(16));
+        params.setMargins(0, 0, 0, dpToPx(14));
         row.setLayoutParams(params);
 
-        // Icono
+        // Icono circular
         ImageView iv = new ImageView(this);
         int size = dpToPx(48);
         LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(size, size);
@@ -238,10 +269,19 @@ public class InicioActivity extends AppCompatActivity {
         iv.setBackgroundResource(h.isCompletadoHoy() ? R.drawable.bg_circulo : R.drawable.bg_circulo_inactivo);
         int p = dpToPx(12);
         iv.setPadding(p, p, p, p);
-        iv.setImageResource(R.drawable.ic_check);
+
+        int iconRes = R.drawable.ic_check;
+        if ("agua".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_agua;
+        else if ("lectura".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_lectura;
+        else if ("ejercicio".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_ejercicio;
+        else if ("noche".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_noche;
+        else if ("corazon".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_corazon;
+        else if ("meditacion".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_meditacion;
+
+        iv.setImageResource(iconRes);
         iv.setColorFilter(Color.parseColor("#2D3142"));
 
-        // Textos
+        // Textos del hábito
         LinearLayout llText = new LinearLayout(this);
         llText.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
@@ -258,22 +298,26 @@ public class InicioActivity extends AppCompatActivity {
         }
 
         TextView tvSub = new TextView(this);
-        String sub = h.getMetaCantidad() + " " + h.getUnidad() + " (" + h.getAreaVida() + ")";
+        String sub = h.getMetaCantidad() + " " + h.getUnidad() + " • " + h.getAreaVida();
+        if (h.getHoraRecordatorio() != null && !h.getHoraRecordatorio().isEmpty()) {
+            sub += " • " + h.getHoraRecordatorio();
+        }
         tvSub.setText(sub);
-        tvSub.setTextSize(14);
+        tvSub.setTextSize(13);
         tvSub.setTextColor(Color.parseColor("#8D909F"));
+        tvSub.setPadding(0, dpToPx(2), 0, 0);
 
         llText.addView(tvTitulo);
         llText.addView(tvSub);
 
-        // Estado Badge
+        // Estado Badge ("Hecho" / "Pendiente")
         TextView tvBadge = new TextView(this);
         tvBadge.setTextSize(12);
         tvBadge.setTypeface(null, android.graphics.Typeface.BOLD);
-        tvBadge.setPadding(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8));
+        tvBadge.setPadding(dpToPx(14), dpToPx(8), dpToPx(14), dpToPx(8));
         actualizarBadgeEstado(tvBadge, h.isCompletadoHoy());
 
-        // Toggle al tocar
+        // Toggle interactivo con recálculo dinámico de estadísticas
         row.setOnClickListener(v -> {
             boolean nuevoEstado = !h.isCompletadoHoy();
             h.setCompletadoHoy(nuevoEstado);
@@ -287,6 +331,14 @@ public class InicioActivity extends AppCompatActivity {
                 tvTitulo.setPaintFlags(tvTitulo.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
             }
             actualizarBadgeEstado(tvBadge, nuevoEstado);
+
+            // Recalcular el porcentaje superior
+            List<Habito> actuales = dbHelper.obtenerHabitosPorUsuario(userId);
+            int comp = 0;
+            for (Habito hab : actuales) {
+                if (hab.isCompletadoHoy()) comp++;
+            }
+            actualizarResumenSuperior(comp, actuales.size());
 
             Toast.makeText(this, nuevoEstado ? "¡Hábito cumplido! 🌱✨" : "Hábito marcado como pendiente", Toast.LENGTH_SHORT).show();
         });

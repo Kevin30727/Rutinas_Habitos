@@ -73,6 +73,20 @@ public class InicioActivity extends AppCompatActivity {
             });
         }
 
+        // Mascota persistente Panda Chibi (rompe la cuarta pared sobre el BottomNavigationView)
+        ImageView ivPandaChibiNav = findViewById(R.id.iv_panda_chibi_nav);
+        if (ivPandaChibiNav != null) {
+            ivPandaChibiNav.setOnClickListener(v -> {
+                // Microinteracción táctil orgánica: efecto squish & bounce
+                v.animate().scaleX(1.18f).scaleY(0.85f).setDuration(120).withEndAction(() -> {
+                    v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).withEndAction(() -> {
+                        Intent intent = new Intent(InicioActivity.this, AsistentePandaActivity.class);
+                        startActivity(intent);
+                    }).start();
+                }).start();
+            });
+        }
+
         // Floating Action Button
         FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito);
         if (fab != null) {

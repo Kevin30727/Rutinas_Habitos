@@ -612,6 +612,7 @@
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
         android:background="@drawable/bg_menu_flotante"
+        android:elevation="8dp"
         app:itemIconTint="@color/estado_menu"
         app:itemTextColor="@color/estado_menu"
         app:itemActiveIndicatorStyle="@null"
@@ -619,5 +620,21 @@
         app:itemIconSize="24dp"
         app:menu="@menu/menu_principal"
         app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Mascota Chibi Panda Zen: rompe la cuarta pared apoyando sus patas sobre el BottomNavigationView -->
+    <ImageView
+        android:id="@+id/iv_panda_chibi_nav"
+        android:layout_width="66dp"
+        android:layout_height="66dp"
+        android:layout_marginStart="28dp"
+        android:src="@drawable/ic_panda"
+        android:contentDescription="Asistente Panda Zen"
+        android:elevation="16dp"
+        android:translationY="20dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintBottom_toTopOf="@id/barra_inferior"
+        app:layout_constraintStart_toStartOf="@id/barra_inferior" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

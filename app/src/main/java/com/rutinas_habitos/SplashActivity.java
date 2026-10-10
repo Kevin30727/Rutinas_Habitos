@@ -19,13 +19,14 @@ public class SplashActivity extends AppCompatActivity {
 
         ImageView ivSplashGif = findViewById(R.id.iv_splash_gif);
 
-        // Cargar el GIF animado usando Glide
+        // Cargar el GIF animado usando Glide garantizando reproducción sin distorsión
         try {
             int gifResourceId = getResources().getIdentifier("splash_logo", "drawable", getPackageName());
             if (gifResourceId != 0) {
                 Glide.with(this)
                         .asGif()
                         .load(gifResourceId)
+                        .fitCenter()
                         .into(ivSplashGif);
             }
         } catch (Exception e) {

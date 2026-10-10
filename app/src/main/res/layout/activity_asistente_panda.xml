@@ -240,7 +240,7 @@
                     app:tint="@color/neutral" />
             </LinearLayout>
 
-            <!-- Tarjeta de Propuesta del Panda (Inicialmente Visible u Oculta tras consultar) -->
+            <!-- Tarjeta de Propuesta del Panda -->
             <LinearLayout
                 android:id="@+id/card_propuesta_panda"
                 android:layout_width="match_parent"
@@ -253,63 +253,42 @@
                 android:layout_marginBottom="24dp">
 
                 <TextView
+                    android:id="@+id/tv_titulo_propuesta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="RUTINA PROPUESTA PARA TI"
+                    android:text="RUTINAS PROPUESTAS PARA TI"
                     android:textColor="@color/green_soft"
                     android:textSize="11sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.1" />
 
-                <LinearLayout
+                <!-- Banner de Sugerencia Contextual Sinergica -->
+                <TextView
+                    android:id="@+id/tv_sugerencia_contextual"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="12dp">
+                    android:background="@drawable/bg_tarjeta_redondeada"
+                    android:padding="12dp"
+                    android:textColor="@color/neutral"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="10dp"
+                    android:text="💡 Sugerencia contextual"
+                    android:visibility="gone" />
 
-                    <ImageView
-                        android:id="@+id/iv_propuesta_icono"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/white"
-                        android:src="@drawable/ic_meditacion"
-                        android:padding="12dp"
-                        android:contentDescription="Icono" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="14dp">
-
-                        <TextView
-                            android:id="@+id/tv_propuesta_nombre"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Pausa de respiración y calma"
-                            android:textColor="@color/neutral"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tv_propuesta_meta"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Meta: 10 min al día"
-                            android:textColor="@color/text_muted"
-                            android:textSize="13sp"
-                            android:layout_marginTop="2dp" />
-                    </LinearLayout>
-                </LinearLayout>
+                <!-- Contenedor dinámico para múltiples rutinas acumuladas -->
+                <LinearLayout
+                    android:id="@+id/ll_rutinas_acumuladas_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="10dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_aceptar_propuesta"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
-                    android:text="✓ Aceptar hábito y empezar 🌱"
+                    android:text="✓ Aceptar rutinas y empezar 🌱"
                     android:textColor="@color/neutral"
                     android:textSize="15sp"
                     android:textStyle="bold"

@@ -4,6 +4,7 @@ public class Habito {
     private long id;
     private long usuarioId;
     private String nombre;
+    private String descripcion;
     private String icono; // "meditacion", "agua", "lectura", "ejercicio", "comida", "sueno", "corazon", "finanzas"
     private String color; // hex string e.g. "#B8E0D2"
     private String areaVida; // "Salud", "Mente", "Foco", "Finanzas"
@@ -85,4 +86,7 @@ public class Habito {
 
     public String getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(String fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 }

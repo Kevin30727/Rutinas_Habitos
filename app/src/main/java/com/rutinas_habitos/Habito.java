@@ -15,6 +15,7 @@ public class Habito {
     private String unidad; // "min", "páginas", "vasos", "ml", "veces"
     private String horaRecordatorio; // "08:00 AM"
     private boolean recordatorioActivo;
+    private String tipoSonidoNotificacion; // "default" o "zen"
     private int rachaDias;
     private boolean completadoHoy;
     private int progresoActual;
@@ -31,6 +32,7 @@ public class Habito {
         this.unidad = "veces";
         this.horaRecordatorio = "08:00 AM";
         this.recordatorioActivo = true;
+        this.tipoSonidoNotificacion = "default";
         this.rachaDias = 0;
         this.completadoHoy = false;
         this.progresoActual = 0;
@@ -89,4 +91,11 @@ public class Habito {
 
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+
+    public String getTipoSonidoNotificacion() {
+        return tipoSonidoNotificacion != null ? tipoSonidoNotificacion : "default";
+    }
+    public void setTipoSonidoNotificacion(String tipoSonidoNotificacion) {
+        this.tipoSonidoNotificacion = tipoSonidoNotificacion;
+    }
 }

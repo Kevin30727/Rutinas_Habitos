@@ -241,6 +241,13 @@ public class HabitosActivity extends AppCompatActivity {
         tvRachaChip.setBackgroundResource(R.drawable.bg_card_destacada_menta);
         row.addView(tvRachaChip);
 
+        // Click para abrir en modo edición (CRUD completo)
+        row.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CrearHabitoActivity.class);
+            intent.putExtra("EXTRA_HABITO_ID", h.getId());
+            startActivity(intent);
+        });
+
         return row;
     }
 
@@ -262,9 +269,6 @@ public class HabitosActivity extends AppCompatActivity {
                     startActivity(new Intent(this, PerfilActivity.class));
                     finish();
                     return true;
-                } else if (itemId == R.id.nav_finanzas) {
-                    Toast.makeText(this, "💰 El módulo de Finanzas Conscientes estará disponible próximamente 🌱", Toast.LENGTH_SHORT).show();
-                    return false;
                 } else if (itemId == R.id.nav_habitos) {
                     return true;
                 }

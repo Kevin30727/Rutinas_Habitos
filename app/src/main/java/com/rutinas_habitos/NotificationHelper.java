@@ -173,6 +173,20 @@ public class NotificationHelper {
     }
 
     /**
+     * Reproduce inmediatamente el tono estándar de notificación en el dispositivo (modo preview/prueba).
+     */
+    public static void reproducirDefaultPreview(Context context) {
+        try {
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            android.media.Ringtone r = RingtoneManager.getRingtone(context, notification);
+            if (r != null) {
+                r.play();
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
      * Reproduce inmediatamente la melodía zen en el dispositivo (modo preview/prueba).
      */
     public static void reproducirMelodiaZenPreview(Context context) {

@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -178,9 +179,6 @@ public class InicioActivity extends AppCompatActivity {
                     overridePendingTransition(0, 0);
                     finish();
                     return true;
-                } else if (itemId == R.id.nav_finanzas) {
-                    Toast.makeText(this, "El módulo de Finanzas Conscientes estará disponible próximamente 🌸", Toast.LENGTH_SHORT).show();
-                    return false;
                 } else if (itemId == R.id.nav_inicio) {
                     return true;
                 }
@@ -341,6 +339,25 @@ public class InicioActivity extends AppCompatActivity {
             actualizarResumenSuperior(comp, actuales.size());
 
             Toast.makeText(this, nuevoEstado ? "¡Hábito cumplido! 🌱✨" : "Hábito marcado como pendiente", Toast.LENGTH_SHORT).show();
+        });
+
+        // Opciones de edición y eliminación (CRUD completo)
+        row.setOnLongClickListener(v -> {
+            new AlertDialog.Builder(this)
+                    .setTitle(h.getNombre())
+                    .setItems(new CharSequence[]{"✏️ Editar hábito", "🗑️ Eliminar hábito"}, (dialog, which) -> {
+                        if (which == 0) {
+                            Intent intent = new Intent(this, CrearHabitoActivity.class);
+                            intent.putExtra("EXTRA_HABITO_ID", h.getId());
+                            startActivity(intent);
+                        } else if (which == 1) {
+                            dbHelper.eliminarHabito(h.getId());
+                            Toast.makeText(this, "Hábito eliminado 🗑️", Toast.LENGTH_SHORT).show();
+                            cargarHabitosDesdeSQLite(userId);
+                        }
+                    })
+                    .show();
+            return true;
         });
 
         row.addView(iv);

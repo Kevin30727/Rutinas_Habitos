@@ -253,9 +253,6 @@ public class CalendarioActivity extends AppCompatActivity {
                     startActivity(new Intent(this, PerfilActivity.class));
                     finish();
                     return true;
-                } else if (itemId == R.id.nav_finanzas) {
-                    Toast.makeText(this, "💰 El módulo de Finanzas Conscientes estará disponible próximamente 🌱", Toast.LENGTH_SHORT).show();
-                    return false;
                 } else if (itemId == R.id.nav_calendario) {
                     return true;
                 }

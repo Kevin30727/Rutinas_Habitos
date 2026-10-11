@@ -2,21 +2,33 @@ package com.rutinas_habitos;
 
 import android.app.TimePickerDialog;
 import android.content.res.ColorStateList;
+import android.database.Cursor;
 import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import com.google.android.material.button.MaterialButton;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -45,8 +57,12 @@ public class CrearHabitoActivity extends AppCompatActivity {
 
     // Selector de Sonido de Notificación
     private TextView btnSonidoDefault;
-    private TextView btnSonidoZen;
+    private TextView btnSonidoRelajante;
+    private TextView btnSonidoCustom;
     private TextView btnPreviewSonidoHabito;
+    private LinearLayout llCompartimentoTonoCustom;
+    private TextView tvNombreTonoCustomActual;
+    private MaterialButton btnElegirTonoCustom;
 
     // Botones de Frecuencia y Meta
     private TextView btnFrecDiario;
@@ -65,10 +81,22 @@ public class CrearHabitoActivity extends AppCompatActivity {
     private String unidadSeleccionada = "minutos";
     private String horaRecordatorio = "08:00 AM";
     private String tipoSonidoSeleccionado = "default";
+    private String rutaTonoCustomSeleccionado = "";
+    private String nombreTonoCustomSeleccionado = "";
     private final List<String> diasActivos = new ArrayList<>();
 
     private DatabaseHelper dbHelper;
     private SessionManager sessionManager;
+    private MediaPlayer customPreviewPlayer = null;
+
+    private final ActivityResultLauncher<String> audioPickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) {
+                    procesarAudioSeleccionado(uri);
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,8 +139,12 @@ public class CrearHabitoActivity extends AppCompatActivity {
         tvResumenDias = findViewById(R.id.tv_resumen_dias);
 
         btnSonidoDefault = findViewById(R.id.btn_sonido_default);
-        btnSonidoZen = findViewById(R.id.btn_sonido_zen);
+        btnSonidoRelajante = findViewById(R.id.btn_sonido_relajante);
+        btnSonidoCustom = findViewById(R.id.btn_sonido_custom);
         btnPreviewSonidoHabito = findViewById(R.id.btn_preview_sonido_habito);
+        llCompartimentoTonoCustom = findViewById(R.id.ll_compartimento_tono_custom);
+        tvNombreTonoCustomActual = findViewById(R.id.tv_nombre_tono_custom_actual);
+        btnElegirTonoCustom = findViewById(R.id.btn_elegir_tono_custom);
 
         btnFrecDiario = findViewById(R.id.btn_frec_diario);
         btnFrecFlexible = findViewById(R.id.btn_frec_flexible);
@@ -239,26 +271,168 @@ public class CrearHabitoActivity extends AppCompatActivity {
             actualizarVistaSonido();
         });
 
-        btnSonidoZen.setOnClickListener(v -> {
-            tipoSonidoSeleccionado = "zen";
+        btnSonidoRelajante.setOnClickListener(v -> {
+            tipoSonidoSeleccionado = "relajante";
             actualizarVistaSonido();
         });
 
-        btnPreviewSonidoHabito.setOnClickListener(v -> {
-            if ("zen".equals(tipoSonidoSeleccionado)) {
-                NotificationHelper.reproducirMelodiaZenPreview(this);
-                Toast.makeText(this, "🎵 Escuchando Melodía Zen (528Hz Solfeggio)", Toast.LENGTH_SHORT).show();
-            } else {
-                NotificationHelper.reproducirDefaultPreview(this);
-                Toast.makeText(this, "🔔 Escuchando tono de notificación estándar", Toast.LENGTH_SHORT).show();
+        btnSonidoCustom.setOnClickListener(v -> {
+            if (!tipoSonidoSeleccionado.startsWith("custom:")) {
+                if (!rutaTonoCustomSeleccionado.isEmpty()) {
+                    tipoSonidoSeleccionado = "custom:" + rutaTonoCustomSeleccionado;
+                } else {
+                    tipoSonidoSeleccionado = "custom:";
+                    mostrarDialogoSeleccionarTono();
+                }
             }
+            actualizarVistaSonido();
         });
+
+        btnElegirTonoCustom.setOnClickListener(v -> mostrarDialogoSeleccionarTono());
+
+        // Previsualizar el audio seleccionado
+        btnPreviewSonidoHabito.setOnClickListener(v -> previsualizarAudio());
 
         // Guardar o Actualizar
         btnGuardarHabito.setOnClickListener(v -> guardarHabito());
 
         // Eliminar Hábito (Modo Edición)
         btnEliminarHabito.setOnClickListener(v -> confirmarEliminarHabito());
+    }
+
+    private void previsualizarAudio() {
+        detenerPreviewAudio();
+        if (tipoSonidoSeleccionado != null && tipoSonidoSeleccionado.startsWith("custom:")) {
+            String path = tipoSonidoSeleccionado.replace("custom:", "");
+            if (path.isEmpty()) path = rutaTonoCustomSeleccionado;
+            if (path.isEmpty()) {
+                Toast.makeText(this, "Selecciona o sube un archivo MP3 primero", Toast.LENGTH_SHORT).show();
+                mostrarDialogoSeleccionarTono();
+                return;
+            }
+            try {
+                File f = new File(path);
+                if (f.exists()) {
+                    customPreviewPlayer = new MediaPlayer();
+                    customPreviewPlayer.setDataSource(f.getAbsolutePath());
+                    customPreviewPlayer.prepare();
+                    customPreviewPlayer.start();
+                    Toast.makeText(this, "🎵 Escuchando: " + (nombreTonoCustomSeleccionado.isEmpty() ? f.getName() : nombreTonoCustomSeleccionado), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "El archivo de audio no fue encontrado", Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                Toast.makeText(this, "Error al reproducir audio: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        } else if ("relajante".equals(tipoSonidoSeleccionado)) {
+            NotificationHelper.reproducirMelodiaRelajantePreview(this);
+            Toast.makeText(this, "🎵 Escuchando Melodía Relajante (528Hz Armónica)", Toast.LENGTH_SHORT).show();
+        } else {
+            NotificationHelper.reproducirDefaultPreview(this);
+            Toast.makeText(this, "🔔 Escuchando tono de notificación estándar", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void detenerPreviewAudio() {
+        if (customPreviewPlayer != null) {
+            try {
+                if (customPreviewPlayer.isPlaying()) customPreviewPlayer.stop();
+                customPreviewPlayer.release();
+            } catch (Exception ignored) {}
+            customPreviewPlayer = null;
+        }
+    }
+
+    private void mostrarDialogoSeleccionarTono() {
+        long userId = sessionManager.getUserId() > 0 ? sessionManager.getUserId() : 1;
+        List<TonoAudio> lista = dbHelper.obtenerTonosPersonalizados(userId);
+
+        List<String> opciones = new ArrayList<>();
+        opciones.add("➕ Subir nuevo archivo MP3/Audio...");
+        for (TonoAudio t : lista) {
+            opciones.add("🎵 " + t.getNombre());
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Seleccionar Tono de Notificación")
+                .setItems(opciones.toArray(new CharSequence[0]), (dialog, which) -> {
+                    if (which == 0) {
+                        audioPickerLauncher.launch("audio/*");
+                    } else {
+                        TonoAudio t = lista.get(which - 1);
+                        rutaTonoCustomSeleccionado = t.getRutaArchivo();
+                        nombreTonoCustomSeleccionado = t.getNombre();
+                        tipoSonidoSeleccionado = "custom:" + t.getRutaArchivo();
+                        tvNombreTonoCustomActual.setText("Audio: " + t.getNombre());
+                        actualizarVistaSonido();
+                        Toast.makeText(this, "Tono '" + t.getNombre() + "' seleccionado", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void procesarAudioSeleccionado(Uri uri) {
+        try {
+            String nombreArchivo = obtenerNombreDesdeUri(uri);
+            if (nombreArchivo == null || nombreArchivo.isEmpty()) {
+                nombreArchivo = "Tono_" + System.currentTimeMillis() + ".mp3";
+            }
+
+            File dir = new File(getFilesDir(), "tonos_mp3");
+            if (!dir.exists()) dir.mkdirs();
+
+            File destino = new File(dir, System.currentTimeMillis() + "_" + nombreArchivo);
+            try (InputStream is = getContentResolver().openInputStream(uri);
+                 FileOutputStream fos = new FileOutputStream(destino)) {
+                if (is != null) {
+                    byte[] buf = new byte[8192];
+                    int len;
+                    while ((len = is.read(buf)) > 0) {
+                        fos.write(buf, 0, len);
+                    }
+                }
+            }
+
+            long userId = sessionManager.getUserId() > 0 ? sessionManager.getUserId() : 1;
+            String fechaHoy = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+            TonoAudio nuevo = new TonoAudio();
+            nuevo.setUsuarioId(userId);
+            nuevo.setNombre(nombreArchivo);
+            nuevo.setRutaArchivo(destino.getAbsolutePath());
+            nuevo.setDuracion("MP3");
+            nuevo.setFechaSubida(fechaHoy);
+            dbHelper.insertarTonoPersonalizado(nuevo);
+
+            rutaTonoCustomSeleccionado = destino.getAbsolutePath();
+            nombreTonoCustomSeleccionado = nombreArchivo;
+            tipoSonidoSeleccionado = "custom:" + destino.getAbsolutePath();
+            tvNombreTonoCustomActual.setText("Audio: " + nombreArchivo);
+            actualizarVistaSonido();
+
+            Toast.makeText(this, "¡Tono '" + nombreArchivo + "' subido y asignado! 🎵", Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error al procesar audio: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private String obtenerNombreDesdeUri(Uri uri) {
+        String res = null;
+        if ("content".equals(uri.getScheme())) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (idx != -1) res = cursor.getString(idx);
+                }
+            } catch (Exception ignored) {}
+        }
+        if (res == null && uri.getPath() != null) {
+            int cut = uri.getPath().lastIndexOf('/');
+            if (cut != -1) res = uri.getPath().substring(cut + 1);
+        }
+        return res;
     }
 
     private void cargarHabitoParaEdicion(long id) {
@@ -300,7 +474,18 @@ public class CrearHabitoActivity extends AppCompatActivity {
         }
         switchRecordatorio.setChecked(h.isRecordatorioActivo());
 
-        tipoSonidoSeleccionado = "zen".equals(h.getTipoSonidoNotificacion()) ? "zen" : "default";
+        String son = h.getTipoSonidoNotificacion();
+        if (son != null && son.startsWith("custom:")) {
+            tipoSonidoSeleccionado = son;
+            rutaTonoCustomSeleccionado = son.replace("custom:", "");
+            File f = new File(rutaTonoCustomSeleccionado);
+            nombreTonoCustomSeleccionado = f.getName();
+            tvNombreTonoCustomActual.setText("Audio: " + f.getName());
+        } else if ("relajante".equals(son)) {
+            tipoSonidoSeleccionado = "relajante";
+        } else {
+            tipoSonidoSeleccionado = "default";
+        }
 
         // Sincronizar UI
         actualizarVistaIcono();
@@ -414,16 +599,26 @@ public class CrearHabitoActivity extends AppCompatActivity {
     }
 
     private void actualizarVistaSonido() {
-        if ("zen".equals(tipoSonidoSeleccionado)) {
-            btnSonidoZen.setBackgroundResource(R.drawable.bg_chip_seleccionado);
-            btnSonidoZen.setTextColor(Color.parseColor("#2D3142"));
-            btnSonidoDefault.setBackgroundResource(R.drawable.bg_chip_normal);
-            btnSonidoDefault.setTextColor(Color.parseColor("#8D909F"));
+        // Resetear todos los chips de sonido
+        btnSonidoDefault.setBackgroundResource(R.drawable.bg_chip_normal);
+        btnSonidoDefault.setTextColor(Color.parseColor("#8D909F"));
+        btnSonidoRelajante.setBackgroundResource(R.drawable.bg_chip_normal);
+        btnSonidoRelajante.setTextColor(Color.parseColor("#8D909F"));
+        btnSonidoCustom.setBackgroundResource(R.drawable.bg_chip_normal);
+        btnSonidoCustom.setTextColor(Color.parseColor("#8D909F"));
+
+        if (tipoSonidoSeleccionado != null && tipoSonidoSeleccionado.startsWith("custom:")) {
+            btnSonidoCustom.setBackgroundResource(R.drawable.bg_chip_seleccionado);
+            btnSonidoCustom.setTextColor(Color.parseColor("#2D3142"));
+            llCompartimentoTonoCustom.setVisibility(View.VISIBLE);
+        } else if ("relajante".equals(tipoSonidoSeleccionado)) {
+            btnSonidoRelajante.setBackgroundResource(R.drawable.bg_chip_seleccionado);
+            btnSonidoRelajante.setTextColor(Color.parseColor("#2D3142"));
+            llCompartimentoTonoCustom.setVisibility(View.GONE);
         } else {
             btnSonidoDefault.setBackgroundResource(R.drawable.bg_chip_seleccionado);
             btnSonidoDefault.setTextColor(Color.parseColor("#2D3142"));
-            btnSonidoZen.setBackgroundResource(R.drawable.bg_chip_normal);
-            btnSonidoZen.setTextColor(Color.parseColor("#8D909F"));
+            llCompartimentoTonoCustom.setVisibility(View.GONE);
         }
     }
 
@@ -615,5 +810,17 @@ public class CrearHabitoActivity extends AppCompatActivity {
                 Toast.makeText(this, "Error al guardar el hábito en la base de datos", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        detenerPreviewAudio();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        detenerPreviewAudio();
     }
 }

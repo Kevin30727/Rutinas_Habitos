@@ -11,13 +11,13 @@ import java.util.Set;
  * Motor de Inteligencia Local Offline para "Rutinas Pastel".
  * 
  * Capacidades:
- * 1. Procesamiento Conversacional Inteligente: Responde inteligentemente y de manera
- *    empática a cualquier comentario (ej: clima "hoy hace un buen día soleado", emociones,
- *    saludos o reflexiones de vida) sin requerir conexión a internet.
+ * 1. Procesamiento Conversacional Inteligente: Responde de forma cálida, inteligente
+ *    y empática a cualquier saludo (ej: "ola", "hola"), preguntas del día a día, clima,
+ *    emociones o reflexiones sin requerir conexión a internet.
  * 2. Procesamiento Múltiple Acumulativo de Hábitos: Escanea toda la frase del usuario,
- *    detecta todas las intenciones presentes (agua, lectura, meditación, etc.) y las acumula.
- * 3. Sugerencias Contextuales Sinérgicas: Evalúa las relaciones cruzadas entre los hábitos
- *    detectados para entregar consejos de alto valor práctico y armonioso.
+ *    detecta todas las intenciones de hábitos presentes (agua, lectura, ejercicio, etc.) y las acumula.
+ * 3. Sugerencias Contextuales Sinérgicas: Evalúa las relaciones entre los hábitos detectados
+ *    para entregar consejos prácticos de alto valor.
  */
 public class AsistenteMotor {
 
@@ -68,12 +68,13 @@ public class AsistenteMotor {
             h.setColor(colorHex);
             h.setAreaVida(areaVida);
             h.setTipoFrecuencia(frecuencia);
-            h.setDiasSemana("L,M,M,J,V,S,D");
+            h.setDiasSemana("L,M,X,J,V,S,D");
             h.setTipoMeta("cantidad");
             h.setMetaCantidad(metaCantidad);
             h.setUnidad(unidad);
             h.setHoraRecordatorio(horaSugerida);
             h.setRecordatorioActivo(true);
+            h.setTipoSonidoNotificacion("default");
             return h;
         }
     }
@@ -96,8 +97,8 @@ public class AsistenteMotor {
     }
 
     /**
-     * Procesa cualquier entrada del usuario: comentarios del día a día, clima,
-     * emociones, dudas o peticiones de hábitos.
+     * Procesa cualquier entrada del usuario: saludos, clima, emociones,
+     * charlas casuales o peticiones de hábitos.
      */
     public static ResultadoAsistente procesarEntrada(String entradaUsuario) {
         String texto = normalizar(entradaUsuario);
@@ -175,45 +176,24 @@ public class AsistenteMotor {
             intentsDetectados.add("GRATITUD");
         }
 
-        // 2. RESPUESTA CONVERSACIONAL INTELIGENTE (CLIMA, CHARLA, EMOCIONES, PREGUNTAS)
+        // 2. RESPUESTA CONVERSACIONAL INTELIGENTE (CHATS, SALUDOS, PREGUNTAS, CLIMA)
         String respuestaConversacional = responderConversacionNatural(texto);
 
         if (respuestaConversacional != null) {
-            // Si el usuario comentó sobre el clima y no pidió una rutina explícita, podemos
-            // ofrecer una propuesta complementaria suave:
-            if (acumulador.isEmpty()) {
-                if (contieneAlguna(texto, "soleado", "sol", "buen dia", "lindo dia")) {
-                    acumulador.add(new RutinaPropuesta(
-                            "CAMINATA_SOL", "Paseo al aire libre y sol",
-                            "15 minutos caminando bajo la luz natural para recargar energía.",
-                            "ejercicio", "#B8E0D2", "Bienestar", 15, "min", "Diario", "11:00 AM"
-                    ));
-                    intentsDetectados.add("EJERCICIO");
-                } else if (contieneAlguna(texto, "lluvia", "lloviendo", "frio", "nublado")) {
-                    acumulador.add(new RutinaPropuesta(
-                            "PAUSA_CALIDA", "Momento de infusión y calma",
-                            "10 minutos disfrutando un té o bebida tibia en serenidad.",
-                            "meditacion", "#F8C8DC", "Calma", 10, "min", "Diario", "05:00 PM"
-                    ));
-                    intentsDetectados.add("MEDITACION");
-                }
+            String sugerencia = null;
+            if (!acumulador.isEmpty()) {
+                sugerencia = generarSugerenciaContextual(intentsDetectados);
             }
-
-            String sugerencia = !acumulador.isEmpty()
-                    ? generarSugerenciaContextual(intentsDetectados)
-                    : "🌱 Consejo Panda: Camina a tu propio compás hoy; cada instante presente es un regalo.";
-
             return new ResultadoAsistente(acumulador, respuestaConversacional, sugerencia);
         }
 
-        // 3. RESPUESTAS PARA ENTRADAS EXCLUSIVAS DE RUTINAS
+        // 3. RESPUESTAS PARA ENTRADAS EXCLUSIVAS DE RUTINAS O CONSULTAS LIBRES
         if (acumulador.isEmpty()) {
-            acumulador.add(new RutinaPropuesta(
-                    "PAUSA_BASE", "Momento de pausa consciente",
-                    "5 minutos para reconectar contigo mismo y tomar aire.",
-                    "corazon", "#B8E0D2", "Bienestar", 5, "min", "Diario", "10:00 AM"
-            ));
-            intentsDetectados.add("PAUSA_BASE");
+            return new ResultadoAsistente(
+                    acumulador,
+                    "Te escucho con cariño 🐼. Estoy aquí para acompañarte sin prisas. ¿Te gustaría trabajar en alguna rutina como tomar más agua, leer, meditar o hacer ejercicio, o simplemente prefieres charlar?",
+                    "💡 Recuerda: Puedes pedirme 'quiero tomar agua y leer' para crear múltiples hábitos a la vez."
+            );
         }
 
         String sugerenciaContextual = generarSugerenciaContextual(intentsDetectados);
@@ -223,78 +203,96 @@ public class AsistenteMotor {
     }
 
     /**
-     * Módulo de conversación natural, clima, empatía y filosofía Zen.
+     * Módulo de conversación natural, clima, empatía y diálogo interactivo.
      */
     private static String responderConversacionNatural(String texto) {
+        // --- Saludos y Bienvenida (incluyendo "ola", "hola", etc.) ---
+        if (esSaludo(texto)) {
+            return "¡Hola! Me alegra muchísimo saludarte 🐼✨ ¿Cómo va tu día? Cuéntame cómo te sientes o si te gustaría que organicemos juntos algún hábito o rutina amable.";
+        }
+        if (contieneAlguna(texto, "buenos dias", "buen dia", "lindo dia")) {
+            return "¡Muy buenos días! 🌅 Que este nuevo amanecer te traiga ligereza y paz. Recuerda dar un pasito amable a la vez sin exigirte de más.";
+        }
+        if (contieneAlguna(texto, "buenas tardes", "buena tarde")) {
+            return "¡Buenas tardes! ☀️ Espero que tu jornada esté fluyendo con serenidad. ¿Es momento de una pausa para respirar hondo o un sorbo de agua fresca?";
+        }
+        if (contieneAlguna(texto, "buenas noches", "buena noche", "hasta manana", "a dormir")) {
+            return "¡Buenas noches! 🌙 Cierra los ojos con la certeza de que diste lo mejor de ti hoy. Suelta las preocupaciones; mañana habrá un nuevo amanecer esperándote a tu propio compás.";
+        }
+        if (contieneAlguna(texto, "como estas", "como te va", "que haces", "como andas", "todo bien")) {
+            return "¡Me encuentro en profunda calma y muy feliz de conversar contigo! 🌿 Gracias por preguntar. ¿Y tú, cómo te sientes en este instante?";
+        }
+
         // --- Clima y Naturaleza ---
-        if (contieneAlguna(texto, "soleado", "sol", "buen dia", "lindo dia", "hermoso dia", "dia lindo")) {
-            return "¡Qué hermoso día soleado! ☀️ La luz natural eleva la serotonina y revitaliza tus ritmos biológicos. Es una oportunidad perfecta para estirar las piernas, sentir el aire fresco o disfrutar un buen vaso de agua bajo el sol 🌿.";
+        if (contieneAlguna(texto, "soleado", "hace sol", "dia soleado", "sol brillante", "hermoso dia")) {
+            return "¡Qué hermoso día soleado! ☀️ La luz natural recarga el ánimo y despierta la vitalidad. Es una oportunidad perfecta para estirar los brazos, salir a caminar un momento o tomar agua fresca bajo el sol 🌿.";
         }
         if (contieneAlguna(texto, "lluvia", "lloviendo", "tormenta", "chubasco")) {
             return "Los días lluviosos tienen una magia especial para reconectar hacia adentro 🌧️. El sonido del agua es un arrullo natural: ideal para bajar revoluciones, preparar una infusión tibia y acompañarla con una lectura amable.";
         }
         if (contieneAlguna(texto, "frio", "helado", "invernal")) {
-            return "¡Qué día tan fresco! 🧣 Abrígate bien y regálate pequeños momentos de confort: estiramientos suaves en casa o una pausa con tu bebida caliente favorita te reconfortarán el alma.";
+            return "¡Qué día tan fresco! 🧣 Abrígate bien y regálate momentos de confort: estiramientos suaves en casa o una pausa con tu bebida tibia favorita te reconfortarán el alma.";
         }
         if (contieneAlguna(texto, "calor", "bochorno", "caluroso")) {
-            return "En días calurosos, tu cuerpo pide ligereza y atención 🍃💧. Mantén cerca tu botella de agua, busca espacios frescos y recuerda que no hay prisa para cumplir tus metas.";
+            return "En días calurosos tu cuerpo pide ligereza y frescura 🍃💧. Mantén cerca tu botella de agua, busca sombra y recuerda que no hay prisa.";
         }
         if (contieneAlguna(texto, "nublado", "gris")) {
-            return "Los cielos nublados nos invitan a la calma reflexiva ☁️. No todos los días tienen que ser vibrantes; los tonos suaves del cielo nos recuerdan que la tranquilidad también es un hermoso logro.";
-        }
-
-        // --- Saludos y Bienvenida ---
-        if (contieneAlguna(texto, "hola", "buenas", "que tal", "que onda", "saludos")) {
-            return "¡Hola! Me alegra mucho verte por aquí 🐼✨ Me siento sereno y listo para acompañarte. ¿Cómo te sientes hoy? Cuéntame si deseas cultivar una rutina o simplemente charlar un momento.";
-        }
-        if (contieneAlguna(texto, "buenos dias")) {
-            return "¡Muy buenos días! 🌅 Que este nuevo amanecer te traiga ligereza y calma. Recuerda que no necesitas conquistar el mundo hoy, solo dar un pasito amable a la vez.";
-        }
-        if (contieneAlguna(texto, "buenas tardes")) {
-            return "¡Buenas tardes! ☀️ Espero que tu jornada esté fluyendo con serenidad. ¿Es momento de una pausa para respirar hondo o un sorbo de agua fresca?";
-        }
-        if (contieneAlguna(texto, "buenas noches", "hasta manana", "a dormir")) {
-            return "¡Buenas noches! 🌙 Cierra los ojos con la certeza de que diste lo mejor de ti hoy. Suelta las preocupaciones; mañana habrá un nuevo comienzo esperándote a tu propio compás.";
-        }
-        if (contieneAlguna(texto, "como estas", "como te va", "que haces")) {
-            return "¡Me encuentro en profunda calma y muy feliz de conversar contigo! 🎋 Gracias por preguntar. ¿Y tú, cómo late tu corazón hoy?";
+            return "Los cielos nublados nos invitan a la calma reflexiva ☁️. No todos los días tienen que ser vibrantes; la tranquilidad también es un hermoso logro.";
         }
 
         // --- Estados Emocionales y Empatía ---
         if (contieneAlguna(texto, "triste", "llorar", "desanimado", "bajon", "pena", "deprimid", "mal")) {
-            return "Siento mucho que te sientas así 🤍. Abraza esa emoción sin juzgarla; está bien no estar bien. En Rutina Pastel no hay espacio para la culpa. Regálate ternura hoy: cobijarte, descansar o beber un vaso de agua es más que suficiente.";
+            return "Siento mucho que te sientas así 🤍. Abraza esa emoción sin juzgarla; está bien no estar bien. En Rutinas Pastel no hay espacio para la culpa. Regálate ternura hoy: descansar o beber un vaso de agua es más que suficiente.";
         }
-        if (contieneAlguna(texto, "feliz", "contento", "alegre", "genial", "motivado", "emocionado", "excelente")) {
-            return "¡Qué hermosa energía! 🌟 La alegría compartida florece aún más. Aprovecha esta vitalidad para disfrutar tus rutinas favoritas o agradecer los pequeños milagros cotidianos.";
+        if (contieneAlguna(texto, "feliz", "contento", "alegre", "genial", "motivado", "emocionado", "excelente", "super")) {
+            return "¡Qué hermosa energía tienes hoy! 🌟 La alegría compartida florece aún más. Aprovecha esta vitalidad para disfrutar tus hábitos favoritos o agradecer los pequeños momentos del día.";
         }
         if (contieneAlguna(texto, "solo", "soledad")) {
-            return "Aunque a veces parezca que estamos solos, este espacio y yo estamos aquí para ti 🤍. La soledad también puede ser un refugio amable para aprender a ser tu propio mejor amigo.";
+            return "Aunque a veces parezca que estamos solos, este refugio y yo estamos aquí para ti 🤍. La soledad también puede ser un espacio amable para aprender a ser tu propio mejor amigo.";
         }
         if (contieneAlguna(texto, "estres", "ansiedad", "abrumado", "agobiado", "colapso")) {
-            return "Detén todo un instante conmigo 🍃. Inhala hondo sintiendo cómo se expande tu pecho... 1, 2, 3, 4... y exhala lento soltando los hombros. No tienes que resolverlo todo en este minuto. Una respiración a la vez.";
+            return "Detén todo un instante conmigo 🍃. Inhala hondo sintiendo cómo se expande tu pecho... 1, 2, 3, 4... y exhala lento soltando los hombros. No tienes que resolverlo todo ahora. Una respiración a la vez.";
         }
         if (contieneAlguna(texto, "enojado", "molesto", "rabia", "bronca", "furioso")) {
             return "Es completamente válido sentir frustración a veces 🌿. No te castigues por sentirla; respira, date un espacio para caminar y deja que el agua se aclare por sí sola.";
         }
+        if (contieneAlguna(texto, "flojera", "pereza", "desgano", "no tengo ganas", "sin ganas")) {
+            return "Es totalmente normal sentir pereza o cansancio a veces 🐼💤. No te obligues a grandes hazañas: haz algo ridículamente pequeño, como sentarte erguido o beber medio vaso de agua. Ese pequeño paso reactiva tu energía con amor.";
+        }
+        if (contieneAlguna(texto, "aburrido", "aburrimiento")) {
+            return "¡El aburrimiento puede ser el inicio de una linda idea! 💡 ¿Qué tal leer unas 5 páginas de algo nuevo, salir a mirar el cielo o estirarte un par de minutos?";
+        }
 
         // --- Filosofía, Dudas y Orientación ---
         if (contieneAlguna(texto, "quien eres", "que eres", "como te llamas")) {
-            return "Soy tu Acompañante Panda Zen 🐼 en Rutina Pastel. Mi propósito es recordarte que el autocuidado se cultiva con amor y pasos diminutos, libre de juicios y sin culpas.";
+            return "Soy tu Acompañante Panda 🐼 en Rutinas Pastel. Mi propósito es recordarte que el autocuidado se cultiva con amor y pasos diminutos, libre de juicios y sin culpas.";
+        }
+        if (contieneAlguna(texto, "que puedes hacer", "que haces", "como me ayudas", "ayuda")) {
+            return "¡Puedo ayudarte en mucho! 🌸\n• Conversar contigo cuando necesites calma o desahogarte.\n• Crear y sugerirte rutinas (agua, lectura, ejercicio, meditación).\n• Cuidar tu ritmo sin culpa para que seas constante a tu propio tiempo.";
         }
         if (contieneAlguna(texto, "consejo", "que me recomiendas", "como empiezo", "no se que hacer")) {
-            return "Mi mejor sugerencia es 'hacerlo ridículamente fácil' 🌱. Elige una meta tan pequeña que sea imposible fallar (por ejemplo, tomar 1 vaso de agua al despertar o leer 2 minutos). Al eliminar la resistencia, la constancia florece sin esfuerzo.";
+            return "Mi mejor sugerencia es 'hacerlo ridículamente fácil' 🌱. Elige una meta tan pequeña que sea imposible fallar (como tomar 1 vaso de agua al despertar o leer 2 minutos). Al eliminar la resistencia, la constancia florece sin esfuerzo.";
         }
         if (contieneAlguna(texto, "constancia", "disciplina", "fuerza de voluntad")) {
             return "La constancia no se trata de no fallar nunca, sino de regresar con amabilidad cuando te desvías 🎋. Por eso nuestro Modo Sin Culpa te cuida: si hoy no pudiste, mañana retomas con calma y sin penalizaciones.";
         }
-        if (contieneAlguna(texto, "rutina pastel", "que es esta app")) {
-            return "Rutina Pastel es tu refugio de bienestar y hábitos amables 🌸🎨. Cuidamos tu salud mental, tu cuerpo y tu tiempo a través de colores suaves y acompañamiento empático.";
+        if (contieneAlguna(texto, "rutina pastel", "que es esta app", "de que trata")) {
+            return "Rutinas Pastel es tu refugio de bienestar y hábitos amables 🌸🎨. Cuidamos tu salud mental, tu cuerpo y tu tiempo a través de colores suaves y acompañamiento empático.";
         }
-        if (contieneAlguna(texto, "gracias", "muchas gracias", "te quiero", "lindo panda", "buen trabajo")) {
+        if (contieneAlguna(texto, "gracias", "muchas gracias", "te quiero", "lindo panda", "buen trabajo", "te amo", "genial")) {
             return "¡Muchísimas gracias a ti! 🐼💕 Es un inmenso honor acompañarte en tus días. Recuerda que siempre estaré aquí cuando necesites serenidad.";
         }
 
         return null;
+    }
+
+    private static boolean esSaludo(String texto) {
+        if (texto.equals("ola") || texto.equals("hola") || texto.equals("holis") || texto.equals("holi") ||
+            texto.equals("hey") || texto.equals("buenas") || texto.equals("hello") || texto.equals("hi") ||
+            texto.equals("que tal") || texto.equals("olaa") || texto.equals("holaa") || texto.equals("saludos")) {
+            return true;
+        }
+        return contieneAlguna(texto, "hola", "ola ", "ola!", "ola,", "buenas", "que tal", "que onda", "saludos");
     }
 
     /**
@@ -314,47 +312,19 @@ public class AsistenteMotor {
         if (intents.contains("LECTURA") && intents.contains("SUENO")) {
             return "💡 Sugerencia: Cambia el brillo del teléfono por 10 páginas de tu libro en la cama para inducir un sueño profundo y natural.";
         }
-        // Cruce: Estrés/Meditación + Sueño
+        // Cruce: Meditación + Sueño
         if (intents.contains("MEDITACION") && intents.contains("SUENO")) {
             return "💡 Sugerencia: Haz tu pausa de respiración justo al acostarte; calmará tu pulso y disipará las tensiones del día.";
         }
-        // Cruce: Estrés/Meditación + Ejercicio
-        if (intents.contains("MEDITACION") && intents.contains("EJERCICIO")) {
-            return "💡 Sugerencia: Inicia tu caminata dedicando los primeros 3 minutos a observar tu respiración y el entorno.";
+        // Cruce: Ejercicio + Meditación
+        if (intents.contains("EJERCICIO") && intents.contains("MEDITACION")) {
+            return "💡 Sugerencia: Dedica los últimos 3 minutos de tu caminata a respirar con atención plena sintiendo el aire fresco.";
         }
-        // Cruce: Productividad + Agua
+        // Cruce: Productividad + Meditación/Agua
         if (intents.contains("PRODUCTIVIDAD") && intents.contains("AGUA")) {
-            return "💡 Sugerencia: Cada vez que concluyas un bloque Pomodoro de 25 min, tómate un vaso de agua para oxigenar tu mente.";
+            return "💡 Sugerencia: Bebe un vaso de agua al terminar cada bloque de trabajo para resetear tu concentración.";
         }
-        // Cruce: Productividad + Meditación
-        if (intents.contains("PRODUCTIVIDAD") && intents.contains("MEDITACION")) {
-            return "💡 Sugerencia: Si sientes bloqueo mental, no fuerces la tarea: 3 minutos de respiración restauran la claridad.";
-        }
-
-        // Sugerencias unitarias si solo se detectó una intención
-        if (intents.contains("AGUA")) {
-            return "💡 Sugerencia: Mantén un termo bonito a la vista en tu escritorio; la visibilidad es el mejor recordatorio.";
-        }
-        if (intents.contains("LECTURA")) {
-            return "💡 Sugerencia: Lleva siempre tu libro o e-reader en el bolso; leer pequeños párrafos en tiempos de espera suma mucho.";
-        }
-        if (intents.contains("MEDITACION")) {
-            return "💡 Sugerencia: No intentes dejar la mente en blanco; simplemente observa tus pensamientos como nubes que pasan.";
-        }
-        if (intents.contains("EJERCICIO")) {
-            return "💡 Sugerencia: Deja tu ropa cómoda preparada la noche anterior para reducir la fricción al empezar.";
-        }
-        if (intents.contains("SUENO")) {
-            return "💡 Sugerencia: Mantén tu habitación fresca y en penumbra para que tu cuerpo entienda que es hora del reposo.";
-        }
-        if (intents.contains("PRODUCTIVIDAD")) {
-            return "💡 Sugerencia: Elige solo una prioridad principal por jornada. Menos dispersión equivale a mayor paz mental.";
-        }
-        if (intents.contains("GRATITUD")) {
-            return "💡 Sugerencia: Puedes agradecer incluso cosas diminutas, como el aroma del café o un rayo de sol entrando por la ventana.";
-        }
-
-        return "💡 Sugerencia: Recuerda que la constancia gentil vale más que la exigencia. Da un paso a la vez a tu propio ritmo 🌱.";
+        return "💡 Recuerda: Pequeños pasos sostenibles valen más que grandes esfuerzos aislados.";
     }
 
     private static String construirMensajePanda(List<RutinaPropuesta> rutinas) {
@@ -368,7 +338,7 @@ public class AsistenteMotor {
                 sb.append("• ").append(rutinas.get(i).getNombre());
                 if (i < rutinas.size() - 1) sb.append("\n");
             }
-            sb.append("\nAmbas rutinas se complementan muy bien para tu bienestar diario.");
+            sb.append("\nEstas rutinas se complementan muy bien para tu bienestar diario.");
             return sb.toString();
         }
     }

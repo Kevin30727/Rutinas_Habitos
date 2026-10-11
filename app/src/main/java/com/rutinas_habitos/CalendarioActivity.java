@@ -65,6 +65,12 @@ public class CalendarioActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         cargarHabitosDelDia();
+
+        // Aplicar paleta activa de colores al FloatingActionButton
+        FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito_cal);
+        if (fab != null) {
+            fab.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(this)));
+        }
     }
 
     private void cargarHabitosDelDia() {

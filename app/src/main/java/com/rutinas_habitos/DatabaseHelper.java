@@ -77,6 +77,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_REG_PROGRESO = "progreso_cantidad";
     public static final String COL_REG_NOTAS = "notas";
 
+    // 5. Tabla TonoPersonalizado (Audios MP3 subidos por el usuario)
+    public static final String TABLE_TONO_PERSONALIZADO = "TonoPersonalizado";
+    public static final String COL_TONO_ID = "id";
+    public static final String COL_TONO_USER_ID = "usuario_id";
+    public static final String COL_TONO_NOMBRE = "nombre";
+    public static final String COL_TONO_RUTA = "ruta_archivo";
+    public static final String COL_TONO_DURACION = "duracion";
+    public static final String COL_TONO_FECHA = "fecha_subida";
+
     // Constantes de compatibilidad hacia atrás
     public static final String TABLE_USUARIOS = TABLE_USUARIO;
     public static final String TABLE_HABITOS = TABLE_HABITO;
@@ -114,7 +123,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String createPerfilAsistente = "CREATE TABLE " + TABLE_PERFIL_ASISTENTE + " (" +
                 COL_PERFIL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_PERFIL_USER_ID + " INTEGER NOT NULL, " +
-                COL_PERFIL_TONO + " TEXT DEFAULT 'Zen Amable', " +
+                COL_PERFIL_TONO + " TEXT DEFAULT 'Cálido y Amable', " +
                 COL_PERFIL_MODO_SIN_CULPA + " INTEGER DEFAULT 1, " +
                 COL_PERFIL_META_BIENESTAR + " TEXT, " +
                 COL_PERFIL_ULTIMA_INTERACCION + " TEXT, " +
@@ -159,10 +168,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY(" + COL_REG_USUARIO_ID + ") REFERENCES " + TABLE_USUARIO + "(" + COL_USER_ID + ") ON DELETE CASCADE" +
                 ");";
 
+        String createTonoPersonalizado = "CREATE TABLE " + TABLE_TONO_PERSONALIZADO + " (" +
+                COL_TONO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COL_TONO_USER_ID + " INTEGER NOT NULL, " +
+                COL_TONO_NOMBRE + " TEXT NOT NULL, " +
+                COL_TONO_RUTA + " TEXT NOT NULL, " +
+                COL_TONO_DURACION + " TEXT, " +
+                COL_TONO_FECHA + " TEXT NOT NULL, " +
+                "FOREIGN KEY(" + COL_TONO_USER_ID + ") REFERENCES " + TABLE_USUARIO + "(" + COL_USER_ID + ") ON DELETE CASCADE" +
+                ");";
+
         db.execSQL(createUsuario);
         db.execSQL(createPerfilAsistente);
         db.execSQL(createHabito);
         db.execSQL(createRegistroDiario);
+        db.execSQL(createTonoPersonalizado);
     }
 
     @Override
@@ -170,6 +190,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         super.onOpen(db);
         try {
             db.execSQL("ALTER TABLE " + TABLE_HABITO + " ADD COLUMN " + COL_HAB_SONIDO + " TEXT DEFAULT 'default'");
+        } catch (Exception ignored) {
+        }
+        try {
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_TONO_PERSONALIZADO + " (" +
+                    COL_TONO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COL_TONO_USER_ID + " INTEGER NOT NULL, " +
+                    COL_TONO_NOMBRE + " TEXT NOT NULL, " +
+                    COL_TONO_RUTA + " TEXT NOT NULL, " +
+                    COL_TONO_DURACION + " TEXT, " +
+                    COL_TONO_FECHA + " TEXT NOT NULL, " +
+                    "FOREIGN KEY(" + COL_TONO_USER_ID + ") REFERENCES " + TABLE_USUARIO + "(" + COL_USER_ID + ") ON DELETE CASCADE" +
+                    ");");
         } catch (Exception ignored) {
         }
     }
@@ -220,7 +252,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // 2. Insertar PerfilAsistente vinculado
             ContentValues cvPerfil = new ContentValues();
             cvPerfil.put(COL_PERFIL_USER_ID, usuarioId);
-            cvPerfil.put(COL_PERFIL_TONO, "Zen Amable");
+            cvPerfil.put(COL_PERFIL_TONO, "Cálido y Amable");
             cvPerfil.put(COL_PERFIL_MODO_SIN_CULPA, 1);
             cvPerfil.put(COL_PERFIL_META_BIENESTAR, metaBienestar != null ? metaBienestar : "Bienestar integral");
             cvPerfil.put(COL_PERFIL_ULTIMA_INTERACCION, ahora);
@@ -291,7 +323,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (id != -1) {
             ContentValues cvPerfil = new ContentValues();
             cvPerfil.put(COL_PERFIL_USER_ID, id);
-            cvPerfil.put(COL_PERFIL_TONO, "Zen Amable");
+            cvPerfil.put(COL_PERFIL_TONO, "Cálido y Amable");
             cvPerfil.put(COL_PERFIL_MODO_SIN_CULPA, 1);
             cvPerfil.put(COL_PERFIL_META_BIENESTAR, "Equilibrio y calma");
             cvPerfil.put(COL_PERFIL_ULTIMA_INTERACCION, sdf.format(new Date()));
@@ -642,5 +674,68 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cv.put(COL_PERFIL_USER_ID, usuarioId);
             db.insert(TABLE_PERFIL_ASISTENTE, null, cv);
         }
+    }
+
+    // =========================================================================
+    // MÉTODOS PARA TONOS PERSONALIZADOS (MP3)
+    // =========================================================================
+
+    public long insertarTonoPersonalizado(TonoAudio tono) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COL_TONO_USER_ID, tono.getUsuarioId());
+        cv.put(COL_TONO_NOMBRE, tono.getNombre());
+        cv.put(COL_TONO_RUTA, tono.getRutaArchivo());
+        cv.put(COL_TONO_DURACION, tono.getDuracion());
+        cv.put(COL_TONO_FECHA, tono.getFechaSubida());
+        return db.insert(TABLE_TONO_PERSONALIZADO, null, cv);
+    }
+
+    public List<TonoAudio> obtenerTonosPersonalizados(long usuarioId) {
+        List<TonoAudio> lista = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_TONO_PERSONALIZADO, null,
+                COL_TONO_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)},
+                null, null, COL_TONO_ID + " DESC");
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                TonoAudio t = new TonoAudio();
+                t.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_TONO_ID)));
+                t.setUsuarioId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_TONO_USER_ID)));
+                t.setNombre(cursor.getString(cursor.getColumnIndexOrThrow(COL_TONO_NOMBRE)));
+                t.setRutaArchivo(cursor.getString(cursor.getColumnIndexOrThrow(COL_TONO_RUTA)));
+                t.setDuracion(cursor.getString(cursor.getColumnIndexOrThrow(COL_TONO_DURACION)));
+                t.setFechaSubida(cursor.getString(cursor.getColumnIndexOrThrow(COL_TONO_FECHA)));
+                lista.add(t);
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+        return lista;
+    }
+
+    public TonoAudio obtenerTonoPorId(long tonoId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_TONO_PERSONALIZADO, null,
+                COL_TONO_ID + " = ?", new String[]{String.valueOf(tonoId)},
+                null, null, null);
+        TonoAudio t = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            t = new TonoAudio();
+            t.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_TONO_ID)));
+            t.setUsuarioId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_TONO_USER_ID)));
+            t.setNombre(cursor.getString(cursor.getColumnIndexOrThrow(COL_TONO_NOMBRE)));
+            t.setRutaArchivo(cursor.getString(cursor.getColumnIndexOrThrow(COL_TONO_RUTA)));
+            t.setDuracion(cursor.getString(cursor.getColumnIndexOrThrow(COL_TONO_DURACION)));
+            t.setFechaSubida(cursor.getString(cursor.getColumnIndexOrThrow(COL_TONO_FECHA)));
+            cursor.close();
+        }
+        return t;
+    }
+
+    public boolean eliminarTonoPersonalizado(long tonoId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rows = db.delete(TABLE_TONO_PERSONALIZADO, COL_TONO_ID + " = ?", new String[]{String.valueOf(tonoId)});
+        return rows > 0;
     }
 }

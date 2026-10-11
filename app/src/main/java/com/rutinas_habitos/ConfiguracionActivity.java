@@ -24,9 +24,9 @@ import java.util.List;
  * 
  * Funcionalidades:
  * 1. Preferencias de Ritmo: Modo Sin Culpa (persistido en SQLite), Meta de Bienestar, Alertas.
- * 2. Apariencia & Armonía Visual: Selección interactiva de Paleta Pastel (Pastel Neo, Dulce Sakura, Océano Calmo, Lavanda Zen) y Modo Descanso Visual.
+ * 2. Apariencia & Armonía Visual: Selección interactiva de Paleta Pastel (Pastel Neo, Dulce Sakura, Océano Calmo, Lavanda Suave) y Modo Descanso Visual.
  * 3. Gestión de Datos: Exportación completa de hábitos en JSON y restablecimiento total de hábitos en SQLite.
- * 4. Sistema de Notificaciones: Prueba en vivo de canal estándar y canal con melodía Zen relajante (528Hz Solfeggio).
+ * 4. Sistema de Notificaciones: Prueba en vivo de canal estándar y canal con melodía armónica relajante (528Hz Solfeggio).
  * 5. Gestión de Cuenta: Cierre seguro de sesión.
  */
 public class ConfiguracionActivity extends AppCompatActivity {
@@ -138,7 +138,7 @@ public class ConfiguracionActivity extends AppCompatActivity {
         optMenta.setOnClickListener(v -> seleccionarPaleta("menta", "Pastel Neo (Menta)"));
         optSakura.setOnClickListener(v -> seleccionarPaleta("sakura", "Dulce Sakura (Rosa)"));
         optOceano.setOnClickListener(v -> seleccionarPaleta("oceano", "Océano Calmo (Azul)"));
-        optLavanda.setOnClickListener(v -> seleccionarPaleta("lavanda", "Lavanda Zen"));
+        optLavanda.setOnClickListener(v -> seleccionarPaleta("lavanda", "Lavanda Suave"));
 
         // Toggle Descanso Visual
         switchDescansoVisual.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -163,15 +163,15 @@ public class ConfiguracionActivity extends AppCompatActivity {
             Toast.makeText(this, "Enviando alerta con sonido estándar de Android", Toast.LENGTH_SHORT).show();
         });
 
-        // Probar Melodía Zen 528Hz
-        findViewById(R.id.btn_test_notif_zen).setOnClickListener(v -> {
-            NotificationHelper.reproducirMelodiaZenPreview(this);
-            NotificationHelper.enviarNotificacionMelodiaZen(
+        // Probar Melodía Relajante 528Hz
+        findViewById(R.id.btn_test_notif_relajante).setOnClickListener(v -> {
+            NotificationHelper.reproducirMelodiaRelajantePreview(this);
+            NotificationHelper.enviarNotificacionMelodiaRelajante(
                     this,
-                    "🎋 Melodía Zen (528Hz)",
+                    "🎋 Melodía Relajante (528Hz)",
                     "Inhala paz, exhala tensión. Este momento de bienestar es solo tuyo."
             );
-            Toast.makeText(this, "🎵 Reproduciendo melodía Zen Solfeggio 528Hz", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "🎵 Reproduciendo melodía relajante armónica", Toast.LENGTH_SHORT).show();
         });
 
         // Cerrar Sesión
@@ -179,6 +179,7 @@ public class ConfiguracionActivity extends AppCompatActivity {
     }
 
     private void seleccionarPaleta(String clave, String nombreAmigable) {
+        ThemeHelper.guardarPaleta(this, clave);
         configPrefs.edit().putString(KEY_PALETA, clave).apply();
         actualizarUIPaleta(clave);
         Toast.makeText(this, "Paleta " + nombreAmigable + " aplicada ✨", Toast.LENGTH_SHORT).show();

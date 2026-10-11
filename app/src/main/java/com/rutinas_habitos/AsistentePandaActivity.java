@@ -90,6 +90,7 @@ public class AsistentePandaActivity extends AppCompatActivity {
         btnEnviar.setOnClickListener(v -> {
             String texto = etMensajeUsuario.getText().toString().trim();
             if (!texto.isEmpty()) {
+                etMensajeUsuario.setText("");
                 procesarEntrada(texto);
             } else {
                 Toast.makeText(this, "Escribe cómo te sientes o qué te gustaría mejorar", Toast.LENGTH_SHORT).show();

@@ -17,21 +17,23 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import java.io.File;
+
 /**
  * Gestor Central de Notificaciones para "Rutinas Pastel".
  * 
- * Soporta dos modalidades:
+ * Soporta modalidades de sonido:
  * 1. Canal por defecto: Sonido nativo de notificación de Android.
- * 2. Canal personalizable: Melodía Zen relajante (WAV/MP3 en res/raw/melodia_zen)
- *    diseñada con frecuencias armónicas (528Hz Solfeggio) para bienestar y calma mental.
+ * 2. Canal con Melodía Relajante: Frecuencias armónicas (528Hz Solfeggio) y campana tibetana.
+ * 3. Audios personalizados: Archivos MP3 o canciones subidas por el usuario.
  */
 public class NotificationHelper {
 
     public static final String CHANNEL_DEFAULT_ID = "canal_rutinas_default";
-    public static final String CHANNEL_MELODIA_ZEN_ID = "canal_rutinas_melodia_zen";
+    public static final String CHANNEL_MELODIA_ARMONICA_ID = "canal_rutinas_melodia_armonica";
 
     public static final int NOTIF_ID_DEFAULT = 1001;
-    public static final int NOTIF_ID_ZEN = 1002;
+    public static final int NOTIF_ID_ARMONICA = 1002;
 
     private static MediaPlayer previewPlayer;
 
@@ -61,36 +63,36 @@ public class NotificationHelper {
             canalDefault.setSound(defaultSoundUri, audioAttrDefault);
             manager.createNotificationChannel(canalDefault);
 
-            // 2. Canal personalizable (Melodía Zen MP3 / Armónica)
-            CharSequence nombreZen = "Recordatorios Zen (Melodía Relajante)";
-            String descZen = "Notificaciones suaves y armoniosas con campana tibetana para cultivar la paz mental.";
-            NotificationChannel canalZen = new NotificationChannel(
-                    CHANNEL_MELODIA_ZEN_ID,
-                    nombreZen,
+            // 2. Canal con Melodía Relajante (Armónica 528Hz)
+            CharSequence nombreArmonica = "Recordatorios Relajantes (Melodía Armónica)";
+            String descArmonica = "Notificaciones suaves y armoniosas para cultivar la calma y constancia.";
+            NotificationChannel canalArmonica = new NotificationChannel(
+                    CHANNEL_MELODIA_ARMONICA_ID,
+                    nombreArmonica,
                     NotificationManager.IMPORTANCE_HIGH
             );
-            canalZen.setDescription(descZen);
-            canalZen.enableVibration(true);
-            canalZen.setVibrationPattern(new long[]{0, 200, 150, 200});
+            canalArmonica.setDescription(descArmonica);
+            canalArmonica.enableVibration(true);
+            canalArmonica.setVibrationPattern(new long[]{0, 200, 150, 200});
 
-            Uri soundUriZen = getZenSoundUri(context);
-            if (soundUriZen != null) {
-                AudioAttributes audioAttrZen = new AudioAttributes.Builder()
+            Uri soundUriArmonica = getMelodiaRelajanteSoundUri(context);
+            if (soundUriArmonica != null) {
+                AudioAttributes audioAttr = new AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .build();
-                canalZen.setSound(soundUriZen, audioAttrZen);
+                canalArmonica.setSound(soundUriArmonica, audioAttr);
             }
-            manager.createNotificationChannel(canalZen);
+            manager.createNotificationChannel(canalArmonica);
         }
     }
 
     /**
-     * Retorna el URI del sonido Zen en res/raw/melodia_zen.
+     * Retorna el URI del sonido en res/raw/melodia_relajante.
      */
-    public static Uri getZenSoundUri(Context context) {
+    public static Uri getMelodiaRelajanteSoundUri(Context context) {
         return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                context.getPackageName() + "/" + R.raw.melodia_zen);
+                context.getPackageName() + "/" + R.raw.melodia_relajante);
     }
 
     /**
@@ -137,9 +139,9 @@ public class NotificationHelper {
     }
 
     /**
-     * Envía una notificación usando el canal con melodía Zen personalizada (Audio MP3/WAV 528Hz).
+     * Envía una notificación usando el canal con melodía relajante personalizada (Audio 528Hz).
      */
-    public static void enviarNotificacionMelodiaZen(Context context, String titulo, String mensaje) {
+    public static void enviarNotificacionMelodiaRelajante(Context context, String titulo, String mensaje) {
         inicializarCanales(context);
 
         Intent intent = new Intent(context, InicioActivity.class);
@@ -149,9 +151,9 @@ public class NotificationHelper {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0
         );
 
-        Uri soundUri = getZenSoundUri(context);
+        Uri soundUri = getMelodiaRelajanteSoundUri(context);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_MELODIA_ZEN_ID)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_MELODIA_ARMONICA_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(titulo)
                 .setContentText(mensaje)
@@ -166,7 +168,7 @@ public class NotificationHelper {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         try {
             if (tienePermisoNotificaciones(context)) {
-                notificationManager.notify(NOTIF_ID_ZEN, builder.build());
+                notificationManager.notify(NOTIF_ID_ARMONICA, builder.build());
             }
         } catch (SecurityException ignored) {
         }
@@ -187,16 +189,40 @@ public class NotificationHelper {
     }
 
     /**
-     * Reproduce inmediatamente la melodía zen en el dispositivo (modo preview/prueba).
+     * Reproduce inmediatamente la melodía relajante en el dispositivo (modo preview/prueba).
      */
-    public static void reproducirMelodiaZenPreview(Context context) {
+    public static void reproducirMelodiaRelajantePreview(Context context) {
         try {
             if (previewPlayer != null) {
                 previewPlayer.release();
                 previewPlayer = null;
             }
-            previewPlayer = MediaPlayer.create(context, R.raw.melodia_zen);
+            previewPlayer = MediaPlayer.create(context, R.raw.melodia_relajante);
             if (previewPlayer != null) {
+                previewPlayer.setOnCompletionListener(mp -> {
+                    mp.release();
+                    previewPlayer = null;
+                });
+                previewPlayer.start();
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
+     * Reproduce un archivo de audio personalizado subido por el usuario.
+     */
+    public static void reproducirAudioPersonalizado(Context context, String rutaArchivo) {
+        try {
+            if (previewPlayer != null) {
+                previewPlayer.release();
+                previewPlayer = null;
+            }
+            File f = new File(rutaArchivo);
+            if (f.exists()) {
+                previewPlayer = new MediaPlayer();
+                previewPlayer.setDataSource(f.getAbsolutePath());
+                previewPlayer.prepare();
                 previewPlayer.setOnCompletionListener(mp -> {
                     mp.release();
                     previewPlayer = null;

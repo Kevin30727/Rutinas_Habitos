@@ -15,7 +15,7 @@ public class Habito {
     private String unidad; // "min", "páginas", "vasos", "ml", "veces"
     private String horaRecordatorio; // "08:00 AM"
     private boolean recordatorioActivo;
-    private String tipoSonidoNotificacion; // "default" o "zen"
+    private String tipoSonidoNotificacion; // "default", "relajante" o custom URI
     private int rachaDias;
     private boolean completadoHoy;
     private int progresoActual;

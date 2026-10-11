@@ -51,6 +51,12 @@ public class HabitosActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         cargarMetricasYHabitosSQLite();
+
+        // Aplicar paleta activa de colores al FloatingActionButton
+        FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito_progreso);
+        if (fab != null) {
+            fab.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(this)));
+        }
     }
 
     private void initViews() {
@@ -333,6 +339,11 @@ public class HabitosActivity extends AppCompatActivity {
         if (btnReporte != null) {
             btnReporte.setOnClickListener(v ->
                     Toast.makeText(this, "Generando reporte de bienestar en PDF... 📄🌱", Toast.LENGTH_LONG).show());
+        }
+
+        FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito_progreso);
+        if (fab != null) {
+            fab.setOnClickListener(v -> startActivity(new Intent(HabitosActivity.this, CrearHabitoActivity.class)));
         }
     }
 

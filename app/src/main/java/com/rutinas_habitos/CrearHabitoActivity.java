@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import com.google.android.material.button.MaterialButton;
@@ -20,6 +21,11 @@ import java.util.List;
 import java.util.Locale;
 
 public class CrearHabitoActivity extends AppCompatActivity {
+
+    // Vistas de Encabezado y Acción
+    private TextView tvTituloPantallaCrear;
+    private MaterialButton btnGuardarHabito;
+    private MaterialButton btnEliminarHabito;
 
     // Vistas de Preview
     private View vPreviewColorCirculo;
@@ -37,7 +43,19 @@ public class CrearHabitoActivity extends AppCompatActivity {
     private SwitchCompat switchRecordatorio;
     private TextView tvResumenDias;
 
+    // Selector de Sonido de Notificación
+    private TextView btnSonidoDefault;
+    private TextView btnSonidoZen;
+    private TextView btnPreviewSonidoHabito;
+
+    // Botones de Frecuencia y Meta
+    private TextView btnFrecDiario;
+    private TextView btnFrecFlexible;
+    private TextView btnMetaSimple;
+    private TextView btnMetaCantidad;
+
     // Estado del Hábito
+    private long editHabitoId = -1;
     private String iconoSeleccionado = "meditacion";
     private String colorSeleccionado = "#B8E0D2";
     private String areaSeleccionada = "Salud & Calma";
@@ -46,6 +64,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
     private int cantidadMeta = 15;
     private String unidadSeleccionada = "minutos";
     private String horaRecordatorio = "08:00 AM";
+    private String tipoSonidoSeleccionado = "default";
     private final List<String> diasActivos = new ArrayList<>();
 
     private DatabaseHelper dbHelper;
@@ -62,10 +81,21 @@ public class CrearHabitoActivity extends AppCompatActivity {
         initViews();
         setupDiasIniciales();
         setupListeners();
-        actualizarPreview();
+
+        // Verificar si es modo edición
+        editHabitoId = getIntent().getLongExtra("EXTRA_HABITO_ID", -1);
+        if (editHabitoId != -1) {
+            cargarHabitoParaEdicion(editHabitoId);
+        } else {
+            actualizarPreview();
+        }
     }
 
     private void initViews() {
+        tvTituloPantallaCrear = findViewById(R.id.tv_titulo_pantalla_crear);
+        btnGuardarHabito = findViewById(R.id.btn_guardar_habito);
+        btnEliminarHabito = findViewById(R.id.btn_eliminar_habito);
+
         vPreviewColorCirculo = findViewById(R.id.v_preview_color_circulo);
         ivPreviewIcono = findViewById(R.id.iv_preview_icono);
         tvPreviewArea = findViewById(R.id.tv_preview_area);
@@ -79,6 +109,15 @@ public class CrearHabitoActivity extends AppCompatActivity {
         tvHoraRecordatorio = findViewById(R.id.tv_hora_recordatorio);
         switchRecordatorio = findViewById(R.id.switch_recordatorio);
         tvResumenDias = findViewById(R.id.tv_resumen_dias);
+
+        btnSonidoDefault = findViewById(R.id.btn_sonido_default);
+        btnSonidoZen = findViewById(R.id.btn_sonido_zen);
+        btnPreviewSonidoHabito = findViewById(R.id.btn_preview_sonido_habito);
+
+        btnFrecDiario = findViewById(R.id.btn_frec_diario);
+        btnFrecFlexible = findViewById(R.id.btn_frec_flexible);
+        btnMetaSimple = findViewById(R.id.btn_meta_simple);
+        btnMetaCantidad = findViewById(R.id.btn_meta_cantidad);
 
         findViewById(R.id.btn_volver_crear).setOnClickListener(v -> finish());
         findViewById(R.id.btn_reiniciar_form).setOnClickListener(v -> reiniciarFormulario());
@@ -130,25 +169,14 @@ public class CrearHabitoActivity extends AppCompatActivity {
         setupAreaSelector(R.id.chip_area_finanzas, "Finanzas Conscientes");
 
         // Frecuencia
-        TextView btnDiario = findViewById(R.id.btn_frec_diario);
-        TextView btnFlexible = findViewById(R.id.btn_frec_flexible);
-
-        btnDiario.setOnClickListener(v -> {
+        btnFrecDiario.setOnClickListener(v -> {
             frecuenciaSeleccionada = "Diario";
-            btnDiario.setBackgroundResource(R.drawable.bg_selector_activo);
-            btnDiario.setTextColor(Color.parseColor("#2D3142"));
-            btnFlexible.setBackground(null);
-            btnFlexible.setTextColor(Color.parseColor("#8D909F"));
-            tvPreviewFrecuencia.setText("🔄 Diario");
+            actualizarVistaFrecuencia();
         });
 
-        btnFlexible.setOnClickListener(v -> {
+        btnFrecFlexible.setOnClickListener(v -> {
             frecuenciaSeleccionada = "Flexible";
-            btnFlexible.setBackgroundResource(R.drawable.bg_selector_activo);
-            btnFlexible.setTextColor(Color.parseColor("#2D3142"));
-            btnDiario.setBackground(null);
-            btnDiario.setTextColor(Color.parseColor("#8D909F"));
-            tvPreviewFrecuencia.setText("🌿 Flexible");
+            actualizarVistaFrecuencia();
         });
 
         // Días de la semana
@@ -161,25 +189,14 @@ public class CrearHabitoActivity extends AppCompatActivity {
         setupDiaToggle(R.id.btn_dia_d, "D");
 
         // Medición de Meta (Simple vs Cantidad)
-        TextView btnSimple = findViewById(R.id.btn_meta_simple);
-        TextView btnCantidad = findViewById(R.id.btn_meta_cantidad);
-
-        btnSimple.setOnClickListener(v -> {
+        btnMetaSimple.setOnClickListener(v -> {
             tipoMetaSeleccionada = "simple";
-            btnSimple.setBackgroundResource(R.drawable.bg_tarjeta_redondeada);
-            btnSimple.setTextColor(Color.parseColor("#2D3142"));
-            btnCantidad.setBackground(null);
-            btnCantidad.setTextColor(Color.parseColor("#8D909F"));
-            actualizarPreview();
+            actualizarVistaMetaTipo();
         });
 
-        btnCantidad.setOnClickListener(v -> {
+        btnMetaCantidad.setOnClickListener(v -> {
             tipoMetaSeleccionada = "cantidad";
-            btnCantidad.setBackgroundResource(R.drawable.bg_tarjeta_redondeada);
-            btnCantidad.setTextColor(Color.parseColor("#2D3142"));
-            btnSimple.setBackground(null);
-            btnSimple.setTextColor(Color.parseColor("#8D909F"));
-            actualizarPreview();
+            actualizarVistaMetaTipo();
         });
 
         // Contador + y -
@@ -216,9 +233,198 @@ public class CrearHabitoActivity extends AppCompatActivity {
             dialog.show();
         });
 
-        // Guardar Hábito
-        MaterialButton btnGuardar = findViewById(R.id.btn_guardar_habito);
-        btnGuardar.setOnClickListener(v -> guardarHabito());
+        // Selector de Sonido de Notificación
+        btnSonidoDefault.setOnClickListener(v -> {
+            tipoSonidoSeleccionado = "default";
+            actualizarVistaSonido();
+        });
+
+        btnSonidoZen.setOnClickListener(v -> {
+            tipoSonidoSeleccionado = "zen";
+            actualizarVistaSonido();
+        });
+
+        btnPreviewSonidoHabito.setOnClickListener(v -> {
+            if ("zen".equals(tipoSonidoSeleccionado)) {
+                NotificationHelper.reproducirMelodiaZenPreview(this);
+                Toast.makeText(this, "🎵 Escuchando Melodía Zen (528Hz Solfeggio)", Toast.LENGTH_SHORT).show();
+            } else {
+                NotificationHelper.reproducirDefaultPreview(this);
+                Toast.makeText(this, "🔔 Escuchando tono de notificación estándar", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Guardar o Actualizar
+        btnGuardarHabito.setOnClickListener(v -> guardarHabito());
+
+        // Eliminar Hábito (Modo Edición)
+        btnEliminarHabito.setOnClickListener(v -> confirmarEliminarHabito());
+    }
+
+    private void cargarHabitoParaEdicion(long id) {
+        Habito h = dbHelper.obtenerHabitoPorId(id);
+        if (h == null) {
+            Toast.makeText(this, "No se encontró el hábito para editar", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Títulos de modo edición
+        if (tvTituloPantallaCrear != null) tvTituloPantallaCrear.setText("Editar Hábito");
+        btnGuardarHabito.setText("✓ Guardar Cambios");
+        btnEliminarHabito.setVisibility(View.VISIBLE);
+
+        // Cargar campos
+        etNombre.setText(h.getNombre());
+        iconoSeleccionado = (h.getIcono() != null && !h.getIcono().isEmpty()) ? h.getIcono() : "meditacion";
+        colorSeleccionado = (h.getColor() != null && !h.getColor().isEmpty()) ? h.getColor() : "#B8E0D2";
+        areaSeleccionada = (h.getAreaVida() != null && !h.getAreaVida().isEmpty()) ? h.getAreaVida() : "Salud & Calma";
+        frecuenciaSeleccionada = (h.getTipoFrecuencia() != null && !h.getTipoFrecuencia().isEmpty()) ? h.getTipoFrecuencia() : "Diario";
+
+        diasActivos.clear();
+        if (h.getDiasSemana() != null && !h.getDiasSemana().isEmpty()) {
+            for (String d : h.getDiasSemana().split(",")) {
+                String trimmed = d.trim();
+                if (!trimmed.isEmpty()) diasActivos.add(trimmed);
+            }
+        }
+
+        tipoMetaSeleccionada = (h.getTipoMeta() != null && !h.getTipoMeta().isEmpty()) ? h.getTipoMeta() : "cantidad";
+        cantidadMeta = h.getMetaCantidad() > 0 ? h.getMetaCantidad() : 15;
+        tvMetaNumero.setText(String.valueOf(cantidadMeta));
+        unidadSeleccionada = (h.getUnidad() != null && !h.getUnidad().isEmpty()) ? h.getUnidad() : "minutos";
+        tvMetaUnidadLabel.setText(" " + unidadSeleccionada);
+
+        if (h.getHoraRecordatorio() != null && !h.getHoraRecordatorio().isEmpty()) {
+            horaRecordatorio = h.getHoraRecordatorio();
+            tvHoraRecordatorio.setText(horaRecordatorio);
+        }
+        switchRecordatorio.setChecked(h.isRecordatorioActivo());
+
+        tipoSonidoSeleccionado = "zen".equals(h.getTipoSonidoNotificacion()) ? "zen" : "default";
+
+        // Sincronizar UI
+        actualizarVistaIcono();
+        vPreviewColorCirculo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(colorSeleccionado)));
+        actualizarVistaArea();
+        actualizarVistaFrecuencia();
+        actualizarVistaDias();
+        actualizarVistaMetaTipo();
+        actualizarVistaSonido();
+        actualizarPreview();
+        actualizarResumenDias();
+    }
+
+    private void actualizarVistaIcono() {
+        int resId = R.drawable.ic_meditacion;
+        int viewId = R.id.ic_sel_meditacion;
+
+        if ("agua".equals(iconoSeleccionado)) {
+            resId = R.drawable.ic_agua;
+            viewId = R.id.ic_sel_agua;
+        } else if ("lectura".equals(iconoSeleccionado)) {
+            resId = R.drawable.ic_lectura;
+            viewId = R.id.ic_sel_lectura;
+        } else if ("ejercicio".equals(iconoSeleccionado)) {
+            resId = R.drawable.ic_ejercicio;
+            viewId = R.id.ic_sel_ejercicio;
+        } else if ("comida".equals(iconoSeleccionado)) {
+            resId = R.drawable.ic_comida;
+            viewId = R.id.ic_sel_comida;
+        } else if ("noche".equals(iconoSeleccionado)) {
+            resId = R.drawable.ic_noche;
+            viewId = R.id.ic_sel_noche;
+        } else if ("corazon".equals(iconoSeleccionado)) {
+            resId = R.drawable.ic_corazon;
+            viewId = R.id.ic_sel_corazon;
+        } else if ("finanzas".equals(iconoSeleccionado)) {
+            resId = R.drawable.ic_finanzas;
+            viewId = R.id.ic_sel_finanzas;
+        }
+
+        ivPreviewIcono.setImageResource(resId);
+        resetIconDrawables();
+        ImageView selView = findViewById(viewId);
+        if (selView != null) {
+            selView.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(colorSeleccionado)));
+        }
+    }
+
+    private void actualizarVistaArea() {
+        tvPreviewArea.setText(areaSeleccionada);
+        int[] chips = {R.id.chip_area_salud, R.id.chip_area_mente, R.id.chip_area_foco, R.id.chip_area_finanzas};
+        for (int id : chips) {
+            TextView chip = findViewById(id);
+            if (chip != null) {
+                if (chip.getText().toString().equalsIgnoreCase(areaSeleccionada)) {
+                    chip.setBackgroundResource(R.drawable.bg_chip_seleccionado);
+                } else {
+                    chip.setBackgroundResource(R.drawable.bg_chip_normal);
+                }
+            }
+        }
+    }
+
+    private void actualizarVistaFrecuencia() {
+        if ("Diario".equalsIgnoreCase(frecuenciaSeleccionada)) {
+            btnFrecDiario.setBackgroundResource(R.drawable.bg_selector_activo);
+            btnFrecDiario.setTextColor(Color.parseColor("#2D3142"));
+            btnFrecFlexible.setBackground(null);
+            btnFrecFlexible.setTextColor(Color.parseColor("#8D909F"));
+            tvPreviewFrecuencia.setText("🔄 Diario");
+        } else {
+            btnFrecFlexible.setBackgroundResource(R.drawable.bg_selector_activo);
+            btnFrecFlexible.setTextColor(Color.parseColor("#2D3142"));
+            btnFrecDiario.setBackground(null);
+            btnFrecDiario.setTextColor(Color.parseColor("#8D909F"));
+            tvPreviewFrecuencia.setText("🌿 Flexible");
+        }
+    }
+
+    private void actualizarVistaDias() {
+        int[] dayIds = {R.id.btn_dia_l, R.id.btn_dia_m, R.id.btn_dia_x, R.id.btn_dia_j, R.id.btn_dia_v, R.id.btn_dia_s, R.id.btn_dia_d};
+        String[] dayKeys = {"L", "M", "X", "J", "V", "S", "D"};
+
+        for (int i = 0; i < dayIds.length; i++) {
+            TextView tv = findViewById(dayIds[i]);
+            if (tv != null) {
+                if (diasActivos.contains(dayKeys[i])) {
+                    tv.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#B8E0D2")));
+                    tv.setTextColor(Color.parseColor("#2D3142"));
+                } else {
+                    tv.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F1F2FD")));
+                    tv.setTextColor(Color.parseColor("#8D909F"));
+                }
+            }
+        }
+    }
+
+    private void actualizarVistaMetaTipo() {
+        if ("simple".equalsIgnoreCase(tipoMetaSeleccionada)) {
+            btnMetaSimple.setBackgroundResource(R.drawable.bg_tarjeta_redondeada);
+            btnMetaSimple.setTextColor(Color.parseColor("#2D3142"));
+            btnMetaCantidad.setBackground(null);
+            btnMetaCantidad.setTextColor(Color.parseColor("#8D909F"));
+        } else {
+            btnMetaCantidad.setBackgroundResource(R.drawable.bg_tarjeta_redondeada);
+            btnMetaCantidad.setTextColor(Color.parseColor("#2D3142"));
+            btnMetaSimple.setBackground(null);
+            btnMetaSimple.setTextColor(Color.parseColor("#8D909F"));
+        }
+        actualizarPreview();
+    }
+
+    private void actualizarVistaSonido() {
+        if ("zen".equals(tipoSonidoSeleccionado)) {
+            btnSonidoZen.setBackgroundResource(R.drawable.bg_chip_seleccionado);
+            btnSonidoZen.setTextColor(Color.parseColor("#2D3142"));
+            btnSonidoDefault.setBackgroundResource(R.drawable.bg_chip_normal);
+            btnSonidoDefault.setTextColor(Color.parseColor("#8D909F"));
+        } else {
+            btnSonidoDefault.setBackgroundResource(R.drawable.bg_chip_seleccionado);
+            btnSonidoDefault.setTextColor(Color.parseColor("#2D3142"));
+            btnSonidoZen.setBackgroundResource(R.drawable.bg_chip_normal);
+            btnSonidoZen.setTextColor(Color.parseColor("#8D909F"));
+        }
     }
 
     private void setupIconSelector(int viewId, String nombreIcono, int drawableRes) {
@@ -252,6 +458,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
             v.setOnClickListener(view -> {
                 colorSeleccionado = hexColor;
                 vPreviewColorCirculo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(hexColor)));
+                actualizarVistaIcono();
             });
         }
     }
@@ -261,15 +468,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
         if (tv != null) {
             tv.setOnClickListener(v -> {
                 areaSeleccionada = areaNombre;
-                tvPreviewArea.setText(areaNombre);
-
-                // Resetear chips
-                int[] chips = {R.id.chip_area_salud, R.id.chip_area_mente, R.id.chip_area_foco, R.id.chip_area_finanzas};
-                for (int id : chips) {
-                    TextView chip = findViewById(id);
-                    if (chip != null) chip.setBackgroundResource(R.drawable.bg_chip_normal);
-                }
-                tv.setBackgroundResource(R.drawable.bg_chip_seleccionado);
+                actualizarVistaArea();
             });
         }
     }
@@ -316,6 +515,9 @@ public class CrearHabitoActivity extends AppCompatActivity {
     }
 
     private void actualizarPreview() {
+        String nombre = etNombre.getText().toString().trim();
+        tvPreviewNombre.setText(nombre.isEmpty() ? "Nombre del Hábito" : nombre);
+
         if ("simple".equals(tipoMetaSeleccionada)) {
             tvPreviewMeta.setText("Meta: Completar cada día");
         } else {
@@ -328,8 +530,26 @@ public class CrearHabitoActivity extends AppCompatActivity {
         cantidadMeta = 15;
         tvMetaNumero.setText("15");
         unidadSeleccionada = "minutos";
+        tipoSonidoSeleccionado = "default";
+        actualizarVistaSonido();
         actualizarPreview();
         Toast.makeText(this, "Formulario restablecido", Toast.LENGTH_SHORT).show();
+    }
+
+    private void confirmarEliminarHabito() {
+        new AlertDialog.Builder(this)
+                .setTitle("Eliminar Hábito")
+                .setMessage("¿Estás seguro de que deseas eliminar este hábito? Perderás su registro y estadísticas.")
+                .setPositiveButton("Eliminar", (dialog, which) -> {
+                    if (editHabitoId != -1) {
+                        dbHelper.eliminarHabito(editHabitoId);
+                        Toast.makeText(this, "Hábito eliminado correctamente 🗑️", Toast.LENGTH_SHORT).show();
+                        setResult(RESULT_OK);
+                        finish();
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
     private void guardarHabito() {
@@ -342,7 +562,18 @@ public class CrearHabitoActivity extends AppCompatActivity {
         long userId = sessionManager.getUserId();
         if (userId <= 0) userId = 1;
 
-        Habito habito = new Habito();
+        Habito habito;
+        if (editHabitoId != -1) {
+            habito = dbHelper.obtenerHabitoPorId(editHabitoId);
+            if (habito == null) {
+                habito = new Habito();
+            }
+        } else {
+            habito = new Habito();
+            habito.setRachaDias(0);
+            habito.setCompletadoHoy(false);
+        }
+
         habito.setUsuarioId(userId);
         habito.setNombre(nombre);
         habito.setIcono(iconoSeleccionado);
@@ -362,16 +593,27 @@ public class CrearHabitoActivity extends AppCompatActivity {
         habito.setUnidad(unidadSeleccionada);
         habito.setHoraRecordatorio(horaRecordatorio);
         habito.setRecordatorioActivo(switchRecordatorio.isChecked());
-        habito.setCompletadoHoy(false);
-        habito.setRachaDias(0);
+        habito.setTipoSonidoNotificacion(tipoSonidoSeleccionado);
 
-        long id = dbHelper.insertarHabito(habito);
-        if (id != -1) {
-            Toast.makeText(this, "¡Hábito '" + nombre + "' guardado con éxito! 🌱", Toast.LENGTH_SHORT).show();
-            setResult(RESULT_OK);
-            finish();
+        if (editHabitoId != -1) {
+            habito.setId(editHabitoId);
+            boolean actualizado = dbHelper.actualizarHabito(habito);
+            if (actualizado) {
+                Toast.makeText(this, "¡Hábito '" + nombre + "' actualizado con éxito! ✨", Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK);
+                finish();
+            } else {
+                Toast.makeText(this, "Error al actualizar el hábito en la base de datos", Toast.LENGTH_SHORT).show();
+            }
         } else {
-            Toast.makeText(this, "Error al guardar el hábito en la base de datos", Toast.LENGTH_SHORT).show();
+            long id = dbHelper.insertarHabito(habito);
+            if (id != -1) {
+                Toast.makeText(this, "¡Hábito '" + nombre + "' guardado con éxito! 🌱", Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK);
+                finish();
+            } else {
+                Toast.makeText(this, "Error al guardar el hábito en la base de datos", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

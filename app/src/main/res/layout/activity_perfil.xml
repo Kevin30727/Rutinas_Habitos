@@ -59,7 +59,7 @@
             android:layout_height="38dp"
             android:background="@drawable/bg_tarjeta_redondeada"
             android:backgroundTint="@color/mint_light"
-            android:src="@drawable/ic_sparkle"
+            android:src="@drawable/ic_settings"
             android:padding="8dp"
             android:contentDescription="Configuración" />
     </LinearLayout>
@@ -413,7 +413,7 @@
                     android:layout_height="38dp"
                     android:background="@drawable/bg_circulo"
                     android:backgroundTint="@color/mint_light"
-                    android:src="@drawable/ic_sparkle"
+                    android:src="@drawable/ic_settings"
                     android:padding="9dp"
                     app:tint="@color/neutral" />
 

@@ -123,15 +123,15 @@ public class PerfilActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        // Abrir diálogo de configuración funcional
+        // Abrir pantalla de configuración funcional
         View btnConfigTop = findViewById(R.id.btn_abrir_configuracion_top);
         if (btnConfigTop != null) {
-            btnConfigTop.setOnClickListener(v -> mostrarDialogoConfiguracion());
+            btnConfigTop.setOnClickListener(v -> startActivity(new Intent(this, ConfiguracionActivity.class)));
         }
 
         View btnConfigCard = findViewById(R.id.btn_abrir_configuracion);
         if (btnConfigCard != null) {
-            btnConfigCard.setOnClickListener(v -> mostrarDialogoConfiguracion());
+            btnConfigCard.setOnClickListener(v -> startActivity(new Intent(this, ConfiguracionActivity.class)));
         }
 
         // Charlar con Panda
@@ -302,9 +302,6 @@ public class PerfilActivity extends AppCompatActivity {
                     startActivity(new Intent(this, CalendarioActivity.class));
                     finish();
                     return true;
-                } else if (itemId == R.id.nav_finanzas) {
-                    Toast.makeText(this, "💰 El módulo de Finanzas Conscientes estará disponible próximamente 🌱", Toast.LENGTH_SHORT).show();
-                    return false;
                 } else if (itemId == R.id.nav_perfil) {
                     return true;
                 }

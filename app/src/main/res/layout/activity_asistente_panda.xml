@@ -6,16 +6,18 @@
     android:layout_height="match_parent"
     android:background="@color/background_app">
 
-    <!-- Encabezado Superior -->
+    <!-- 1. Encabezado de Chat Superior -->
     <LinearLayout
         android:id="@+id/ll_top_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="20dp"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
         android:paddingBottom="12dp"
+        android:background="@color/background_app"
+        android:elevation="2dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -27,28 +29,47 @@
             android:padding="8dp"
             android:contentDescription="Volver" />
 
+        <FrameLayout
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="12dp">
+
+            <View
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_circulo"
+                android:backgroundTint="@color/mint_light" />
+
+            <ImageView
+                android:id="@+id/iv_avatar_panda_top"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_panda"
+                android:contentDescription="Avatar Panda" />
+        </FrameLayout>
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="14dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ACOMPAÑANTE DE BIENVENIDA"
-                android:textColor="@color/text_muted"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.1" />
+            android:layout_marginStart="10dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Panda Asistente 🐼"
                 android:textColor="@color/neutral"
-                android:textSize="18sp"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="En línea • Tu guía compasivo 🟢"
+                android:textColor="@color/green_soft"
+                android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -56,249 +77,211 @@
             android:id="@+id/btn_saltar_panda"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Saltar"
+            android:text="Listo"
             android:textColor="@color/text_muted"
             android:textSize="14sp"
             android:textStyle="bold"
             android:padding="8dp" />
     </LinearLayout>
 
+    <!-- 2. Área de Conversación / Historial de Mensajes (Scrollable Chat) -->
     <ScrollView
+        android:id="@+id/scroll_chat"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
         android:clipToPadding="false"
-        android:paddingBottom="24dp"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
         app:layout_constraintTop_toBottomOf="@id/ll_top_bar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toTopOf="@id/ll_bottom_container">
 
+        <!-- Contenedor dinámico de burbujas de diálogo (Panda a la izquierda, Usuario a la derecha) -->
         <LinearLayout
+            android:id="@+id/ll_chat_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="20dp"
-            android:paddingTop="12dp">
+            android:orientation="vertical" />
+    </ScrollView>
 
-            <!-- Avatar del Panda -->
+    <!-- 3. Contenedor Inferior: Chips Rápidos + Barra de Entrada -->
+    <LinearLayout
+        android:id="@+id/ll_bottom_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/background_app"
+        android:paddingTop="6dp"
+        android:paddingBottom="12dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Sugerencias Rápidas Desplazables Horizontalmente -->
+        <HorizontalScrollView
+            android:id="@+id/scroll_sugerencias_chips"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="8dp">
+
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_marginBottom="16dp">
-
-                <FrameLayout
-                    android:layout_width="100dp"
-                    android:layout_height="100dp">
-
-                    <View
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/mint_light" />
-
-                    <ImageView
-                        android:id="@+id/iv_avatar_panda"
-                        android:layout_width="85dp"
-                        android:layout_height="85dp"
-                        android:layout_gravity="center"
-                        android:scaleType="fitCenter"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/ic_panda"
-                        android:contentDescription="Avatar Panda" />
-                </FrameLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tu guía compasivo"
-                    android:textColor="@color/green_soft"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="8dp" />
-            </LinearLayout>
-
-            <!-- Burbuja de mensaje del Panda -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_dialogo_burbuja"
-                android:orientation="vertical"
-                android:padding="18dp"
-                android:elevation="2dp"
-                android:layout_marginBottom="18dp">
-
-                <TextView
-                    android:id="@+id/tv_mensaje_panda"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="¡Hola! Soy tu compañero Panda 🐼. Sé que empezar una rutina en blanco puede ser abrumador. Cuéntame, ¿cómo te sientes hoy o qué te gustaría mejorar?"
-                    android:textColor="@color/neutral"
-                    android:textSize="15sp"
-                    android:lineSpacingExtra="4dp" />
-            </LinearLayout>
-
-            <!-- Sugerencias Rápidas / Chips -->
-            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Opciones rápidas para orientarte:"
-                android:textColor="@color/text_muted"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="10dp" />
+                android:orientation="horizontal">
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chip_group_sugerencias"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="18dp">
+                <TextView
+                    android:id="@+id/chip_saludo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="👋 ¡Hola Panda!"
+                    android:textColor="@color/neutral"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_chip_normal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="7dp"
+                    android:layout_marginEnd="8dp" />
 
-                <com.google.android.material.chip.Chip
+                <TextView
+                    android:id="@+id/chip_como_estas"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🐼 ¿Cómo estás?"
+                    android:textColor="@color/neutral"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_chip_normal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="7dp"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
                     android:id="@+id/chip_estres"
-                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="🌿 Siento estrés o cansancio"
                     android:textColor="@color/neutral"
-                    app:chipBackgroundColor="@color/gray_input"
-                    app:chipCornerRadius="16dp"
-                    app:chipStrokeWidth="0dp" />
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_chip_normal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="7dp"
+                    android:layout_marginEnd="8dp" />
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_productividad"
-                    style="@style/Widget.MaterialComponents.Chip.Action"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="⚡ Mejorar productividad"
-                    android:textColor="@color/neutral"
-                    app:chipBackgroundColor="@color/gray_input"
-                    app:chipCornerRadius="16dp"
-                    app:chipStrokeWidth="0dp" />
-
-                <com.google.android.material.chip.Chip
+                <TextView
                     android:id="@+id/chip_agua"
-                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="💧 Beber más agua"
                     android:textColor="@color/neutral"
-                    app:chipBackgroundColor="@color/gray_input"
-                    app:chipCornerRadius="16dp"
-                    app:chipStrokeWidth="0dp" />
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_chip_normal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="7dp"
+                    android:layout_marginEnd="8dp" />
 
-                <com.google.android.material.chip.Chip
+                <TextView
                     android:id="@+id/chip_lectura"
-                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="📖 Hábito de lectura"
                     android:textColor="@color/neutral"
-                    app:chipBackgroundColor="@color/gray_input"
-                    app:chipCornerRadius="16dp"
-                    app:chipStrokeWidth="0dp" />
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_chip_normal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="7dp"
+                    android:layout_marginEnd="8dp" />
 
-                <com.google.android.material.chip.Chip
+                <TextView
                     android:id="@+id/chip_ejercicio"
-                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="👟 Caminar o moverme"
+                    android:text="👟 Caminar y moverme"
                     android:textColor="@color/neutral"
-                    app:chipBackgroundColor="@color/gray_input"
-                    app:chipCornerRadius="16dp"
-                    app:chipStrokeWidth="0dp" />
-            </com.google.android.material.chip.ChipGroup>
-
-            <!-- Campo de Entrada Libre -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="20dp">
-
-                <EditText
-                    android:id="@+id/et_mensaje_usuario"
-                    android:layout_width="0dp"
-                    android:layout_height="52dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_input_field"
-                    android:hint="Escribe cómo te sientes..."
-                    android:textColorHint="@color/text_subtle"
-                    android:textColor="@color/neutral"
-                    android:textSize="14sp"
-                    android:paddingHorizontal="16dp"
-                    android:maxLines="2" />
-
-                <ImageButton
-                    android:id="@+id/btn_enviar_mensaje"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/bg_boton_primario"
-                    android:src="@drawable/ic_check"
-                    android:contentDescription="Enviar"
-                    app:tint="@color/neutral" />
-            </LinearLayout>
-
-            <!-- Tarjeta de Propuesta del Panda -->
-            <LinearLayout
-                android:id="@+id/card_propuesta_panda"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_card_destacada_menta"
-                android:orientation="vertical"
-                android:padding="18dp"
-                android:elevation="3dp"
-                android:visibility="gone"
-                android:layout_marginBottom="24dp">
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_chip_normal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="7dp"
+                    android:layout_marginEnd="8dp" />
 
                 <TextView
-                    android:id="@+id/tv_titulo_propuesta"
+                    android:id="@+id/chip_productividad"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="RUTINAS PROPUESTAS PARA TI"
-                    android:textColor="@color/green_soft"
-                    android:textSize="11sp"
+                    android:text="⚡ Mejorar productividad"
+                    android:textColor="@color/neutral"
+                    android:textSize="12sp"
                     android:textStyle="bold"
-                    android:letterSpacing="0.1" />
+                    android:background="@drawable/bg_chip_normal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="7dp"
+                    android:layout_marginEnd="8dp" />
 
-                <!-- Banner de Sugerencia Contextual Sinergica -->
                 <TextView
-                    android:id="@+id/tv_sugerencia_contextual"
-                    android:layout_width="match_parent"
+                    android:id="@+id/chip_soleado"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_tarjeta_redondeada"
-                    android:padding="12dp"
+                    android:text="☀️ Hoy hace un lindo día soleado"
                     android:textColor="@color/neutral"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     android:textStyle="bold"
-                    android:layout_marginTop="10dp"
-                    android:text="💡 Sugerencia contextual"
-                    android:visibility="gone" />
+                    android:background="@drawable/bg_chip_normal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="7dp"
+                    android:layout_marginEnd="8dp" />
 
-                <!-- Contenedor dinámico para múltiples rutinas acumuladas -->
-                <LinearLayout
-                    android:id="@+id/ll_rutinas_acumuladas_container"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/chip_consejo"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_aceptar_propuesta"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:text="✓ Aceptar rutinas y empezar 🌱"
+                    android:text="💡 Dame un consejo"
                     android:textColor="@color/neutral"
-                    android:textSize="15sp"
+                    android:textSize="12sp"
                     android:textStyle="bold"
-                    android:backgroundTint="@color/primary"
-                    app:cornerRadius="24dp"
-                    android:layout_marginTop="16dp" />
+                    android:background="@drawable/bg_chip_normal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="7dp" />
             </LinearLayout>
+        </HorizontalScrollView>
 
+        <!-- Barra de Entrada de Texto Pinned al Fondo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp">
+
+            <EditText
+                android:id="@+id/et_mensaje_usuario"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_input_field"
+                android:hint="Escribe un mensaje al Panda..."
+                android:textColorHint="@color/text_subtle"
+                android:textColor="@color/neutral"
+                android:textSize="14.5sp"
+                android:paddingHorizontal="16dp"
+                android:maxLines="3"
+                android:inputType="textCapSentences|textMultiLine"
+                android:imeOptions="actionSend" />
+
+            <ImageButton
+                android:id="@+id/btn_enviar_mensaje"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_boton_primario"
+                android:src="@drawable/ic_send"
+                android:padding="13dp"
+                android:contentDescription="Enviar mensaje"
+                app:tint="@color/neutral" />
         </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

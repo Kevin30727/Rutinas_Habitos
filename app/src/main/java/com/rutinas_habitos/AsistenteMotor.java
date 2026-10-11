@@ -279,8 +279,31 @@ public class AsistenteMotor {
         if (contieneAlguna(texto, "rutina pastel", "que es esta app", "de que trata")) {
             return "Rutinas Pastel es tu refugio de bienestar y hábitos amables 🌸🎨. Cuidamos tu salud mental, tu cuerpo y tu tiempo a través de colores suaves y acompañamiento empático.";
         }
-        if (contieneAlguna(texto, "gracias", "muchas gracias", "te quiero", "lindo panda", "buen trabajo", "te amo", "genial")) {
-            return "¡Muchísimas gracias a ti! 🐼💕 Es un inmenso honor acompañarte en tus días. Recuerda que siempre estaré aquí cuando necesites serenidad.";
+        // --- Despedidas y Cierre ---
+        if (contieneAlguna(texto, "adios", "chao", "hasta luego", "nos vemos", "bye", "hasta pronto")) {
+            return "¡Hasta pronto! 🐼 Cuídate mucho y recuerda que aquí estaré esperándote con los brazos abiertos siempre que necesites un respiro.";
+        }
+
+        // --- Chistes y Humor ---
+        if (contieneAlguna(texto, "chiste", "hazme reir", "gracioso", "risa", "cuentame algo")) {
+            return "¡Aquí va uno! 🐼😄 ¿Por qué los osos pandas somos tan relajados y tranquilos? ¡Porque nunca nos dejamos llevar por el 'pandamonio'! Recuerda regalarte una sonrisa hoy, te sienta muy bien 🌸.";
+        }
+
+        // --- Curiosidades y Gustos del Panda ---
+        if (contieneAlguna(texto, "que comes", "comida favorita", "bambu", "que te gusta")) {
+            return "¡Me fascina masticar bambú fresco y crujiente! 🎋 Pero sobre todo, lo que más me nutre el corazón es acompañarte a cuidar de ti con ternura día tras día.";
+        }
+        if (contieneAlguna(texto, "musica", "cancion", "que escuchas", "melodia")) {
+            return "Me apasionan las frecuencias armónicas suaves (528Hz), las campanas tibetanas y el sonido de la lluvia 🎶. Puedes configurar tus propios tonos MP3 o la melodía relajante en tu perfil.";
+        }
+        if (contieneAlguna(texto, "miedo", "temor", "asustad", "insegur", "nervios", "panico")) {
+            return "Es muy valiente reconocer lo que sientes 🤍. El miedo solo nos muestra que algo nos importa. Pon tu mano en el pecho, siente tus latidos y respira lento: estás a salvo aquí conmigo.";
+        }
+        if (contieneAlguna(texto, "te quiero", "te amo", "eres lindo", "te adoro", "amigo panda")) {
+            return "¡Aww, mi corazón de panda se llena de ternura! 🐼💕 Es un privilegio inmenso ser tu compañero. ¡Yo también te aprecio muchísimo!";
+        }
+        if (contieneAlguna(texto, "que hora es", "hora")) {
+            return "¡Es la hora exacta para ser comprensivo contigo mismo! ⏰ Recuerda que no vas tarde en la vida: cada hábito florece a su propio tiempo.";
         }
 
         return null;

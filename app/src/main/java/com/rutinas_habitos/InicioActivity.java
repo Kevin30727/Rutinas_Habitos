@@ -85,7 +85,7 @@ public class InicioActivity extends AppCompatActivity {
             tvSaludo.setText("¡Hola, " + sessionManager.getUserName() + "! ✨");
         }
 
-        // Banner del Panda Zen
+        // Banner del Panda
         LinearLayout bannerPanda = findViewById(R.id.card_banner_panda);
         if (bannerPanda != null) {
             bannerPanda.setOnClickListener(v -> {
@@ -107,9 +107,34 @@ public class InicioActivity extends AppCompatActivity {
             });
         }
 
+        // Burbuja de Diálogo sobre el Panda en el navegador (según hora del día)
+        TextView tvSaludoBurbuja = findViewById(R.id.tv_saludo_burbuja_panda);
+        if (tvSaludoBurbuja != null) {
+            Calendar cal = Calendar.getInstance();
+            int hora = cal.get(Calendar.HOUR_OF_DAY);
+            String saludo;
+            if (hora >= 5 && hora < 12) {
+                saludo = "¡Buen día! ☀️";
+            } else if (hora >= 12 && hora < 19) {
+                saludo = "¡Buena tarde! ⛅";
+            } else {
+                saludo = "¡Buenas noches! 🌙";
+            }
+            tvSaludoBurbuja.setText(saludo);
+
+            View llBurbuja = findViewById(R.id.ll_burbuja_panda_nav);
+            if (llBurbuja != null) {
+                llBurbuja.setOnClickListener(v -> {
+                    Intent intent = new Intent(InicioActivity.this, AsistentePandaActivity.class);
+                    startActivity(intent);
+                });
+            }
+        }
+
         // Floating Action Button
         FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito);
         if (fab != null) {
+            fab.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(this)));
             fab.setOnClickListener(v -> {
                 Intent intent = new Intent(InicioActivity.this, CrearHabitoActivity.class);
                 startActivity(intent);
@@ -156,6 +181,12 @@ public class InicioActivity extends AppCompatActivity {
 
         setupPandaAvatars();
         cargarHabitosDesdeSQLite(userId);
+
+        // Aplicar paleta activa de colores al FloatingActionButton
+        FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito);
+        if (fab != null) {
+            fab.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(this)));
+        }
     }
 
     private void configurarNavegacion() {

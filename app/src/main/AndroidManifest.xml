@@ -20,6 +20,7 @@
         <activity
             android:name=".SplashActivity"
             android:exported="true"
+            android:noHistory="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,7 +39,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Asistente Panda Zen (Acompañante de Bienvenida) -->
+        <!-- Asistente Panda (Acompañante de Bienvenida) -->
         <activity
             android:name=".AsistentePandaActivity"
             android:exported="false"
@@ -72,6 +73,11 @@
 
         <activity
             android:name=".ConfiguracionActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".TonosActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 

@@ -46,7 +46,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Panda Zen 🐼"
+                android:text="Panda Asistente 🐼"
                 android:textColor="@color/neutral"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -132,7 +132,7 @@
                     android:id="@+id/tv_mensaje_panda"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="¡Hola! Soy tu compañero Zen 🐼. Sé que empezar una rutina en blanco puede ser abrumador. Cuéntame, ¿cómo te sientes hoy o qué te gustaría mejorar?"
+                    android:text="¡Hola! Soy tu compañero Panda 🐼. Sé que empezar una rutina en blanco puede ser abrumador. Cuéntame, ¿cómo te sientes hoy o qué te gustaría mejorar?"
                     android:textColor="@color/neutral"
                     android:textSize="15sp"
                     android:lineSpacingExtra="4dp" />

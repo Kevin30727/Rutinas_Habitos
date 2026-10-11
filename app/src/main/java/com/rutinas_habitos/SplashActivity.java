@@ -38,51 +38,21 @@ public class SplashActivity extends AppCompatActivity {
 
         ImageView ivSplashGif = findViewById(R.id.iv_splash_gif);
 
-        // Fallback de seguridad: Si el GIF tarda más de 6 segundos o no responde el callback, avanza
-        timeoutRunnable = () -> navegarSiguientePantalla();
-        timeoutHandler.postDelayed(timeoutRunnable, 6000);
+        // Garantizar que el GIF se muestre completo durante 3 segundos cada vez que se abre la app
+        timeoutRunnable = this::navegarSiguientePantalla;
+        timeoutHandler.postDelayed(timeoutRunnable, 3000);
 
         try {
-            int gifResourceId = getResources().getIdentifier("splash_logo", "drawable", getPackageName());
-            if (gifResourceId != 0) {
-                Glide.with(this)
-                        .asGif()
-                        .load(gifResourceId)
-                        .apply(new RequestOptions()
-                                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                                .format(DecodeFormat.PREFER_RGB_565)) // Optimización para reproducción suave sin lag
-                        .centerCrop()
-                        .listener(new RequestListener<GifDrawable>() {
-                            @Override
-                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<GifDrawable> target, boolean isFirstResource) {
-                                // Si falla la carga, avanzar sin bloquear al usuario
-                                timeoutHandler.removeCallbacks(timeoutRunnable);
-                                navegarSiguientePantalla();
-                                return false;
-                            }
-
-                            @Override
-                            public boolean onResourceReady(GifDrawable resource, Object model, Target<GifDrawable> target, DataSource dataSource, boolean isFirstResource) {
-                                // Configurar exactamente 1 ciclo completo del GIF para no cortar su duración
-                                resource.setLoopCount(1);
-                                resource.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
-                                    @Override
-                                    public void onAnimationEnd(Drawable drawable) {
-                                        // Navegar al concluir la animación completa
-                                        timeoutHandler.removeCallbacks(timeoutRunnable);
-                                        navegarSiguientePantalla();
-                                    }
-                                });
-                                return false;
-                            }
-                        })
-                        .into(ivSplashGif);
-            } else {
-                navegarSiguientePantalla();
-            }
+            Glide.with(this)
+                    .asGif()
+                    .load(R.drawable.splash_logo)
+                    .apply(new RequestOptions()
+                            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                            .format(DecodeFormat.PREFER_RGB_565)) // Optimización para reproducción suave sin lag
+                    .centerCrop()
+                    .into(ivSplashGif);
         } catch (Exception e) {
             e.printStackTrace();
-            navegarSiguientePantalla();
         }
     }
 

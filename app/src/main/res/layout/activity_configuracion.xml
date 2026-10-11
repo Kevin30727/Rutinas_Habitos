@@ -345,7 +345,7 @@
                         android:textSize="12sp" />
                 </LinearLayout>
 
-                <!-- Opción 4: Lavanda Zen -->
+                <!-- Opción 4: Lavanda Suave -->
                 <LinearLayout
                     android:id="@+id/opt_paleta_lavanda"
                     android:layout_width="match_parent"
@@ -366,7 +366,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Lavanda Zen (Paz Interior)"
+                        android:text="Lavanda Suave (Paz Interior)"
                         android:textColor="@color/neutral"
                         android:textSize="13.5sp"
                         android:layout_marginStart="12dp" />
@@ -597,9 +597,9 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Probar Melodía Zen -->
+            <!-- Probar Melodía Relajante Armónica -->
             <LinearLayout
-                android:id="@+id/btn_test_notif_zen"
+                android:id="@+id/btn_test_notif_relajante"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_tarjeta_redondeada"
@@ -624,7 +624,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Canal Zen Relajante (528Hz)"
+                        android:text="Canal Relajante Armónico (528Hz)"
                         android:textColor="@color/neutral"
                         android:textSize="14.5sp"
                         android:textStyle="bold" />

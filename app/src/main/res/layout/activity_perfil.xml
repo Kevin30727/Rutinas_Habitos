@@ -46,7 +46,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mi Perfil Zen"
+                android:text="Mi Perfil Pastel"
                 android:textColor="@color/neutral"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -316,7 +316,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 3. Tarjeta de Compañero Panda Zen -->
+            <!-- 3. Tarjeta de Compañero Panda Asistente -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -351,7 +351,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Panda Zen Amable"
+                            android:text="Panda Acompañante"
                             android:textColor="@color/neutral"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -447,6 +447,56 @@
                     android:textSize="18sp" />
             </LinearLayout>
 
+            <!-- Botón Mis Tonos Personalizados (Subir y Visualizar MP3) -->
+            <LinearLayout
+                android:id="@+id/btn_abrir_tonos_personalizados"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/bg_circulo"
+                    android:backgroundTint="@color/rose_light"
+                    android:text="🎵"
+                    android:textSize="18sp"
+                    android:gravity="center" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mis Tonos Personalizados"
+                        android:textColor="@color/neutral"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sube y visualiza tus canciones y MP3"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_chevron_right"
+                    app:tint="@color/text_muted" />
+            </LinearLayout>
+
             <!-- Botón Probar Notificación Estándar -->
             <LinearLayout
                 android:id="@+id/btn_probar_notif_default_directo"
@@ -492,9 +542,9 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Botón Probar Melodía Zen MP3 -->
+            <!-- Botón Probar Melodía Relajante MP3 -->
             <LinearLayout
-                android:id="@+id/btn_probar_notif_zen_directo"
+                android:id="@+id/btn_probar_notif_relajante_directo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_tarjeta_redondeada"
@@ -523,7 +573,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🎵 Probar Melodía Zen (528Hz)"
+                        android:text="🎵 Probar Melodía Relajante (528Hz)"
                         android:textColor="@color/neutral"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -531,7 +581,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Campana armónica relajante y notificación suave"
+                        android:text="Campana armónica y notificación suave"
                         android:textColor="@color/text_muted"
                         android:textSize="11.5sp" />
                 </LinearLayout>

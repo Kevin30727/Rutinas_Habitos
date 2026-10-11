@@ -25,7 +25,7 @@ import com.google.android.material.button.MaterialButton;
  *    edición de meta de bienestar y gestión de recordatorios.
  * 3. Pruebas interactivas del sistema de notificaciones:
  *    - Notificación estándar con tono nativo de Android.
- *    - Notificación personalizable Zen con melodía armónica (528Hz Solfeggio) y campana tibetana.
+ *    - Notificación personalizable con melodía armónica relajante (528Hz Solfeggio) y campana tibetana.
  */
 public class PerfilActivity extends AppCompatActivity {
 
@@ -134,6 +134,12 @@ public class PerfilActivity extends AppCompatActivity {
             btnConfigCard.setOnClickListener(v -> startActivity(new Intent(this, ConfiguracionActivity.class)));
         }
 
+        // Abrir Gestor de Tonos Personalizados (Subir y Ver MP3s)
+        View btnTonos = findViewById(R.id.btn_abrir_tonos_personalizados);
+        if (btnTonos != null) {
+            btnTonos.setOnClickListener(v -> startActivity(new Intent(this, TonosActivity.class)));
+        }
+
         // Charlar con Panda
         View btnCharlarPanda = findViewById(R.id.btn_charlar_panda_perfil);
         if (btnCharlarPanda != null) {
@@ -156,15 +162,15 @@ public class PerfilActivity extends AppCompatActivity {
             });
         }
 
-        // Probar Notificación Personalizable con Melodía Zen MP3 / 528Hz
-        View btnProbarZen = findViewById(R.id.btn_probar_notif_zen_directo);
-        if (btnProbarZen != null) {
-            btnProbarZen.setOnClickListener(v -> {
-                Toast.makeText(this, "🎵 Reproduciendo melodía Zen y enviando alerta suave...", Toast.LENGTH_SHORT).show();
-                NotificationHelper.reproducirMelodiaZenPreview(this);
-                NotificationHelper.enviarNotificacionMelodiaZen(
+        // Probar Notificación con Melodía Relajante MP3 / 528Hz
+        View btnProbarRelajante = findViewById(R.id.btn_probar_notif_relajante_directo);
+        if (btnProbarRelajante != null) {
+            btnProbarRelajante.setOnClickListener(v -> {
+                Toast.makeText(this, "🎵 Reproduciendo melodía relajante y enviando alerta suave...", Toast.LENGTH_SHORT).show();
+                NotificationHelper.reproducirMelodiaRelajantePreview(this);
+                NotificationHelper.enviarNotificacionMelodiaRelajante(
                         this,
-                        "🎋 Campana Zen de Hábitos",
+                        "🎋 Campana Relajante de Hábitos",
                         "Inhala paz, exhala tensión. Tómate este momento solo para ti."
                 );
             });
@@ -236,18 +242,18 @@ public class PerfilActivity extends AppCompatActivity {
         });
         layout.addView(btnTestDefault);
 
-        MaterialButton btnTestZen = new MaterialButton(this);
-        btnTestZen.setText("🎵 Probar melodía Zen (528Hz)");
-        btnTestZen.setTextSize(12f);
-        btnTestZen.setTextColor(getResources().getColor(R.color.neutral));
-        btnTestZen.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FDE8EF")));
-        btnTestZen.setCornerRadius(dpToPx(12));
-        btnTestZen.setOnClickListener(v -> {
-            NotificationHelper.reproducirMelodiaZenPreview(this);
-            NotificationHelper.enviarNotificacionMelodiaZen(this, "Melodía Zen", "Sonido armónico de relajación activo.");
-            Toast.makeText(this, "Melodía Zen reproducida", Toast.LENGTH_SHORT).show();
+        MaterialButton btnTestRelajante = new MaterialButton(this);
+        btnTestRelajante.setText("🎵 Probar melodía relajante (528Hz)");
+        btnTestRelajante.setTextSize(12f);
+        btnTestRelajante.setTextColor(getResources().getColor(R.color.neutral));
+        btnTestRelajante.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FDE8EF")));
+        btnTestRelajante.setCornerRadius(dpToPx(12));
+        btnTestRelajante.setOnClickListener(v -> {
+            NotificationHelper.reproducirMelodiaRelajantePreview(this);
+            NotificationHelper.enviarNotificacionMelodiaRelajante(this, "Melodía Relajante", "Sonido armónico de relajación activo.");
+            Toast.makeText(this, "Melodía relajante reproducida", Toast.LENGTH_SHORT).show();
         });
-        layout.addView(btnTestZen);
+        layout.addView(btnTestRelajante);
 
         builder.setView(layout);
 

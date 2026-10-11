@@ -52,6 +52,13 @@ public class CrearHabitoActivity extends AppCompatActivity {
     private TextView tvMetaNumero;
     private TextView tvMetaUnidadLabel;
     private TextView tvHoraRecordatorio;
+    private TextView tvEstadoRecordatorioDesc;
+    private LinearLayout llContenedorHoraNotificacion;
+    private View btnSeleccionarHoraRecordatorio;
+    private TextView chipHoraManana;
+    private TextView chipHoraMediodia;
+    private TextView chipHoraTarde;
+    private TextView chipHoraNoche;
     private SwitchCompat switchRecordatorio;
     private TextView tvResumenDias;
 
@@ -115,6 +122,8 @@ public class CrearHabitoActivity extends AppCompatActivity {
         if (editHabitoId != -1) {
             cargarHabitoParaEdicion(editHabitoId);
         } else {
+            setHora("08:00 AM");
+            actualizarEstadoRecordatorio(true);
             actualizarPreview();
         }
     }
@@ -136,6 +145,13 @@ public class CrearHabitoActivity extends AppCompatActivity {
         tvMetaUnidadLabel = findViewById(R.id.tv_meta_unidad_label);
         tvHoraRecordatorio = findViewById(R.id.tv_hora_recordatorio);
         switchRecordatorio = findViewById(R.id.switch_recordatorio);
+        tvEstadoRecordatorioDesc = findViewById(R.id.tv_estado_recordatorio_desc);
+        llContenedorHoraNotificacion = findViewById(R.id.ll_contenedor_hora_notificacion);
+        btnSeleccionarHoraRecordatorio = findViewById(R.id.btn_seleccionar_hora_recordatorio);
+        chipHoraManana = findViewById(R.id.chip_hora_manana);
+        chipHoraMediodia = findViewById(R.id.chip_hora_mediodia);
+        chipHoraTarde = findViewById(R.id.chip_hora_tarde);
+        chipHoraNoche = findViewById(R.id.chip_hora_noche);
         tvResumenDias = findViewById(R.id.tv_resumen_dias);
 
         btnSonidoDefault = findViewById(R.id.btn_sonido_default);
@@ -253,17 +269,20 @@ public class CrearHabitoActivity extends AppCompatActivity {
         setupUnidad(R.id.u_ml, "ml");
         setupUnidad(R.id.u_veces, "veces");
 
-        // Selector de hora
-        tvHoraRecordatorio.setOnClickListener(v -> {
-            TimePickerDialog dialog = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
-                String amPm = hourOfDay >= 12 ? "PM" : "AM";
-                int h = hourOfDay % 12;
-                if (h == 0) h = 12;
-                horaRecordatorio = String.format(Locale.getDefault(), "%02d:%02d %s", h, minute, amPm);
-                tvHoraRecordatorio.setText(horaRecordatorio);
-            }, 8, 0, false);
-            dialog.show();
+        // Activación y Toggle de Recordatorio
+        switchRecordatorio.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            actualizarEstadoRecordatorio(isChecked);
         });
+
+        // Selector Interactivo de Hora de Notificación
+        btnSeleccionarHoraRecordatorio.setOnClickListener(v -> mostrarSelectorHora());
+        tvHoraRecordatorio.setOnClickListener(v -> mostrarSelectorHora());
+
+        // Opciones Rápidas de Horario
+        if (chipHoraManana != null) chipHoraManana.setOnClickListener(v -> setHora("08:00 AM"));
+        if (chipHoraMediodia != null) chipHoraMediodia.setOnClickListener(v -> setHora("12:30 PM"));
+        if (chipHoraTarde != null) chipHoraTarde.setOnClickListener(v -> setHora("05:00 PM"));
+        if (chipHoraNoche != null) chipHoraNoche.setOnClickListener(v -> setHora("09:00 PM"));
 
         // Selector de Sonido de Notificación
         btnSonidoDefault.setOnClickListener(v -> {
@@ -469,10 +488,12 @@ public class CrearHabitoActivity extends AppCompatActivity {
         tvMetaUnidadLabel.setText(" " + unidadSeleccionada);
 
         if (h.getHoraRecordatorio() != null && !h.getHoraRecordatorio().isEmpty()) {
-            horaRecordatorio = h.getHoraRecordatorio();
-            tvHoraRecordatorio.setText(horaRecordatorio);
+            setHora(h.getHoraRecordatorio());
+        } else {
+            setHora("08:00 AM");
         }
         switchRecordatorio.setChecked(h.isRecordatorioActivo());
+        actualizarEstadoRecordatorio(h.isRecordatorioActivo());
 
         String son = h.getTipoSonidoNotificacion();
         if (son != null && son.startsWith("custom:")) {
@@ -622,6 +643,82 @@ public class CrearHabitoActivity extends AppCompatActivity {
         }
     }
 
+    private void mostrarSelectorHora() {
+        int horaDefecto = 8;
+        int minutoDefecto = 0;
+        try {
+            if (horaRecordatorio != null && horaRecordatorio.contains(":")) {
+                String[] partes = horaRecordatorio.trim().split("[: ]");
+                int h = Integer.parseInt(partes[0]);
+                int m = Integer.parseInt(partes[1]);
+                String amPm = partes.length > 2 ? partes[2].toUpperCase() : "AM";
+                if ("PM".equals(amPm) && h < 12) h += 12;
+                if ("AM".equals(amPm) && h == 12) h = 0;
+                horaDefecto = h;
+                minutoDefecto = m;
+            }
+        } catch (Exception ignored) {
+        }
+
+        TimePickerDialog dialog = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
+            String amPm = hourOfDay >= 12 ? "PM" : "AM";
+            int h = hourOfDay % 12;
+            if (h == 0) h = 12;
+            String nuevaHora = String.format(Locale.getDefault(), "%02d:%02d %s", h, minute, amPm);
+            setHora(nuevaHora);
+        }, horaDefecto, minutoDefecto, false);
+        dialog.show();
+    }
+
+    private void setHora(String nuevaHora) {
+        this.horaRecordatorio = nuevaHora;
+        if (tvHoraRecordatorio != null) {
+            tvHoraRecordatorio.setText(nuevaHora);
+        }
+        if (tvEstadoRecordatorioDesc != null && switchRecordatorio != null && switchRecordatorio.isChecked()) {
+            tvEstadoRecordatorioDesc.setText("Alerta activa a las " + nuevaHora);
+        }
+        actualizarChipsHora();
+    }
+
+    private void actualizarChipsHora() {
+        if (chipHoraManana == null) return;
+
+        chipHoraManana.setBackgroundResource(R.drawable.bg_chip_normal);
+        chipHoraManana.setTextColor(Color.parseColor("#8D909F"));
+        chipHoraMediodia.setBackgroundResource(R.drawable.bg_chip_normal);
+        chipHoraMediodia.setTextColor(Color.parseColor("#8D909F"));
+        chipHoraTarde.setBackgroundResource(R.drawable.bg_chip_normal);
+        chipHoraTarde.setTextColor(Color.parseColor("#8D909F"));
+        chipHoraNoche.setBackgroundResource(R.drawable.bg_chip_normal);
+        chipHoraNoche.setTextColor(Color.parseColor("#8D909F"));
+
+        if ("08:00 AM".equalsIgnoreCase(horaRecordatorio)) {
+            chipHoraManana.setBackgroundResource(R.drawable.bg_chip_seleccionado);
+            chipHoraManana.setTextColor(Color.parseColor("#2D3142"));
+        } else if ("12:30 PM".equalsIgnoreCase(horaRecordatorio)) {
+            chipHoraMediodia.setBackgroundResource(R.drawable.bg_chip_seleccionado);
+            chipHoraMediodia.setTextColor(Color.parseColor("#2D3142"));
+        } else if ("05:00 PM".equalsIgnoreCase(horaRecordatorio)) {
+            chipHoraTarde.setBackgroundResource(R.drawable.bg_chip_seleccionado);
+            chipHoraTarde.setTextColor(Color.parseColor("#2D3142"));
+        } else if ("09:00 PM".equalsIgnoreCase(horaRecordatorio)) {
+            chipHoraNoche.setBackgroundResource(R.drawable.bg_chip_seleccionado);
+            chipHoraNoche.setTextColor(Color.parseColor("#2D3142"));
+        }
+    }
+
+    private void actualizarEstadoRecordatorio(boolean activo) {
+        if (llContenedorHoraNotificacion != null) {
+            llContenedorHoraNotificacion.setVisibility(activo ? View.VISIBLE : View.GONE);
+        }
+        if (tvEstadoRecordatorioDesc != null) {
+            tvEstadoRecordatorioDesc.setText(activo
+                    ? "Alerta activa a las " + horaRecordatorio
+                    : "Recordatorios desactivados para este hábito");
+        }
+    }
+
     private void setupIconSelector(int viewId, String nombreIcono, int drawableRes) {
         ImageView iv = findViewById(viewId);
         if (iv != null) {
@@ -727,6 +824,9 @@ public class CrearHabitoActivity extends AppCompatActivity {
         unidadSeleccionada = "minutos";
         tipoSonidoSeleccionado = "default";
         actualizarVistaSonido();
+        setHora("08:00 AM");
+        switchRecordatorio.setChecked(true);
+        actualizarEstadoRecordatorio(true);
         actualizarPreview();
         Toast.makeText(this, "Formulario restablecido", Toast.LENGTH_SHORT).show();
     }

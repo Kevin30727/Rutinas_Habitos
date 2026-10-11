@@ -77,6 +77,11 @@ Rutinas Pastel incluye un sistema sonoro adaptado a la calma mental:
    - Accesible desde el perfil del usuario.
    - Permite subir audios desde el almacenamiento del dispositivo, copiándolos de forma segura al directorio privado interno de la aplicación (`tonos_mp3/`).
    - Muestra la lista de tonos subidos con controles interactivos para **▶ Escuchar / ⏹ Parar** y **🗑 Eliminar** de SQLite y disco.
+5. **Selector Dedicado de Hora de Notificación:**
+   - En la creación de hábitos (`CrearHabitoActivity`), un compartimento interactivo permite programar con precisión el momento del día en que se disparará la alerta.
+   - Tarjeta destacada con reloj y botón `Elegir hora ✏️` que despliega el selector `TimePickerDialog` nativo.
+   - Opciones rápidas frecuentes de un solo toque: 🌅 Mañana (08:00 AM), ☀️ Mediodía (12:30 PM), ⛅ Tarde (05:00 PM) y 🌙 Noche (09:00 PM).
+   - Interruptor para activar/desactivar recordatorios por hábito individual con retroalimentación visual inmediata.
 
 ---
 

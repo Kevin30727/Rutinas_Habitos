@@ -608,76 +608,218 @@
                 <TextView android:id="@+id/u_veces" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="veces" android:textColor="@color/text_muted" android:textSize="12sp" android:background="@drawable/bg_chip_normal" android:paddingHorizontal="10dp" android:paddingVertical="5dp" android:layout_marginHorizontal="3dp" />
             </LinearLayout>
 
-            <!-- 7. Recordatorio Diario -->
+            <!-- 7. Recordatorio y Selección de Hora de Notificación -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_tarjeta_redondeada"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:orientation="vertical"
                 android:padding="16dp"
                 android:elevation="1dp"
-                android:layout_marginBottom="20dp">
+                android:layout_marginBottom="16dp">
 
-                <ImageView
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="@drawable/bg_circulo"
-                    android:backgroundTint="@color/blue_light"
-                    android:src="@drawable/ic_bell"
-                    android:padding="11dp"
-                    app:tint="@color/tertiary_dark"
-                    android:contentDescription="Recordatorio" />
-
+                <!-- Fila de Activación del Recordatorio -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="@drawable/bg_circulo"
+                        android:backgroundTint="@color/blue_light"
+                        android:src="@drawable/ic_bell"
+                        android:padding="11dp"
+                        app:tint="@color/tertiary_dark"
+                        android:contentDescription="Recordatorio" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="14dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Recordatorio de Hábito"
+                            android:textColor="@color/neutral"
+                            android:textSize="15.5sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_estado_recordatorio_desc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Alerta activa a la hora seleccionada"
+                            android:textColor="@color/text_muted"
+                            android:textSize="12sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_recordatorio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true" />
+                </LinearLayout>
+
+                <!-- Compartimento para Seleccionar la Hora Exacta de la Notificación -->
+                <LinearLayout
+                    android:id="@+id/ll_contenedor_hora_notificacion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginStart="14dp">
+                    android:layout_marginTop="14dp">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider_line"
+                        android:layout_marginBottom="12dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Recordatorio diario"
+                        android:text="¿A qué hora quieres recibir la notificación?"
                         android:textColor="@color/neutral"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
+                        android:textSize="13.5sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
 
+                    <!-- Tarjeta / Botón interactivo principal para seleccionar hora -->
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:id="@+id/btn_seleccionar_hora_recordatorio"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/bg_card_destacada_menta"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:layout_marginTop="2dp">
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="12dp"
+                        android:layout_marginBottom="10dp"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <TextView
-                            android:id="@+id/tv_hora_recordatorio"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="08:00 AM"
+                            android:text="⏰"
+                            android:textSize="24sp"
+                            android:layout_marginEnd="12dp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="HORA PROGRAMADA"
+                                android:textColor="@color/green_soft"
+                                android:textSize="10.5sp"
+                                android:textStyle="bold"
+                                android:letterSpacing="0.08" />
+
+                            <TextView
+                                android:id="@+id/tv_hora_recordatorio"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="08:00 AM"
+                                android:textColor="@color/neutral"
+                                android:textSize="20sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Elegir hora ✏️"
                             android:textColor="@color/neutral"
-                            android:textSize="13sp"
+                            android:textSize="12.5sp"
                             android:textStyle="bold"
                             android:background="@drawable/bg_chip_normal"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="2dp" />
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="6dp" />
+                    </LinearLayout>
 
-                        <TextView
+                    <!-- Horarios Rápidos Sugeridos -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Opciones rápidas frecuentes:"
+                        android:textColor="@color/text_muted"
+                        android:textSize="11.5sp"
+                        android:layout_marginBottom="6dp" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none">
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Con música suave"
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp"
-                            android:layout_marginStart="8dp" />
-                    </LinearLayout>
-                </LinearLayout>
+                            android:orientation="horizontal">
 
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switch_recordatorio"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
+                            <TextView
+                                android:id="@+id/chip_hora_manana"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🌅 Mañana (08:00 AM)"
+                                android:textColor="@color/neutral"
+                                android:textSize="11.5sp"
+                                android:textStyle="bold"
+                                android:background="@drawable/bg_chip_seleccionado"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="6dp"
+                                android:layout_marginEnd="6dp" />
+
+                            <TextView
+                                android:id="@+id/chip_hora_mediodia"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="☀️ Mediodía (12:30 PM)"
+                                android:textColor="@color/text_muted"
+                                android:textSize="11.5sp"
+                                android:textStyle="bold"
+                                android:background="@drawable/bg_chip_normal"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="6dp"
+                                android:layout_marginEnd="6dp" />
+
+                            <TextView
+                                android:id="@+id/chip_hora_tarde"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="⛅ Tarde (05:00 PM)"
+                                android:textColor="@color/text_muted"
+                                android:textSize="11.5sp"
+                                android:textStyle="bold"
+                                android:background="@drawable/bg_chip_normal"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="6dp"
+                                android:layout_marginEnd="6dp" />
+
+                            <TextView
+                                android:id="@+id/chip_hora_noche"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🌙 Noche (09:00 PM)"
+                                android:textColor="@color/text_muted"
+                                android:textSize="11.5sp"
+                                android:textStyle="bold"
+                                android:background="@drawable/bg_chip_normal"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="6dp" />
+                        </LinearLayout>
+                    </HorizontalScrollView>
+                </LinearLayout>
             </LinearLayout>
 
             <!-- 7.1 Selector de Tono de Notificación (Default vs Melodía Relajante) -->

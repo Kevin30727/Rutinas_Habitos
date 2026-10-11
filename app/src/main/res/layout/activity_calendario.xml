@@ -19,7 +19,7 @@
             android:orientation="vertical"
             android:paddingHorizontal="20dp"
             android:paddingTop="20dp"
-            android:paddingBottom="120dp">
+            android:paddingBottom="160dp">
 
             <!-- 1. Top Bar (Avatar y Título) -->
             <LinearLayout
@@ -285,51 +285,56 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/tv_contador_habitos_cal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="4/4 Completados"
+                        android:text="0/0 Completados"
                         android:textColor="#8D909F"
                         android:textSize="12sp" />
                 </LinearLayout>
 
-                <!-- Ítem 1 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_tarjeta_redondeada" android:backgroundTint="#F6F5FA" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
-                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_circulo" android:src="@drawable/ic_check" android:padding="8dp" app:tint="@color/neutral" />
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Despertar temprano" android:textColor="@color/neutral" android:textSize="14sp" android:textStyle="bold" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Completado 07:30" android:textColor="#8D909F" android:textSize="12sp" />
-                    </LinearLayout>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="☀️" android:textSize="16sp"/>
-                </LinearLayout>
+                <!-- Contenedor dinámico SQLite -->
+                <LinearLayout
+                    android:id="@+id/ll_contenedor_habitos_calendario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
 
-                <!-- Ítem 2 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_tarjeta_redondeada" android:backgroundTint="#F6F5FA" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
-                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_circulo" android:src="@drawable/ic_check" android:padding="8dp" app:tint="@color/neutral" />
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Desayuno saludable" android:textColor="@color/neutral" android:textSize="14sp" android:textStyle="bold" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Completado 08:00" android:textColor="#8D909F" android:textSize="12sp" />
-                    </LinearLayout>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🍎" android:textSize="16sp"/>
-                </LinearLayout>
+                <!-- Estado vacío cuando no hay hábitos -->
+                <LinearLayout
+                    android:id="@+id/ll_estado_vacio_calendario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_tarjeta_redondeada"
+                    android:backgroundTint="#F8F9FB"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="24dp"
+                    android:visibility="gone">
 
-                <!-- Ítem 3 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_tarjeta_redondeada" android:backgroundTint="#F6F5FA" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp" android:layout_marginBottom="12dp">
-                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_circulo" android:src="@drawable/ic_check" android:padding="8dp" app:tint="@color/neutral" />
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pausa activa" android:textColor="@color/neutral" android:textSize="14sp" android:textStyle="bold" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Completado 13:30" android:textColor="#8D909F" android:textSize="12sp" />
-                    </LinearLayout>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🧘" android:textSize="16sp"/>
-                </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎋"
+                        android:textSize="32sp" />
 
-                <!-- Ítem 4 -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_tarjeta_redondeada" android:backgroundTint="#F6F5FA" android:orientation="horizontal" android:gravity="center_vertical" android:padding="12dp">
-                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_circulo" android:src="@drawable/ic_check" android:padding="8dp" app:tint="@color/neutral" />
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="12dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lectura de noche" android:textColor="@color/neutral" android:textSize="14sp" android:textStyle="bold" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Completado 19:00" android:textColor="#8D909F" android:textSize="12sp" />
-                    </LinearLayout>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📖" android:textSize="16sp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sin hábitos para este día"
+                        android:textColor="@color/neutral"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Crea una nueva rutina con el botón + o conversa con tu Asistente Panda 🌱"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp"
+                        android:gravity="center"
+                        android:layout_marginTop="4dp" />
                 </LinearLayout>
             </LinearLayout>
 

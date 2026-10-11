@@ -37,7 +37,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="AJUSTES &amp; BIENESTAR"
+                android:text="BIENESTAR PERSONAL"
                 android:textColor="@color/text_muted"
                 android:textSize="10sp"
                 android:textStyle="bold"
@@ -46,26 +46,29 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Configuración"
+                android:text="Mi Perfil Zen"
                 android:textColor="@color/neutral"
                 android:textSize="18sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <!-- Botón de Configuración Funcional en la Barra Superior -->
         <ImageView
+            android:id="@+id/btn_abrir_configuracion_top"
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:background="@drawable/bg_tarjeta_redondeada"
+            android:backgroundTint="@color/mint_light"
             android:src="@drawable/ic_sparkle"
             android:padding="8dp"
-            android:contentDescription="Ajustes" />
+            android:contentDescription="Configuración" />
     </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingBottom="120dp"
+        android:paddingBottom="160dp"
         app:layout_constraintTop_toBottomOf="@id/ll_perfil_header"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -76,55 +79,343 @@
             android:paddingHorizontal="20dp"
             android:paddingTop="10dp">
 
-            <!-- Buscador en ajustes -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:background="@drawable/bg_tarjeta_redondeada"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="14dp"
-                android:layout_marginBottom="18dp">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_search"
-                    android:contentDescription="Buscar" />
-
-                <EditText
-                    android:id="@+id/et_buscar_ajustes"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@null"
-                    android:hint="Buscar en ajustes..."
-                    android:textColorHint="@color/text_subtle"
-                    android:textColor="@color/neutral"
-                    android:textSize="14sp"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="0dp"
-                    android:inputType="text" />
-            </LinearLayout>
-
-            <!-- Banner Espacio Amable -->
+            <!-- 1. Tarjeta Principal de Perfil de Usuario (Relacional SQLite) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_card_destacada_menta"
-                android:backgroundTint="@color/lavender_light"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:padding="20dp"
+                android:elevation="2dp"
+                android:layout_marginBottom="20dp">
+
+                <!-- Avatar con marco pastel -->
+                <FrameLayout
+                    android:layout_width="84dp"
+                    android:layout_height="84dp"
+                    android:layout_marginBottom="12dp">
+
+                    <View
+                        android:layout_width="84dp"
+                        android:layout_height="84dp"
+                        android:background="@drawable/bg_circulo"
+                        android:backgroundTint="@color/rose_light" />
+
+                    <ImageView
+                        android:id="@+id/iv_avatar_perfil"
+                        android:layout_width="68dp"
+                        android:layout_height="68dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_panda"
+                        android:contentDescription="Avatar" />
+                </FrameLayout>
+
+                <!-- Nombre del usuario -->
+                <TextView
+                    android:id="@+id/tv_perfil_nombre"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Usuario"
+                    android:textColor="@color/neutral"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <!-- Correo electrónico -->
+                <TextView
+                    android:id="@+id/tv_perfil_correo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="correo@ejemplo.com"
+                    android:textColor="@color/text_muted"
+                    android:textSize="13sp"
+                    android:layout_marginTop="2dp" />
+
+                <!-- Badge Miembro desde -->
+                <TextView
+                    android:id="@+id/tv_perfil_fecha_registro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🌱 Miembro desde: Reciente"
+                    android:textColor="@color/green_soft"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="5dp"
+                    android:background="@drawable/bg_card_destacada_menta"
+                    android:layout_marginTop="10dp" />
+
+                <!-- Meta activa de bienestar -->
+                <TextView
+                    android:id="@+id/tv_perfil_meta_bienestar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Meta activa: Equilibrio y calma interior"
+                    android:textColor="@color/neutral"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+
+            <!-- 2. Grid de Estadísticas Relacionales SQLite (4 Tarjetas) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TUS MÉTRICAS EN TIEMPO REAL"
+                android:textColor="@color/text_muted"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:layout_marginBottom="10dp" />
+
+            <!-- Fila 1: Total Hábitos | Hábitos Hoy -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <!-- Total Hábitos -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_tarjeta_redondeada"
+                    android:backgroundTint="#F8F9FB"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:layout_marginEnd="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total Hábitos"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_stat_total_habitos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/neutral"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="En tu base SQLite"
+                        android:textColor="@color/text_muted"
+                        android:textSize="10sp"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+
+                <!-- Cumplidos Hoy -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_tarjeta_redondeada"
+                    android:backgroundTint="#F8F9FB"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:layout_marginStart="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Cumplidos Hoy"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_stat_habitos_hoy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 / 0"
+                        android:textColor="@color/neutral"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Progreso diario"
+                        android:textColor="@color/text_muted"
+                        android:textSize="10sp"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Fila 2: Racha Máxima | Modo Sin Culpa -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:layout_marginBottom="24dp">
 
+                <!-- Racha Máxima -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card_destacada_rosa"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:layout_marginEnd="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔥 Mejor Racha"
+                        android:textColor="@color/secondary_dark"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_stat_mejor_racha"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 días"
+                        android:textColor="@color/neutral"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+
+                <!-- Modo Sin Culpa -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_card_destacada_menta"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:layout_marginStart="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🌱 Sin Culpa"
+                        android:textColor="@color/green_soft"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_stat_modo_sin_culpa"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Activo"
+                        android:textColor="@color/neutral"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 3. Tarjeta de Compañero Panda Zen -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:orientation="vertical"
+                android:padding="18dp"
+                android:elevation="1dp"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_circulo"
+                        android:backgroundTint="@color/lavender_light"
+                        android:src="@drawable/ic_panda"
+                        android:padding="6dp"
+                        android:contentDescription="Panda" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Panda Zen Amable"
+                            android:textColor="@color/neutral"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Acompañante offline conectado"
+                            android:textColor="@color/text_muted"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_charlar_panda_perfil"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Charlar 🐼"
+                        android:textColor="@color/neutral"
+                        android:textSize="12sp"
+                        android:backgroundTint="@color/mint_light"
+                        app:cornerRadius="18dp"
+                        android:paddingHorizontal="14dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="&quot;El bienestar no es una carrera de velocidad, sino un sendero amable que se transita a tu propio ritmo.&quot; 🎋"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12.5sp"
+                    android:fontFamily="serif"
+                    android:layout_marginTop="12dp" />
+            </LinearLayout>
+
+            <!-- 4. Acciones y Configuración Funcional -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AJUSTES &amp; PREFERENCIAS"
+                android:textColor="@color/text_muted"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Botón Configuración de la App -->
+            <LinearLayout
+                android:id="@+id/btn_abrir_configuracion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+
                 <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
                     android:background="@drawable/bg_circulo"
-                    android:backgroundTint="@color/white"
-                    android:src="@drawable/ic_panda"
-                    android:padding="8dp"
-                    android:contentDescription="Avatar" />
+                    android:backgroundTint="@color/mint_light"
+                    android:src="@drawable/ic_sparkle"
+                    android:padding="9dp"
+                    app:tint="@color/neutral" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -136,804 +427,113 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🌱 ESPACIO AMABLE"
-                        android:textColor="@color/green_soft"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.1" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tu ritmo, tus reglas"
+                        android:text="Configurar App &amp; Sonidos"
                         android:textColor="@color/neutral"
                         android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="2dp" />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ajusta cada detalle para que tu rutina sea un abrazo, no una obligación."
+                        android:text="Modo sin culpa, alertas y preferencias"
                         android:textColor="@color/text_muted"
-                        android:textSize="12sp"
-                        android:layout_marginTop="3dp" />
+                        android:textSize="12sp" />
                 </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⚙️"
+                    android:textSize="18sp" />
             </LinearLayout>
 
-            <!-- SECCIÓN 1: Preferencias de Hábitos y Ritmo -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Preferencias de Hábitos y Ritmo"
-                android:textColor="@color/text_muted"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="10dp" />
-
+            <!-- Botón Probar Notificación Estándar -->
             <LinearLayout
+                android:id="@+id/btn_probar_notif_default_directo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_tarjeta_redondeada"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:elevation="1dp"
-                android:layout_marginBottom="20dp">
+                android:backgroundTint="#F8F9FB"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="14dp"
+                android:layout_marginBottom="10dp">
 
-                <!-- Ítem: Modo Sin Culpa -->
+                <ImageView
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_circulo"
+                    android:backgroundTint="@color/blue_light"
+                    android:src="@drawable/ic_check"
+                    android:padding="8dp"
+                    app:tint="@color/neutral" />
+
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/mint_light"
-                        android:src="@drawable/ic_corazon"
-                        android:padding="9dp"
-                        app:tint="@color/green_soft"
-                        android:contentDescription="Modo sin culpa" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Modo Sin Culpa / Pausa..."
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Congela rachas sin penalización..."
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switch_modo_sin_culpa"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true" />
-                </LinearLayout>
-
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_line" android:layout_marginBottom="16dp" />
-
-                <!-- Ítem: Horario de Notificaciones -->
-                <LinearLayout
-                    android:id="@+id/ll_horario_notificaciones"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/blue_light"
-                        android:src="@drawable/ic_bell"
-                        android:padding="9dp"
-                        app:tint="@color/tertiary_dark"
-                        android:contentDescription="Notificaciones" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Horario de Notificaciones"
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Sonido suave de cuencos tibetanos..."
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        android:contentDescription="Ir" />
-                </LinearLayout>
-
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_line" android:layout_marginBottom="16dp" />
-
-                <!-- Ítem: Día de inicio de semana -->
-                <LinearLayout
-                    android:id="@+id/ll_dia_inicio_semana"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/lavender_light"
-                        android:src="@drawable/ic_calendario"
-                        android:padding="9dp"
-                        app:tint="@color/neutral"
-                        android:contentDescription="Inicio semana" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Día de inicio de semana"
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Lunes (Predeterminado)"
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        android:contentDescription="Ir" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- SECCIÓN 2: Finanzas y Moneda -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Finanzas y Moneda"
-                android:textColor="@color/text_muted"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="10dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_tarjeta_redondeada"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:elevation="1dp"
-                android:layout_marginBottom="20dp">
-
-                <!-- Ítem: Moneda Principal -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/rose_light"
-                        android:src="@drawable/ic_finanzas"
-                        android:padding="9dp"
-                        app:tint="@color/secondary_dark"
-                        android:contentDescription="Moneda" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Moneda principal"
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="USD ($) Dólar estadounidense"
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="USD"
+                        android:text="🔔 Probar Notificación Estándar"
                         android:textColor="@color/neutral"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="4dp"
-                        android:background="@drawable/bg_chip_normal" />
-                </LinearLayout>
-
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_line" android:layout_marginBottom="16dp" />
-
-                <!-- Ítem: Presupuesto Mensual Consciente -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/lavender_light"
-                        android:src="@drawable/ic_finanzas"
-                        android:padding="9dp"
-                        app:tint="@color/neutral"
-                        android:contentDescription="Presupuesto" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Presupuesto mensual consciente"
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="$1,200.00 / mes"
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        android:contentDescription="Ir" />
-                </LinearLayout>
-
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_line" android:layout_marginBottom="16dp" />
-
-                <!-- Ítem: Ocultar balances en inicio -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/blue_light"
-                        android:src="@drawable/ic_sparkle"
-                        android:padding="9dp"
-                        app:tint="@color/neutral"
-                        android:contentDescription="Ocultar balances" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Ocultar balances en inicio"
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Protege tu privacidad con toque..."
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switch_ocultar_balance"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="false" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- SECCIÓN 3: Apariencia y Tema -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Apariencia y Tema"
-                android:textColor="@color/text_muted"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="10dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_tarjeta_redondeada"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:elevation="1dp"
-                android:layout_marginBottom="20dp">
-
-                <!-- Tema actual -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/mint_light"
-                        android:src="@drawable/ic_sparkle"
-                        android:padding="9dp"
-                        app:tint="@color/green_soft"
-                        android:contentDescription="Tema" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Tema de la app"
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Pastel Neo - Calm (Predeterminado)"
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-
-                        <!-- Dots de Paleta Activa -->
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginTop="8dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="PALETA ACTIVA"
-                                android:textColor="@color/text_muted"
-                                android:textSize="9sp"
-                                android:textStyle="bold"
-                                android:letterSpacing="0.1"
-                                android:layout_marginEnd="8dp" />
-
-                            <View android:layout_width="16dp" android:layout_height="16dp" android:background="@drawable/bg_circulo" android:backgroundTint="@color/secondary" android:layout_marginEnd="4dp" />
-                            <View android:layout_width="16dp" android:layout_height="16dp" android:background="@drawable/bg_circulo" android:backgroundTint="@color/tertiary" android:layout_marginEnd="4dp" />
-                            <View android:layout_width="16dp" android:layout_height="16dp" android:background="@drawable/bg_circulo" android:backgroundTint="@color/primary" android:layout_marginEnd="4dp" />
-                            <View android:layout_width="16dp" android:layout_height="16dp" android:background="@drawable/bg_circulo" android:backgroundTint="@color/lavender" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:src="@drawable/ic_check"
-                        app:tint="@color/green_soft"
-                        android:contentDescription="Seleccionado" />
-                </LinearLayout>
-
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_line" android:layout_marginVertical="16dp" />
-
-                <!-- Modo Oscuro -->
-                <LinearLayout
-                    android:id="@+id/ll_modo_oscuro"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/lavender_light"
-                        android:src="@drawable/ic_noche"
-                        android:padding="9dp"
-                        app:tint="@color/neutral"
-                        android:contentDescription="Modo oscuro" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Modo oscuro nocturno"
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Programado con la puesta de sol"
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        android:contentDescription="Ir" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- SECCIÓN 4: Datos y Seguridad -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Datos y Seguridad"
-                android:textColor="@color/text_muted"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="10dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_tarjeta_redondeada"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:elevation="1dp"
-                android:layout_marginBottom="20dp">
-
-                <!-- Copia de seguridad en la nube -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/mint_light"
-                        android:src="@drawable/ic_cloud"
-                        android:padding="9dp"
-                        app:tint="@color/green_soft"
-                        android:contentDescription="Nube" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Copia de seguridad en la nube"
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Sincronizado hoy en SQLite local"
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="✓ Al día"
-                        android:textColor="@color/green_soft"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="4dp"
-                        android:background="@drawable/bg_card_destacada_menta" />
-                </LinearLayout>
-
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_line" android:layout_marginBottom="16dp" />
-
-                <!-- Biometría -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/lavender_light"
-                        android:src="@drawable/ic_check"
-                        android:padding="9dp"
-                        app:tint="@color/neutral"
-                        android:contentDescription="Biometría" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Bloqueo con Biometría / PIN"
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Mayor protección para tus reflexiones"
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switch_biometria"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="false" />
-                </LinearLayout>
-
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_line" android:layout_marginBottom="16dp" />
-
-                <!-- Exportar mis datos -->
-                <LinearLayout
-                    android:id="@+id/ll_exportar_datos"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/blue_light"
-                        android:src="@drawable/ic_download"
-                        android:padding="9dp"
-                        app:tint="@color/neutral"
-                        android:contentDescription="Exportar" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Exportar mis datos"
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Archivos portables en JSON o CSV"
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_download"
-                        app:tint="@color/text_muted"
-                        android:contentDescription="Descargar" />
+                        android:text="Sonido clásico del sistema Android"
+                        android:textColor="@color/text_muted"
+                        android:textSize="11.5sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- SECCIÓN 5: Cuenta y Soporte -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cuenta y Soporte"
-                android:textColor="@color/text_muted"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="10dp" />
-
+            <!-- Botón Probar Melodía Zen MP3 -->
             <LinearLayout
+                android:id="@+id/btn_probar_notif_zen_directo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_tarjeta_redondeada"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:elevation="1dp"
-                android:layout_marginBottom="24dp">
+                android:backgroundTint="#F8F9FB"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="14dp"
+                android:layout_marginBottom="16dp">
 
-                <!-- Soporte -->
+                <ImageView
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_circulo"
+                    android:backgroundTint="@color/rose_light"
+                    android:src="@drawable/ic_meditacion"
+                    android:padding="8dp"
+                    app:tint="@color/neutral" />
+
                 <LinearLayout
-                    android:id="@+id/ll_soporte"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
 
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/rose_light"
-                        android:src="@drawable/ic_sparkle"
-                        android:padding="9dp"
-                        app:tint="@color/secondary_dark"
-                        android:contentDescription="Soporte" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
+                        android:text="🎵 Probar Melodía Zen (528Hz)"
+                        android:textColor="@color/neutral"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Soporte con amor &amp; Preguntas"
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Estamos aquí para escucharte con calma..."
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        android:contentDescription="Ir" />
-                </LinearLayout>
-
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_line" android:layout_marginBottom="16dp" />
-
-                <!-- Términos -->
-                <LinearLayout
-                    android:id="@+id/ll_terminos"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:background="@drawable/bg_circulo"
-                        android:backgroundTint="@color/blue_light"
-                        android:src="@drawable/ic_lectura"
-                        android:padding="9dp"
-                        app:tint="@color/tertiary_dark"
-                        android:contentDescription="Términos" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Términos de servicio &amp; Privacidad"
-                            android:textColor="@color/neutral"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Tus datos nunca son comercializados"
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        android:contentDescription="Ir" />
+                        android:text="Campana armónica relajante y notificación suave"
+                        android:textColor="@color/text_muted"
+                        android:textSize="11.5sp" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -941,68 +541,27 @@
             <LinearLayout
                 android:id="@+id/btn_cerrar_sesion"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:background="@drawable/bg_boton_peligro_suave"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:backgroundTint="#FFF0F0"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginBottom="24dp">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_logout"
-                    app:tint="@color/secondary_dark"
-                    android:contentDescription="Salir" />
+                android:padding="15dp"
+                android:layout_marginBottom="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Cerrar sesión"
-                    android:textColor="@color/neutral"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="10dp" />
+                    android:text="🚪 Cerrar Sesión"
+                    android:textColor="#E05D5D"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
             </LinearLayout>
-
-            <!-- Footer Versión -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="RUTINA PASTEL - V2.4.0 PASTEL"
-                android:textColor="@color/text_muted"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.1" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Hecho con calma y propósito ♡"
-                android:textColor="@color/text_subtle"
-                android:textSize="11sp"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="10dp" />
 
         </LinearLayout>
     </ScrollView>
 
-    <!-- Botón Flotante e Inferior -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btn_nuevo_habito_perfil"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/primary"
-        android:src="@drawable/ic_add"
-        app:tint="@color/neutral"
-        app:borderWidth="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/barra_inferior"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Barra Inferior Flotante -->
+    <!-- Barra Inferior -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/barra_inferior"
         style="@style/Widget.MaterialComponents.BottomNavigationView"

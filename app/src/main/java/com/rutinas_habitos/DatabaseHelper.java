@@ -481,4 +481,87 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void actualizarModoSinCulpa(long usuarioId, boolean activo) {
         guardarModoSinCulpa(usuarioId, activo);
     }
+
+    // =========================================================================
+    // CONSULTAS RELACIONALES DINÁMICAS (PERFIL Y MÉTRICAS REALES)
+    // =========================================================================
+
+    public Usuario obtenerUsuarioPorId(long usuarioId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_USUARIO + " WHERE " + COL_USER_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(usuarioId)});
+        Usuario usuario = null;
+        if (cursor.moveToFirst()) {
+            usuario = new Usuario();
+            usuario.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_USER_ID)));
+            usuario.setNombre(cursor.getString(cursor.getColumnIndexOrThrow(COL_USER_NOMBRE)));
+            usuario.setCorreo(cursor.getString(cursor.getColumnIndexOrThrow(COL_USER_CORREO)));
+            usuario.setPassword(cursor.getString(cursor.getColumnIndexOrThrow(COL_USER_PASSWORD)));
+            usuario.setFechaRegistro(cursor.getString(cursor.getColumnIndexOrThrow(COL_USER_FECHA)));
+        }
+        cursor.close();
+        return usuario;
+    }
+
+    public int obtenerTotalHabitos(long usuarioId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT COUNT(*) FROM " + TABLE_HABITO + " WHERE " + COL_HAB_USUARIO_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(usuarioId)});
+        int count = 0;
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+
+    public int obtenerHabitosCompletadosHoy(long usuarioId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT COUNT(*) FROM " + TABLE_HABITO + " WHERE " + COL_HAB_USUARIO_ID + " = ? AND " + COL_HAB_COMPLETADO + " = 1";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(usuarioId)});
+        int count = 0;
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+
+    public int obtenerMejorRacha(long usuarioId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT MAX(" + COL_HAB_RACHA + ") FROM " + TABLE_HABITO + " WHERE " + COL_HAB_USUARIO_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(usuarioId)});
+        int max = 0;
+        if (cursor.moveToFirst()) {
+            max = cursor.getInt(0);
+        }
+        cursor.close();
+        return max;
+    }
+
+    public String obtenerMetaBienestar(long usuarioId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT " + COL_PERFIL_META_BIENESTAR + " FROM " + TABLE_PERFIL_ASISTENTE + " WHERE " + COL_PERFIL_USER_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(usuarioId)});
+        String meta = "Equilibrio y calma interior";
+        if (cursor.moveToFirst()) {
+            String val = cursor.getString(0);
+            if (val != null && !val.trim().isEmpty()) {
+                meta = val;
+            }
+        }
+        cursor.close();
+        return meta;
+    }
+
+    public void guardarMetaBienestar(long usuarioId, String meta) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COL_PERFIL_META_BIENESTAR, meta);
+        int rows = db.update(TABLE_PERFIL_ASISTENTE, cv, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
+        if (rows == 0) {
+            cv.put(COL_PERFIL_USER_ID, usuarioId);
+            db.insert(TABLE_PERFIL_ASISTENTE, null, cv);
+        }
+    }
 }

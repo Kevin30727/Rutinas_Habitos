@@ -153,18 +153,22 @@ public class AsistentePandaActivity extends AppCompatActivity {
             tvSugerenciaContextual.setVisibility(View.GONE);
         }
 
-        // 3. Renderizado dinámico de todas las rutinas acumuladas
+        // 3. Renderizado dinámico de rutinas si existen sugerencias
         llRutinasAcumuladasContainer.removeAllViews();
-        for (AsistenteMotor.RutinaPropuesta r : rutinasPropuestasActuales) {
-            View itemRutina = crearItemRutinaView(r);
-            llRutinasAcumuladasContainer.addView(itemRutina);
+        if (rutinasPropuestasActuales != null && !rutinasPropuestasActuales.isEmpty()) {
+            for (AsistenteMotor.RutinaPropuesta r : rutinasPropuestasActuales) {
+                View itemRutina = crearItemRutinaView(r);
+                llRutinasAcumuladasContainer.addView(itemRutina);
+            }
+
+            btnAceptarPropuesta.setText(rutinasPropuestasActuales.size() > 1
+                    ? "✓ Aceptar " + rutinasPropuestasActuales.size() + " rutinas y empezar 🌱"
+                    : "✓ Aceptar hábito y empezar 🌱");
+
+            cardPropuesta.setVisibility(View.VISIBLE);
+        } else {
+            cardPropuesta.setVisibility(View.GONE);
         }
-
-        btnAceptarPropuesta.setText(rutinasPropuestasActuales.size() > 1
-                ? "✓ Aceptar " + rutinasPropuestasActuales.size() + " rutinas y empezar 🌱"
-                : "✓ Aceptar hábito y empezar 🌱");
-
-        cardPropuesta.setVisibility(View.VISIBLE);
     }
 
     private View crearItemRutinaView(AsistenteMotor.RutinaPropuesta r) {

@@ -1,6 +1,7 @@
 package com.rutinas_habitos;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,24 +14,33 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import java.io.File;
+import java.util.Calendar;
+import java.util.Locale;
 
 /**
- * Gestor Central de Notificaciones para "Rutinas Pastel".
+ * Gestor Central de Notificaciones y Alarmas para "Rutinas Pastel".
  * 
- * Soporta modalidades de sonido:
- * 1. Canal por defecto: Sonido nativo de notificación de Android.
- * 2. Canal con Melodía Relajante: Frecuencias armónicas (528Hz Solfeggio) y campana tibetana.
- * 3. Audios personalizados: Archivos MP3 o canciones subidas por el usuario.
+ * Funcionalidades clave:
+ * 1. Programación exacta de alarmas diarias (AlarmManager + HabitoReminderReceiver) según la hora configurada.
+ * 2. Soporte para 3 modalidades de sonido reales:
+ *    - Estándar: Tono por defecto de Android.
+ *    - Relajante: Melodía armónica 528Hz Solfeggio / campana tibetana (res/raw/melodia_relajante).
+ *    - Personalizado: Canción / pista de audio MP3 subida por el usuario.
+ * 3. Cancelación y reprogramación de alarmas al editar o eliminar hábitos.
  */
 public class NotificationHelper {
 
+    private static final String TAG = "NotificationHelper";
+
     public static final String CHANNEL_DEFAULT_ID = "canal_rutinas_default";
     public static final String CHANNEL_MELODIA_ARMONICA_ID = "canal_rutinas_melodia_armonica";
+    public static final String CHANNEL_CUSTOM_ID = "canal_rutinas_custom_mp3";
 
     public static final int NOTIF_ID_DEFAULT = 1001;
     public static final int NOTIF_ID_ARMONICA = 1002;
@@ -84,6 +94,20 @@ public class NotificationHelper {
                 canalArmonica.setSound(soundUriArmonica, audioAttr);
             }
             manager.createNotificationChannel(canalArmonica);
+
+            // 3. Canal con Música MP3 Personalizada
+            CharSequence nombreCustom = "Recordatorios con Música Personalizada (MP3)";
+            String descCustom = "Notificaciones que reproducen tu propia música o canciones MP3 elegidas.";
+            NotificationChannel canalCustom = new NotificationChannel(
+                    CHANNEL_CUSTOM_ID,
+                    nombreCustom,
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            canalCustom.setDescription(descCustom);
+            canalCustom.enableVibration(true);
+            // El canal no reproduce ding genérico para dejar que el archivo MP3 suene con claridad
+            canalCustom.setSound(null, null);
+            manager.createNotificationChannel(canalCustom);
         }
     }
 
@@ -104,6 +128,199 @@ public class NotificationHelper {
                     == PackageManager.PERMISSION_GRANTED;
         }
         return true;
+    }
+
+    /**
+     * Parsea una cadena de hora ("08:00 AM", "05:30 PM", "14:30") y retorna [horaEn24h, minuto].
+     */
+    public static int[] parsearHoraMinuto(String horaStr) {
+        int hora = 8;
+        int minuto = 0;
+        if (horaStr == null || horaStr.trim().isEmpty()) {
+            return new int[]{hora, minuto};
+        }
+        try {
+            String limpia = horaStr.trim().toUpperCase(Locale.ROOT);
+            boolean esPM = limpia.contains("PM");
+            boolean esAM = limpia.contains("AM");
+
+            String soloNumeros = limpia.replace("AM", "").replace("PM", "").trim();
+            String[] partes = soloNumeros.split(":");
+            if (partes.length >= 2) {
+                hora = Integer.parseInt(partes[0].trim());
+                minuto = Integer.parseInt(partes[1].trim());
+
+                if (esPM && hora < 12) {
+                    hora += 12;
+                } else if (esAM && hora == 12) {
+                    hora = 0;
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "No se pudo parsear hora: '" + horaStr + "', usando 08:00 AM");
+            hora = 8;
+            minuto = 0;
+        }
+        return new int[]{hora, minuto};
+    }
+
+    /**
+     * Programa una alarma exacta con AlarmManager para un hábito específico.
+     * Si la hora ya pasó hoy, se programa para mañana a la misma hora.
+     */
+    public static void programarAlarmaHabito(Context context, Habito habito) {
+        if (context == null || habito == null) return;
+
+        // Si el hábito tiene el recordatorio desactivado, cancelamos la alarma
+        if (!habito.isRecordatorioActivo()) {
+            cancelarAlarmaHabito(context, (int) habito.getId());
+            return;
+        }
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager == null) return;
+
+        int[] horaMinuto = parsearHoraMinuto(habito.getHoraRecordatorio());
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, horaMinuto[0]);
+        calendar.set(Calendar.MINUTE, horaMinuto[1]);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        // Si la hora ya pasó en el día de hoy, programar para mañana a la misma hora
+        if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        Intent intent = new Intent(context, HabitoReminderReceiver.class);
+        intent.putExtra(HabitoReminderReceiver.EXTRA_HABITO_ID, habito.getId());
+        intent.putExtra(HabitoReminderReceiver.EXTRA_HABITO_NOMBRE, habito.getNombre());
+        intent.putExtra(HabitoReminderReceiver.EXTRA_TIPO_SONIDO, habito.getTipoSonidoNotificacion());
+        intent.putExtra(HabitoReminderReceiver.EXTRA_HORA, habito.getHoraRecordatorio());
+
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        int requestCode = (int) habito.getId();
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, flags);
+        long triggerTime = calendar.getTimeInMillis();
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                } else {
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            }
+            Log.d(TAG, "Alarma programada con éxito para hábito '" + habito.getNombre() + "' a las " + calendar.getTime());
+        } catch (SecurityException se) {
+            Log.w(TAG, "Sin permiso de alarma exacta; usando alarma aproximada: " + se.getMessage());
+            try {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            } catch (Exception ignored) {}
+        } catch (Exception e) {
+            Log.e(TAG, "Error programando alarma: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Cancela la alarma programada para un hábito.
+     */
+    public static void cancelarAlarmaHabito(Context context, int habitoId) {
+        if (context == null || habitoId <= 0) return;
+        try {
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            if (alarmManager == null) return;
+
+            Intent intent = new Intent(context, HabitoReminderReceiver.class);
+            int flags = PendingIntent.FLAG_NO_CREATE;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, habitoId, intent, flags);
+            if (pendingIntent != null) {
+                alarmManager.cancel(pendingIntent);
+                pendingIntent.cancel();
+                Log.d(TAG, "Alarma cancelada para hábito id=" + habitoId);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Error cancelando alarma id=" + habitoId + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Dispara una notificación real en el teléfono con el sonido seleccionado por el usuario.
+     */
+    public static void dispararNotificacionHabito(Context context, long habitoId, String nombreHabito, String tipoSonido) {
+        if (context == null) return;
+        inicializarCanales(context);
+
+        Intent intent = new Intent(context, InicioActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra("from_notification", true);
+        intent.putExtra("habito_id", habitoId);
+
+        int pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pendingFlags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+        int notifId = (int) (habitoId > 0 ? habitoId : System.currentTimeMillis() % 100000);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, notifId, intent, pendingFlags);
+
+        String channelId = CHANNEL_DEFAULT_ID;
+        Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        String mensaje = "Es momento de cumplir tu hábito: " + nombreHabito + " 🌿✨";
+        String detalle = "Tómate este instante para ti y mantén tu constancia activa.";
+
+        if (tipoSonido != null && tipoSonido.startsWith("custom:")) {
+            channelId = CHANNEL_CUSTOM_ID;
+            String ruta = tipoSonido.substring("custom:".length()).trim();
+            reproducirAudioPersonalizado(context, ruta);
+            detalle = "Música personalizada activa 🎵. ¡A por tu meta diaria!";
+        } else if ("relajante".equalsIgnoreCase(tipoSonido)) {
+            channelId = CHANNEL_MELODIA_ARMONICA_ID;
+            soundUri = getMelodiaRelajanteSoundUri(context);
+            reproducirMelodiaRelajantePreview(context);
+            detalle = "🎋 Melodía Armónica 528Hz: Respira hondo y cultiva tu bienestar.";
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("⏰ Recordatorio: " + nombreHabito)
+                .setContentText(mensaje)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .setBigContentTitle("⏰ Recordatorio: " + nombreHabito)
+                        .bigText(mensaje + "\n\n" + detalle))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setDefaults(NotificationCompat.DEFAULT_VIBRATE | NotificationCompat.DEFAULT_LIGHTS);
+
+        if (CHANNEL_DEFAULT_ID.equals(channelId) && soundUri != null) {
+            builder.setSound(soundUri);
+        }
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        try {
+            if (tienePermisoNotificaciones(context)) {
+                notificationManager.notify(notifId, builder.build());
+                Log.d(TAG, "Notificación disparada exitosamente para id=" + notifId + " con sonido=" + tipoSonido);
+            } else {
+                Log.w(TAG, "No se puede disparar notificación: Permiso POST_NOTIFICATIONS denegado");
+            }
+        } catch (SecurityException se) {
+            Log.e(TAG, "Permiso denegado al disparar notificación: " + se.getMessage());
+        } catch (Exception e) {
+            Log.e(TAG, "Error al disparar notificación: " + e.getMessage());
+        }
     }
 
     /**
@@ -194,11 +411,17 @@ public class NotificationHelper {
     public static void reproducirMelodiaRelajantePreview(Context context) {
         try {
             if (previewPlayer != null) {
+                try { previewPlayer.stop(); } catch (Exception ignored) {}
                 previewPlayer.release();
                 previewPlayer = null;
             }
             previewPlayer = MediaPlayer.create(context, R.raw.melodia_relajante);
             if (previewPlayer != null) {
+                AudioAttributes attr = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build();
+                previewPlayer.setAudioAttributes(attr);
                 previewPlayer.setOnCompletionListener(mp -> {
                     mp.release();
                     previewPlayer = null;
@@ -215,12 +438,20 @@ public class NotificationHelper {
     public static void reproducirAudioPersonalizado(Context context, String rutaArchivo) {
         try {
             if (previewPlayer != null) {
+                try { previewPlayer.stop(); } catch (Exception ignored) {}
                 previewPlayer.release();
                 previewPlayer = null;
             }
+            if (rutaArchivo == null || rutaArchivo.trim().isEmpty()) return;
+
             File f = new File(rutaArchivo);
             if (f.exists()) {
                 previewPlayer = new MediaPlayer();
+                AudioAttributes attr = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build();
+                previewPlayer.setAudioAttributes(attr);
                 previewPlayer.setDataSource(f.getAbsolutePath());
                 previewPlayer.prepare();
                 previewPlayer.setOnCompletionListener(mp -> {
@@ -228,6 +459,20 @@ public class NotificationHelper {
                     previewPlayer = null;
                 });
                 previewPlayer.start();
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
+     * Detiene cualquier reproducción de audio en curso.
+     */
+    public static void detenerAudio() {
+        try {
+            if (previewPlayer != null) {
+                try { previewPlayer.stop(); } catch (Exception ignored) {}
+                previewPlayer.release();
+                previewPlayer = null;
             }
         } catch (Exception ignored) {
         }

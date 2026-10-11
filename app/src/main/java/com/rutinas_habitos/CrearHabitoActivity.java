@@ -1,11 +1,14 @@
 package com.rutinas_habitos;
 
+import android.Manifest;
 import android.app.TimePickerDialog;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.text.Editable;
@@ -21,6 +24,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.content.ContextCompat;
 import com.google.android.material.button.MaterialButton;
 
 import java.io.File;
@@ -105,10 +109,31 @@ public class CrearHabitoActivity extends AppCompatActivity {
             }
     );
 
+    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            isGranted -> {
+                if (!isGranted) {
+                    Toast.makeText(this, "Permiso de notificación no concedido. Las alertas podrían no mostrarse.", Toast.LENGTH_LONG).show();
+                }
+            }
+    );
+
+    private void verificarPermisoNotificaciones() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crear_habito);
+
+        NotificationHelper.inicializarCanales(this);
+        verificarPermisoNotificaciones();
 
         dbHelper = DatabaseHelper.getInstance(this);
         sessionManager = new SessionManager(this);
@@ -272,6 +297,9 @@ public class CrearHabitoActivity extends AppCompatActivity {
         // Activación y Toggle de Recordatorio
         switchRecordatorio.setOnCheckedChangeListener((buttonView, isChecked) -> {
             actualizarEstadoRecordatorio(isChecked);
+            if (isChecked) {
+                verificarPermisoNotificaciones();
+            }
         });
 
         // Selector Interactivo de Hora de Notificación
@@ -837,6 +865,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
                 .setMessage("¿Estás seguro de que deseas eliminar este hábito? Perderás su registro y estadísticas.")
                 .setPositiveButton("Eliminar", (dialog, which) -> {
                     if (editHabitoId != -1) {
+                        NotificationHelper.cancelarAlarmaHabito(this, (int) editHabitoId);
                         dbHelper.eliminarHabito(editHabitoId);
                         Toast.makeText(this, "Hábito eliminado correctamente 🗑️", Toast.LENGTH_SHORT).show();
                         setResult(RESULT_OK);
@@ -894,6 +923,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
             habito.setId(editHabitoId);
             boolean actualizado = dbHelper.actualizarHabito(habito);
             if (actualizado) {
+                NotificationHelper.programarAlarmaHabito(this, habito);
                 Toast.makeText(this, "¡Hábito '" + nombre + "' actualizado con éxito! ✨", Toast.LENGTH_SHORT).show();
                 setResult(RESULT_OK);
                 finish();
@@ -903,6 +933,8 @@ public class CrearHabitoActivity extends AppCompatActivity {
         } else {
             long id = dbHelper.insertarHabito(habito);
             if (id != -1) {
+                habito.setId(id);
+                NotificationHelper.programarAlarmaHabito(this, habito);
                 Toast.makeText(this, "¡Hábito '" + nombre + "' guardado con éxito! 🌱", Toast.LENGTH_SHORT).show();
                 setResult(RESULT_OK);
                 finish();

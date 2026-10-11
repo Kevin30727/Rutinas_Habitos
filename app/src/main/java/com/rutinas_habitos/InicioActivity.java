@@ -5,6 +5,8 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
@@ -38,6 +40,22 @@ public class InicioActivity extends AppCompatActivity {
     private TextView tvPorcentajeHoy;
     private TextView tvContadorHabitosBadge;
 
+    // Burbuja de saludo del Panda Chibi y auto-desaparición a los 10 segundos
+    private View llBurbujaPandaNav;
+    private final Handler burbujaHandler = new Handler(Looper.getMainLooper());
+    private final Runnable ocultarBurbujaRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (llBurbujaPandaNav != null && llBurbujaPandaNav.getVisibility() == View.VISIBLE) {
+                llBurbujaPandaNav.animate()
+                        .alpha(0f)
+                        .setDuration(400)
+                        .withEndAction(() -> llBurbujaPandaNav.setVisibility(View.GONE))
+                        .start();
+            }
+        }
+    };
+
     private static final int[] IDS_NUM_DIA = {
             R.id.tv_num_dia_1, R.id.tv_num_dia_2, R.id.tv_num_dia_3,
             R.id.tv_num_dia_4, R.id.tv_num_dia_5, R.id.tv_num_dia_6, R.id.tv_num_dia_7
@@ -58,6 +76,8 @@ public class InicioActivity extends AppCompatActivity {
 
         dbHelper = DatabaseHelper.getInstance(this);
         sessionManager = new SessionManager(this);
+
+        NotificationHelper.inicializarCanales(this);
 
         initViews();
         setupPandaAvatars();
@@ -108,28 +128,8 @@ public class InicioActivity extends AppCompatActivity {
         }
 
         // Burbuja de Diálogo sobre el Panda en el navegador (según hora del día)
-        TextView tvSaludoBurbuja = findViewById(R.id.tv_saludo_burbuja_panda);
-        if (tvSaludoBurbuja != null) {
-            Calendar cal = Calendar.getInstance();
-            int hora = cal.get(Calendar.HOUR_OF_DAY);
-            String saludo;
-            if (hora >= 5 && hora < 12) {
-                saludo = "¡Buen día! ☀️";
-            } else if (hora >= 12 && hora < 19) {
-                saludo = "¡Buena tarde! ⛅";
-            } else {
-                saludo = "¡Buenas noches! 🌙";
-            }
-            tvSaludoBurbuja.setText(saludo);
-
-            View llBurbuja = findViewById(R.id.ll_burbuja_panda_nav);
-            if (llBurbuja != null) {
-                llBurbuja.setOnClickListener(v -> {
-                    Intent intent = new Intent(InicioActivity.this, AsistentePandaActivity.class);
-                    startActivity(intent);
-                });
-            }
-        }
+        llBurbujaPandaNav = findViewById(R.id.ll_burbuja_panda_nav);
+        actualizarYMostrarBurbujaPanda();
 
         // Floating Action Button
         FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito);
@@ -180,6 +180,7 @@ public class InicioActivity extends AppCompatActivity {
         }
 
         setupPandaAvatars();
+        actualizarYMostrarBurbujaPanda();
         cargarHabitosDesdeSQLite(userId);
 
         // Aplicar paleta activa de colores al FloatingActionButton
@@ -187,6 +188,56 @@ public class InicioActivity extends AppCompatActivity {
         if (fab != null) {
             fab.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(this)));
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (burbujaHandler != null) {
+            burbujaHandler.removeCallbacks(ocultarBurbujaRunnable);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (burbujaHandler != null) {
+            burbujaHandler.removeCallbacks(ocultarBurbujaRunnable);
+        }
+    }
+
+    /**
+     * Muestra la burbuja de diálogo sobre el Panda Chibi con un saludo dinámico según la hora.
+     * La burbuja permanece visible durante exactamente 10 segundos (10,000 ms) y luego desaparece suavemente.
+     */
+    private void actualizarYMostrarBurbujaPanda() {
+        if (llBurbujaPandaNav == null) return;
+
+        TextView tvSaludoBurbuja = findViewById(R.id.tv_saludo_burbuja_panda);
+        if (tvSaludoBurbuja != null) {
+            Calendar cal = Calendar.getInstance();
+            int hora = cal.get(Calendar.HOUR_OF_DAY);
+            String saludo;
+            if (hora >= 5 && hora < 12) {
+                saludo = "¡Buen día! ☀️";
+            } else if (hora >= 12 && hora < 19) {
+                saludo = "¡Buena tarde! ⛅";
+            } else {
+                saludo = "¡Buenas noches! 🌙";
+            }
+            tvSaludoBurbuja.setText(saludo);
+        }
+
+        llBurbujaPandaNav.setAlpha(1f);
+        llBurbujaPandaNav.setVisibility(View.VISIBLE);
+        llBurbujaPandaNav.setOnClickListener(v -> {
+            Intent intent = new Intent(InicioActivity.this, AsistentePandaActivity.class);
+            startActivity(intent);
+        });
+
+        // Temporizador de 10 segundos para desvanecer la burbuja
+        burbujaHandler.removeCallbacks(ocultarBurbujaRunnable);
+        burbujaHandler.postDelayed(ocultarBurbujaRunnable, 10000);
     }
 
     private void configurarNavegacion() {

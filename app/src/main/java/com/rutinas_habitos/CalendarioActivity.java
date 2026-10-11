@@ -17,6 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class CalendarioActivity extends AppCompatActivity {
@@ -25,26 +26,157 @@ public class CalendarioActivity extends AppCompatActivity {
     private final Locale idioma = new Locale("es", "ES");
     private TextView tvFechaSeleccionada;
     private TextView tvMesCalendario;
+    private TextView tvContadorHabitos;
     private GridLayout grid;
+    private LinearLayout llContenedorHabitos;
+    private LinearLayout llEstadoVacio;
     private int diaSeleccionadoActual = -1;
+
+    private DatabaseHelper dbHelper;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendario);
 
+        dbHelper = DatabaseHelper.getInstance(this);
+        sessionManager = new SessionManager(this);
+
         calActual = Calendar.getInstance();
         diaSeleccionadoActual = calActual.get(Calendar.DAY_OF_MONTH);
 
         tvFechaSeleccionada = findViewById(R.id.tv_fecha_seleccionada);
         tvMesCalendario = findViewById(R.id.tv_mes_calendario);
+        tvContadorHabitos = findViewById(R.id.tv_contador_habitos_cal);
         grid = findViewById(R.id.grid_calendario_dinamico);
+        llContenedorHabitos = findViewById(R.id.ll_contenedor_habitos_calendario);
+        llEstadoVacio = findViewById(R.id.ll_estado_vacio_calendario);
 
         actualizarCabeceraFecha(calActual.get(Calendar.DAY_OF_MONTH));
         generarCalendarioMes();
         setupControlesMes();
         configurarSelectoresVista();
         setupNavegacion();
+        cargarHabitosDelDia();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cargarHabitosDelDia();
+    }
+
+    private void cargarHabitosDelDia() {
+        if (llContenedorHabitos == null) return;
+        llContenedorHabitos.removeAllViews();
+
+        long userId = sessionManager.getUserId();
+        if (userId <= 0) userId = 1;
+
+        List<Habito> habitos = dbHelper.obtenerHabitosPorUsuario(userId);
+
+        if (habitos == null || habitos.isEmpty()) {
+            if (llEstadoVacio != null) llEstadoVacio.setVisibility(View.VISIBLE);
+            if (tvContadorHabitos != null) tvContadorHabitos.setText("0/0 Completados");
+            return;
+        }
+
+        if (llEstadoVacio != null) llEstadoVacio.setVisibility(View.GONE);
+
+        int completados = 0;
+        for (Habito h : habitos) {
+            if (h.isCompletadoHoy()) completados++;
+            View card = crearTarjetaHabito(h);
+            llContenedorHabitos.addView(card);
+        }
+
+        if (tvContadorHabitos != null) {
+            tvContadorHabitos.setText(completados + "/" + habitos.size() + " Completados");
+        }
+    }
+
+    private View crearTarjetaHabito(Habito h) {
+        LinearLayout row = new LinearLayout(this);
+        row.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(dpToPx(12), dpToPx(12), dpToPx(12), dpToPx(12));
+        row.setBackgroundResource(R.drawable.bg_tarjeta_redondeada);
+        row.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F6F5FA")));
+
+        LinearLayout.LayoutParams marginParams = (LinearLayout.LayoutParams) row.getLayoutParams();
+        marginParams.bottomMargin = dpToPx(10);
+        row.setLayoutParams(marginParams);
+
+        // Checkbox circular interactivo
+        ImageView ivCheck = new ImageView(this);
+        int checkSize = dpToPx(32);
+        ivCheck.setLayoutParams(new LinearLayout.LayoutParams(checkSize, checkSize));
+        ivCheck.setBackgroundResource(R.drawable.bg_circulo);
+
+        boolean completado = h.isCompletadoHoy();
+        if (completado) {
+            ivCheck.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#B8E0D2")));
+            ivCheck.setImageResource(R.drawable.ic_check);
+        } else {
+            ivCheck.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#E4E7EB")));
+            ivCheck.setImageDrawable(null);
+        }
+        ivCheck.setPadding(dpToPx(7), dpToPx(7), dpToPx(7), dpToPx(7));
+
+        // Títulos
+        LinearLayout textLayout = new LinearLayout(this);
+        textLayout.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams lpText = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
+        lpText.setMarginStart(dpToPx(12));
+        textLayout.setLayoutParams(lpText);
+
+        TextView tvTitulo = new TextView(this);
+        tvTitulo.setText(h.getNombre());
+        tvTitulo.setTextColor(Color.parseColor("#2D3142"));
+        tvTitulo.setTextSize(14f);
+        tvTitulo.setTypeface(null, android.graphics.Typeface.BOLD);
+        textLayout.addView(tvTitulo);
+
+        TextView tvSubtitulo = new TextView(this);
+        String estadoTexto = completado ? "✓ Completado" : "Pendiente";
+        if (h.getHoraRecordatorio() != null && !h.getHoraRecordatorio().isEmpty()) {
+            estadoTexto += " • " + h.getHoraRecordatorio();
+        }
+        tvSubtitulo.setText(estadoTexto);
+        tvSubtitulo.setTextColor(Color.parseColor("#8D909F"));
+        tvSubtitulo.setTextSize(12f);
+        textLayout.addView(tvSubtitulo);
+
+        // Emoji / Icono decorativo de área
+        TextView tvEmoji = new TextView(this);
+        String emoji = "🌱";
+        if ("Salud".equalsIgnoreCase(h.getAreaVida())) emoji = "💧";
+        else if ("Mente".equalsIgnoreCase(h.getAreaVida())) emoji = "📖";
+        else if ("Cuerpo".equalsIgnoreCase(h.getAreaVida())) emoji = "🧘";
+        else if ("Descanso".equalsIgnoreCase(h.getAreaVida())) emoji = "🌙";
+        else if ("Foco".equalsIgnoreCase(h.getAreaVida())) emoji = "🎯";
+        tvEmoji.setText(emoji);
+        tvEmoji.setTextSize(16f);
+
+        // Listener para togglear estado en SQLite
+        row.setOnClickListener(v -> {
+            boolean nuevoEstado = !h.isCompletadoHoy();
+            h.setCompletadoHoy(nuevoEstado);
+            dbHelper.toggleHabitoCompletado(h.getId(), nuevoEstado);
+            cargarHabitosDelDia();
+            String msg = nuevoEstado ? "¡Hábito cumplido! 🌱✨" : "Hábito marcado como pendiente";
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        });
+
+        row.addView(ivCheck);
+        row.addView(textLayout);
+        row.addView(tvEmoji);
+        return row;
     }
 
     private void setupControlesMes() {
@@ -57,6 +189,7 @@ public class CalendarioActivity extends AppCompatActivity {
                 diaSeleccionadoActual = 1;
                 actualizarCabeceraFecha(diaSeleccionadoActual);
                 generarCalendarioMes();
+                cargarHabitosDelDia();
             });
         }
 
@@ -66,6 +199,7 @@ public class CalendarioActivity extends AppCompatActivity {
                 diaSeleccionadoActual = 1;
                 actualizarCabeceraFecha(diaSeleccionadoActual);
                 generarCalendarioMes();
+                cargarHabitosDelDia();
             });
         }
     }
@@ -210,18 +344,12 @@ public class CalendarioActivity extends AppCompatActivity {
                 int dia = i - espaciosVacios + 1;
                 tvNum.setText(String.valueOf(dia));
 
-                // Indicador visual de cumplimiento de hábitos
-                if (dia % 4 == 0) {
-                    punto.setBackgroundResource(R.drawable.bg_punto_pendiente);
-                } else if (dia % 3 == 0) {
-                    punto.setBackgroundResource(R.drawable.bg_punto_parcial);
-                } else {
-                    punto.setBackgroundResource(R.drawable.bg_punto_completo);
-                }
-
+                // Indicador visual dinámico
                 if (dia == diaSeleccionadoActual) {
                     tvNum.setBackgroundResource(R.drawable.bg_dia_seleccionado_calendario);
                     tvNum.setTypeface(null, android.graphics.Typeface.BOLD);
+                } else {
+                    punto.setBackgroundResource(R.drawable.bg_punto_completo);
                 }
 
                 // Interactividad al tocar un día
@@ -230,6 +358,7 @@ public class CalendarioActivity extends AppCompatActivity {
                     diaSeleccionadoActual = diaTocado;
                     actualizarCabeceraFecha(diaTocado);
                     generarCalendarioMes();
+                    cargarHabitosDelDia();
                 });
             } else {
                 tvNum.setVisibility(View.INVISIBLE);

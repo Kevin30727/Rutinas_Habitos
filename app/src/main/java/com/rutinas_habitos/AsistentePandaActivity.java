@@ -63,6 +63,26 @@ public class AsistentePandaActivity extends AppCompatActivity {
         if (btnSaltar != null) {
             btnSaltar.setOnClickListener(v -> irAInicio());
         }
+
+        // Cargar GIF animado para el avatar del Panda si está presente en res/drawable
+        ImageView ivAvatarPanda = findViewById(R.id.iv_avatar_panda);
+        if (ivAvatarPanda != null) {
+            int gifId = getResources().getIdentifier("panda_animado", "drawable", getPackageName());
+            if (gifId == 0) {
+                gifId = getResources().getIdentifier("asistente_panda", "drawable", getPackageName());
+            }
+            if (gifId == 0) {
+                gifId = getResources().getIdentifier("panda_gif", "drawable", getPackageName());
+            }
+
+            if (gifId != 0) {
+                com.bumptech.glide.Glide.with(this)
+                        .asGif()
+                        .load(gifId)
+                        .fitCenter()
+                        .into(ivAvatarPanda);
+            }
+        }
     }
 
     private void setupListeners() {
@@ -133,18 +153,22 @@ public class AsistentePandaActivity extends AppCompatActivity {
             tvSugerenciaContextual.setVisibility(View.GONE);
         }
 
-        // 3. Renderizado dinámico de todas las rutinas acumuladas
+        // 3. Renderizado dinámico de rutinas si existen sugerencias
         llRutinasAcumuladasContainer.removeAllViews();
-        for (AsistenteMotor.RutinaPropuesta r : rutinasPropuestasActuales) {
-            View itemRutina = crearItemRutinaView(r);
-            llRutinasAcumuladasContainer.addView(itemRutina);
+        if (rutinasPropuestasActuales != null && !rutinasPropuestasActuales.isEmpty()) {
+            for (AsistenteMotor.RutinaPropuesta r : rutinasPropuestasActuales) {
+                View itemRutina = crearItemRutinaView(r);
+                llRutinasAcumuladasContainer.addView(itemRutina);
+            }
+
+            btnAceptarPropuesta.setText(rutinasPropuestasActuales.size() > 1
+                    ? "✓ Aceptar " + rutinasPropuestasActuales.size() + " rutinas y empezar 🌱"
+                    : "✓ Aceptar hábito y empezar 🌱");
+
+            cardPropuesta.setVisibility(View.VISIBLE);
+        } else {
+            cardPropuesta.setVisibility(View.GONE);
         }
-
-        btnAceptarPropuesta.setText(rutinasPropuestasActuales.size() > 1
-                ? "✓ Aceptar " + rutinasPropuestasActuales.size() + " rutinas y empezar 🌱"
-                : "✓ Aceptar hábito y empezar 🌱");
-
-        cardPropuesta.setVisibility(View.VISIBLE);
     }
 
     private View crearItemRutinaView(AsistenteMotor.RutinaPropuesta r) {

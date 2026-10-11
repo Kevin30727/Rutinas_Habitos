@@ -1,16 +1,35 @@
 package com.rutinas_habitos;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.ImageView;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 
+/**
+ * SplashActivity optimizada:
+ * 1. Reproduce el GIF completo (setLoopCount = 1) y navega exactamente cuando concluye la animación.
+ * 2. Carga optimizada con hardware y formato RGB_565 para eliminar el lag o tirones de framerate.
+ * 3. Fallback con temporizador seguro por si la carga o animación falla.
+ */
 public class SplashActivity extends AppCompatActivity {
 
-    private static final int SPLASH_DURATION = 2500; // 2.5 segundos para mostrar el GIF
+    private boolean yaNavego = false;
+    private final Handler timeoutHandler = new Handler(Looper.getMainLooper());
+    private Runnable timeoutRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,33 +38,81 @@ public class SplashActivity extends AppCompatActivity {
 
         ImageView ivSplashGif = findViewById(R.id.iv_splash_gif);
 
-        // Cargar el GIF animado usando Glide garantizando reproducción sin distorsión
+        // Fallback de seguridad: Si el GIF tarda más de 6 segundos o no responde el callback, avanza
+        timeoutRunnable = () -> navegarSiguientePantalla();
+        timeoutHandler.postDelayed(timeoutRunnable, 6000);
+
         try {
             int gifResourceId = getResources().getIdentifier("splash_logo", "drawable", getPackageName());
             if (gifResourceId != 0) {
                 Glide.with(this)
                         .asGif()
                         .load(gifResourceId)
-                        .fitCenter()
+                        .apply(new RequestOptions()
+                                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                                .format(DecodeFormat.PREFER_RGB_565)) // Optimización para reproducción suave sin lag
+                        .centerCrop()
+                        .listener(new RequestListener<GifDrawable>() {
+                            @Override
+                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<GifDrawable> target, boolean isFirstResource) {
+                                // Si falla la carga, avanzar sin bloquear al usuario
+                                timeoutHandler.removeCallbacks(timeoutRunnable);
+                                navegarSiguientePantalla();
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(GifDrawable resource, Object model, Target<GifDrawable> target, DataSource dataSource, boolean isFirstResource) {
+                                // Configurar exactamente 1 ciclo completo del GIF para no cortar su duración
+                                resource.setLoopCount(1);
+                                resource.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
+                                    @Override
+                                    public void onAnimationEnd(Drawable drawable) {
+                                        // Navegar al concluir la animación completa
+                                        timeoutHandler.removeCallbacks(timeoutRunnable);
+                                        navegarSiguientePantalla();
+                                    }
+                                });
+                                return false;
+                            }
+                        })
                         .into(ivSplashGif);
+            } else {
+                navegarSiguientePantalla();
             }
         } catch (Exception e) {
             e.printStackTrace();
+            navegarSiguientePantalla();
+        }
+    }
+
+    private synchronized void navegarSiguientePantalla() {
+        if (yaNavego) return;
+        yaNavego = true;
+
+        if (timeoutHandler != null && timeoutRunnable != null) {
+            timeoutHandler.removeCallbacks(timeoutRunnable);
         }
 
-        // Navegar después de la animación
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            SessionManager sessionManager = new SessionManager(SplashActivity.this);
-            Intent intent;
+        SessionManager sessionManager = new SessionManager(SplashActivity.this);
+        Intent intent;
 
-            if (sessionManager.estaAutenticado()) {
-                intent = new Intent(SplashActivity.this, InicioActivity.class);
-            } else {
-                intent = new Intent(SplashActivity.this, LoginActivity.class);
-            }
+        if (sessionManager.estaAutenticado()) {
+            intent = new Intent(SplashActivity.this, InicioActivity.class);
+        } else {
+            intent = new Intent(SplashActivity.this, LoginActivity.class);
+        }
 
-            startActivity(intent);
-            finish();
-        }, SPLASH_DURATION);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (timeoutHandler != null && timeoutRunnable != null) {
+            timeoutHandler.removeCallbacks(timeoutRunnable);
+        }
     }
 }

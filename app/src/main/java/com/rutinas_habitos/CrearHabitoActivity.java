@@ -75,6 +75,15 @@ public class CrearHabitoActivity extends AppCompatActivity {
     private TextView tvNombreTonoCustomActual;
     private MaterialButton btnElegirTonoCustom;
 
+    // Selector de Duración de Sonido / Música
+    private TextView tvDuracionMusicaSeleccionada;
+    private TextView chipDuracion10s;
+    private TextView chipDuracion30s;
+    private TextView chipDuracion1m;
+    private TextView chipDuracion3m;
+    private TextView chipDuracion5m;
+    private int duracionSonidoSeleccionada = 30; // 10, 30, 60, 180, 300 segundos
+
     // Botones de Frecuencia y Meta
     private TextView btnFrecDiario;
     private TextView btnFrecFlexible;
@@ -186,6 +195,13 @@ public class CrearHabitoActivity extends AppCompatActivity {
         llCompartimentoTonoCustom = findViewById(R.id.ll_compartimento_tono_custom);
         tvNombreTonoCustomActual = findViewById(R.id.tv_nombre_tono_custom_actual);
         btnElegirTonoCustom = findViewById(R.id.btn_elegir_tono_custom);
+
+        tvDuracionMusicaSeleccionada = findViewById(R.id.tv_duracion_musica_seleccionada);
+        chipDuracion10s = findViewById(R.id.chip_duracion_10s);
+        chipDuracion30s = findViewById(R.id.chip_duracion_30s);
+        chipDuracion1m = findViewById(R.id.chip_duracion_1m);
+        chipDuracion3m = findViewById(R.id.chip_duracion_3m);
+        chipDuracion5m = findViewById(R.id.chip_duracion_5m);
 
         btnFrecDiario = findViewById(R.id.btn_frec_diario);
         btnFrecFlexible = findViewById(R.id.btn_frec_flexible);
@@ -336,6 +352,13 @@ public class CrearHabitoActivity extends AppCompatActivity {
         });
 
         btnElegirTonoCustom.setOnClickListener(v -> mostrarDialogoSeleccionarTono());
+
+        // Selector de Duración de Sonido / Música
+        if (chipDuracion10s != null) chipDuracion10s.setOnClickListener(v -> setDuracionSonido(10));
+        if (chipDuracion30s != null) chipDuracion30s.setOnClickListener(v -> setDuracionSonido(30));
+        if (chipDuracion1m != null) chipDuracion1m.setOnClickListener(v -> setDuracionSonido(60));
+        if (chipDuracion3m != null) chipDuracion3m.setOnClickListener(v -> setDuracionSonido(180));
+        if (chipDuracion5m != null) chipDuracion5m.setOnClickListener(v -> setDuracionSonido(300));
 
         // Previsualizar el audio seleccionado
         btnPreviewSonidoHabito.setOnClickListener(v -> previsualizarAudio());
@@ -535,6 +558,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
         } else {
             tipoSonidoSeleccionado = "default";
         }
+        setDuracionSonido(h.getDuracionSonidoSegundos());
 
         // Sincronizar UI
         actualizarVistaIcono();
@@ -668,6 +692,39 @@ public class CrearHabitoActivity extends AppCompatActivity {
             btnSonidoDefault.setBackgroundResource(R.drawable.bg_chip_seleccionado);
             btnSonidoDefault.setTextColor(Color.parseColor("#2D3142"));
             llCompartimentoTonoCustom.setVisibility(View.GONE);
+        }
+    }
+
+    private void setDuracionSonido(int segundos) {
+        this.duracionSonidoSeleccionada = segundos;
+        if (tvDuracionMusicaSeleccionada != null) {
+            String etiqueta = "30 seg";
+            if (segundos == 10) etiqueta = "10 seg";
+            else if (segundos == 30) etiqueta = "30 seg";
+            else if (segundos == 60) etiqueta = "1 min";
+            else if (segundos == 180) etiqueta = "3 min";
+            else if (segundos == 300) etiqueta = "5 min";
+            tvDuracionMusicaSeleccionada.setText(etiqueta);
+        }
+
+        TextView[] chips = {chipDuracion10s, chipDuracion30s, chipDuracion1m, chipDuracion3m, chipDuracion5m};
+        for (TextView c : chips) {
+            if (c != null) {
+                c.setBackgroundResource(R.drawable.bg_chip_normal);
+                c.setTextColor(Color.parseColor("#8D909F"));
+            }
+        }
+
+        TextView seleccionado = chipDuracion30s;
+        if (segundos == 10) seleccionado = chipDuracion10s;
+        else if (segundos == 30) seleccionado = chipDuracion30s;
+        else if (segundos == 60) seleccionado = chipDuracion1m;
+        else if (segundos == 180) seleccionado = chipDuracion3m;
+        else if (segundos == 300) seleccionado = chipDuracion5m;
+
+        if (seleccionado != null) {
+            seleccionado.setBackgroundResource(R.drawable.bg_chip_seleccionado);
+            seleccionado.setTextColor(Color.parseColor("#2D3142"));
         }
     }
 
@@ -852,6 +909,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
         unidadSeleccionada = "minutos";
         tipoSonidoSeleccionado = "default";
         actualizarVistaSonido();
+        setDuracionSonido(30);
         setHora("08:00 AM");
         switchRecordatorio.setChecked(true);
         actualizarEstadoRecordatorio(true);
@@ -918,6 +976,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
         habito.setHoraRecordatorio(horaRecordatorio);
         habito.setRecordatorioActivo(switchRecordatorio.isChecked());
         habito.setTipoSonidoNotificacion(tipoSonidoSeleccionado);
+        habito.setDuracionSonidoSegundos(duracionSonidoSeleccionada);
 
         if (editHabitoId != -1) {
             habito.setId(editHabitoId);

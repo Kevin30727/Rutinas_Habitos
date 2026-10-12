@@ -943,6 +943,128 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- 7.2 Selector de Duración de Sonido / Música de la Notificación -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:backgroundTint="#F8F9FB"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="6dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Duración de la Alarma / Música"
+                        android:textColor="@color/neutral"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_duracion_musica_seleccionada"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="30 seg"
+                        android:textColor="@color/green_soft"
+                        android:textSize="12.5sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tiempo que sonará el recordatorio antes de silenciarse:"
+                    android:textColor="@color/text_muted"
+                    android:textSize="11.5sp"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="5">
+
+                    <TextView
+                        android:id="@+id/chip_duracion_10s"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="10 seg"
+                        android:textColor="@color/text_muted"
+                        android:textSize="11.5sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_normal"
+                        android:paddingVertical="9dp"
+                        android:layout_marginEnd="3dp" />
+
+                    <TextView
+                        android:id="@+id/chip_duracion_30s"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="30 seg"
+                        android:textColor="@color/neutral"
+                        android:textSize="11.5sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_seleccionado"
+                        android:paddingVertical="9dp"
+                        android:layout_marginHorizontal="2dp" />
+
+                    <TextView
+                        android:id="@+id/chip_duracion_1m"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="1 min"
+                        android:textColor="@color/text_muted"
+                        android:textSize="11.5sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_normal"
+                        android:paddingVertical="9dp"
+                        android:layout_marginHorizontal="2dp" />
+
+                    <TextView
+                        android:id="@+id/chip_duracion_3m"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="3 min"
+                        android:textColor="@color/text_muted"
+                        android:textSize="11.5sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_normal"
+                        android:paddingVertical="9dp"
+                        android:layout_marginHorizontal="2dp" />
+
+                    <TextView
+                        android:id="@+id/chip_duracion_5m"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="5 min"
+                        android:textColor="@color/text_muted"
+                        android:textSize="11.5sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_normal"
+                        android:paddingVertical="9dp"
+                        android:layout_marginStart="3dp" />
+                </LinearLayout>
+            </LinearLayout>
+
             <!-- 8. Tarjeta Motivacional Rosa -->
             <LinearLayout
                 android:layout_width="match_parent"

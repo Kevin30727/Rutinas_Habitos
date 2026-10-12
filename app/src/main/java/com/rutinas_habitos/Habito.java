@@ -16,6 +16,7 @@ public class Habito {
     private String horaRecordatorio; // "08:00 AM"
     private boolean recordatorioActivo;
     private String tipoSonidoNotificacion; // "default", "relajante" o custom URI
+    private int duracionSonidoSegundos; // 10, 30, 60, 180, 300 segundos
     private int rachaDias;
     private boolean completadoHoy;
     private int progresoActual;
@@ -33,6 +34,7 @@ public class Habito {
         this.horaRecordatorio = "08:00 AM";
         this.recordatorioActivo = true;
         this.tipoSonidoNotificacion = "default";
+        this.duracionSonidoSegundos = 30; // 30 seg por defecto
         this.rachaDias = 0;
         this.completadoHoy = false;
         this.progresoActual = 0;
@@ -97,5 +99,12 @@ public class Habito {
     }
     public void setTipoSonidoNotificacion(String tipoSonidoNotificacion) {
         this.tipoSonidoNotificacion = tipoSonidoNotificacion;
+    }
+
+    public int getDuracionSonidoSegundos() {
+        return duracionSonidoSegundos > 0 ? duracionSonidoSegundos : 30;
+    }
+    public void setDuracionSonidoSegundos(int duracionSonidoSegundos) {
+        this.duracionSonidoSegundos = duracionSonidoSegundos;
     }
 }

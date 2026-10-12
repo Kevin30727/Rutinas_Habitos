@@ -66,6 +66,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_HAB_PROGRESO = "progreso_actual";
     public static final String COL_HAB_FECHA_CREACION = "fecha_creacion";
     public static final String COL_HAB_SONIDO = "tipo_sonido";
+    public static final String COL_HAB_DURACION_SONIDO = "duracion_sonido";
 
     // 4. Tabla RegistroDiario
     public static final String TABLE_REGISTRO_DIARIO = "RegistroDiario";
@@ -153,6 +154,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_HAB_PROGRESO + " INTEGER DEFAULT 0, " +
                 COL_HAB_FECHA_CREACION + " TEXT NOT NULL, " +
                 COL_HAB_SONIDO + " TEXT DEFAULT 'default', " +
+                COL_HAB_DURACION_SONIDO + " INTEGER DEFAULT 30, " +
                 "FOREIGN KEY(" + COL_HAB_USUARIO_ID + ") REFERENCES " + TABLE_USUARIO + "(" + COL_USER_ID + ") ON DELETE CASCADE" +
                 ");";
 
@@ -190,6 +192,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         super.onOpen(db);
         try {
             db.execSQL("ALTER TABLE " + TABLE_HABITO + " ADD COLUMN " + COL_HAB_SONIDO + " TEXT DEFAULT 'default'");
+        } catch (Exception ignored) {
+        }
+        try {
+            db.execSQL("ALTER TABLE " + TABLE_HABITO + " ADD COLUMN " + COL_HAB_DURACION_SONIDO + " INTEGER DEFAULT 30");
         } catch (Exception ignored) {
         }
         try {
@@ -386,6 +392,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(COL_HAB_COMPLETADO, habito.isCompletadoHoy() ? 1 : 0);
         cv.put(COL_HAB_PROGRESO, habito.getProgresoActual());
         cv.put(COL_HAB_SONIDO, habito.getTipoSonidoNotificacion());
+        cv.put(COL_HAB_DURACION_SONIDO, habito.getDuracionSonidoSegundos());
 
         if (habito.getFechaCreacion() == null) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -429,6 +436,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     if (colSonido != -1) {
                         h.setTipoSonidoNotificacion(cursor.getString(colSonido));
                     }
+                    int colDur = cursor.getColumnIndex(COL_HAB_DURACION_SONIDO);
+                    if (colDur != -1 && !cursor.isNull(colDur)) {
+                        h.setDuracionSonidoSegundos(cursor.getInt(colDur));
+                    }
                 } catch (Exception ignored) {}
                 lista.add(h);
             } while (cursor.moveToNext());
@@ -467,6 +478,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (colSonido != -1) {
                     h.setTipoSonidoNotificacion(cursor.getString(colSonido));
                 }
+                int colDur = cursor.getColumnIndex(COL_HAB_DURACION_SONIDO);
+                if (colDur != -1 && !cursor.isNull(colDur)) {
+                    h.setDuracionSonidoSegundos(cursor.getInt(colDur));
+                }
             } catch (Exception ignored) {}
         }
         cursor.close();
@@ -489,6 +504,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(COL_HAB_HORA, habito.getHoraRecordatorio());
         cv.put(COL_HAB_RECORDATORIO, habito.isRecordatorioActivo() ? 1 : 0);
         cv.put(COL_HAB_SONIDO, habito.getTipoSonidoNotificacion());
+        cv.put(COL_HAB_DURACION_SONIDO, habito.getDuracionSonidoSegundos());
         int rows = db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habito.getId())});
         return rows > 0;
     }

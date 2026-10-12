@@ -87,6 +87,10 @@ public class InicioActivity extends AppCompatActivity {
         long userId = sessionManager.getUserId();
         if (userId <= 0) userId = 1;
         cargarHabitosDesdeSQLite(userId);
+
+        if (getIntent() != null && getIntent().getBooleanExtra("from_notification", false)) {
+            NotificationHelper.detenerAudio();
+        }
     }
 
     private void initViews() {
@@ -187,6 +191,19 @@ public class InicioActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito);
         if (fab != null) {
             fab.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(this)));
+        }
+
+        if (getIntent() != null && getIntent().getBooleanExtra("from_notification", false)) {
+            NotificationHelper.detenerAudio();
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (intent != null && intent.getBooleanExtra("from_notification", false)) {
+            NotificationHelper.detenerAudio();
         }
     }
 

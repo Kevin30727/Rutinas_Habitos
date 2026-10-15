@@ -5,9 +5,9 @@ public class Habito {
     private long usuarioId;
     private String nombre;
     private String descripcion;
-    private String icono; // "meditacion", "agua", "lectura", "ejercicio", "comida", "sueno", "corazon", "finanzas"
+    private String icono; // "meditacion", "agua", "lectura", "ejercicio", "comida", "sueno", "corazon", "sol"
     private String color; // hex string e.g. "#B8E0D2"
-    private String areaVida; // "Salud", "Mente", "Foco", "Finanzas"
+    private String areaVida; // "Salud", "Mente", "Foco"
     private String tipoFrecuencia; // "Diario", "Flexible"
     private String diasSemana; // "L,M,M,J,V,S"
     private String tipoMeta; // "simple", "cantidad"

@@ -29,8 +29,8 @@ public class HabitosActivity extends AppCompatActivity {
     private LinearLayout llListaHabitosEstrella;
     private LinearLayout llEstadoVacio;
 
-    private TextView tvPctSalud, tvPctMente, tvPctFinanzas, tvPctProductividad;
-    private ProgressBar pbSalud, pbMente, pbFinanzas, pbProductividad;
+    private TextView tvPctSalud, tvPctMente, tvPctProductividad;
+    private ProgressBar pbSalud, pbMente, pbProductividad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +71,6 @@ public class HabitosActivity extends AppCompatActivity {
 
         tvPctMente = findViewById(R.id.tv_pct_mente);
         pbMente = findViewById(R.id.pb_mente);
-
-        tvPctFinanzas = findViewById(R.id.tv_pct_finanzas);
-        pbFinanzas = findViewById(R.id.pb_finanzas);
 
         tvPctProductividad = findViewById(R.id.tv_pct_productividad);
         pbProductividad = findViewById(R.id.pb_productividad);
@@ -120,14 +117,13 @@ public class HabitosActivity extends AppCompatActivity {
             }
         }
 
-        // 4. Métricas por Áreas de Vida (Salud, Mente, Finanzas, Productividad)
+        // 4. Métricas por Áreas de Vida (Salud, Mente, Productividad)
         calcularMetricasPorAreas(lista);
     }
 
     private void calcularMetricasPorAreas(List<Habito> lista) {
         int totSalud = 0, compSalud = 0;
         int totMente = 0, compMente = 0;
-        int totFinanzas = 0, compFinanzas = 0;
         int totProd = 0, compProd = 0;
 
         if (lista != null) {
@@ -141,9 +137,6 @@ public class HabitosActivity extends AppCompatActivity {
                 } else if (area.contains("mente") || area.contains("bienestar") || area.contains("calma")) {
                     totMente++;
                     if (comp) compMente++;
-                } else if (area.contains("finanz") || area.contains("dinero")) {
-                    totFinanzas++;
-                    if (comp) compFinanzas++;
                 } else if (area.contains("foco") || area.contains("productiv")) {
                     totProd++;
                     if (comp) compProd++;
@@ -153,7 +146,6 @@ public class HabitosActivity extends AppCompatActivity {
 
         int pSalud = totSalud > 0 ? (compSalud * 100 / totSalud) : (totSalud > 0 ? 0 : 50);
         int pMente = totMente > 0 ? (compMente * 100 / totMente) : (totMente > 0 ? 0 : 50);
-        int pFinanzas = totFinanzas > 0 ? (compFinanzas * 100 / totFinanzas) : (totFinanzas > 0 ? 0 : 50);
         int pProd = totProd > 0 ? (compProd * 100 / totProd) : (totProd > 0 ? 0 : 50);
 
         if (tvPctSalud != null) tvPctSalud.setText(pSalud + "%");
@@ -161,9 +153,6 @@ public class HabitosActivity extends AppCompatActivity {
 
         if (tvPctMente != null) tvPctMente.setText(pMente + "%");
         if (pbMente != null) pbMente.setProgress(pMente);
-
-        if (tvPctFinanzas != null) tvPctFinanzas.setText(pFinanzas + "%");
-        if (pbFinanzas != null) pbFinanzas.setProgress(pFinanzas);
 
         if (tvPctProductividad != null) tvPctProductividad.setText(pProd + "%");
         if (pbProductividad != null) pbProductividad.setProgress(pProd);
@@ -201,9 +190,10 @@ public class HabitosActivity extends AppCompatActivity {
         if ("agua".equals(h.getIcono())) iconRes = R.drawable.ic_agua;
         else if ("lectura".equals(h.getIcono())) iconRes = R.drawable.ic_lectura;
         else if ("ejercicio".equals(h.getIcono())) iconRes = R.drawable.ic_ejercicio;
+        else if ("comida".equals(h.getIcono())) iconRes = R.drawable.ic_comida;
         else if ("noche".equals(h.getIcono())) iconRes = R.drawable.ic_noche;
         else if ("corazon".equals(h.getIcono())) iconRes = R.drawable.ic_corazon;
-        else if ("finanzas".equals(h.getIcono())) iconRes = R.drawable.ic_finanzas;
+        else if ("sol".equals(h.getIcono())) iconRes = R.drawable.ic_sun;
 
         iv.setImageResource(iconRes);
         iv.setPadding(dpToPx(11), dpToPx(11), dpToPx(11), dpToPx(11));

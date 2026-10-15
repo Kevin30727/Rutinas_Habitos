@@ -241,7 +241,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
         setupIconSelector(R.id.ic_sel_comida, "comida", R.drawable.ic_comida);
         setupIconSelector(R.id.ic_sel_noche, "noche", R.drawable.ic_noche);
         setupIconSelector(R.id.ic_sel_corazon, "corazon", R.drawable.ic_corazon);
-        setupIconSelector(R.id.ic_sel_finanzas, "finanzas", R.drawable.ic_finanzas);
+        setupIconSelector(R.id.ic_sel_sol, "sol", R.drawable.ic_sun);
 
         // Selección de Colores
         setupColorSelector(R.id.color_sel_1, "#B8E0D2");
@@ -255,7 +255,6 @@ public class CrearHabitoActivity extends AppCompatActivity {
         setupAreaSelector(R.id.chip_area_salud, "Salud & Calma");
         setupAreaSelector(R.id.chip_area_mente, "Mente & Serenidad");
         setupAreaSelector(R.id.chip_area_foco, "Foco & Productividad");
-        setupAreaSelector(R.id.chip_area_finanzas, "Finanzas Conscientes");
 
         // Frecuencia
         btnFrecDiario.setOnClickListener(v -> {
@@ -594,9 +593,9 @@ public class CrearHabitoActivity extends AppCompatActivity {
         } else if ("corazon".equals(iconoSeleccionado)) {
             resId = R.drawable.ic_corazon;
             viewId = R.id.ic_sel_corazon;
-        } else if ("finanzas".equals(iconoSeleccionado)) {
-            resId = R.drawable.ic_finanzas;
-            viewId = R.id.ic_sel_finanzas;
+        } else if ("sol".equals(iconoSeleccionado)) {
+            resId = R.drawable.ic_sun;
+            viewId = R.id.ic_sel_sol;
         }
 
         ivPreviewIcono.setImageResource(resId);
@@ -609,7 +608,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
 
     private void actualizarVistaArea() {
         tvPreviewArea.setText(areaSeleccionada);
-        int[] chips = {R.id.chip_area_salud, R.id.chip_area_mente, R.id.chip_area_foco, R.id.chip_area_finanzas};
+        int[] chips = {R.id.chip_area_salud, R.id.chip_area_mente, R.id.chip_area_foco};
         for (int id : chips) {
             TextView chip = findViewById(id);
             if (chip != null) {
@@ -819,7 +818,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
     private void resetIconDrawables() {
         int[] iconIds = {
                 R.id.ic_sel_meditacion, R.id.ic_sel_agua, R.id.ic_sel_lectura, R.id.ic_sel_ejercicio,
-                R.id.ic_sel_comida, R.id.ic_sel_noche, R.id.ic_sel_corazon, R.id.ic_sel_finanzas
+                R.id.ic_sel_comida, R.id.ic_sel_noche, R.id.ic_sel_corazon, R.id.ic_sel_sol
         };
         for (int id : iconIds) {
             ImageView iv = findViewById(id);

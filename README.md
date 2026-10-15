@@ -104,15 +104,18 @@ Mediante el asistente `ThemeHelper`, los usuarios pueden cambiar la paleta visua
 Rutinas Pastel
  ├── 🎬 SplashActivity (Animación GIF en pantalla completa por 3s)
  ├── 🔐 LoginActivity & RegistroActivity (Autenticación local SQLite)
- ├── 🏠 InicioActivity (Resumen diario, lista dinámica de hábitos, panda con viñeta horaria)
+ ├── 🏠 InicioActivity (Resumen diario, progreso de hábitos y calendario semanal)
  ├── ➕ CrearHabitoActivity (CRUD completo: meta simple/cantidad, días, audio MP3 o estándar)
- ├── 📊 HabitosActivity (Progreso circular, métricas por áreas: Salud, Mente, Productividad, Finanzas)
+ ├── 📊 HabitosActivity (Progreso circular, métricas por áreas: Salud, Mente, Productividad)
  ├── 📅 CalendarioActivity (Cuadrícula mensual interactiva y desglose por días)
- ├── 🐼 AsistentePandaActivity (Chat interactivo inteligente con el Panda, chips y propuestas)
- ├── 👤 PerfilActivity (Estadísticas consolidadas, acceso a tonos y configuración)
+ ├── 👤 PerfilActivity (Estadísticas consolidadas, tarjeta de inspiración diaria, tonos y configuración)
  ├── ⚙️ ConfiguracionActivity (Paletas dinámicas, modo sin culpa, exportación JSON, reset SQLite)
  └── 🎵 TonosActivity (Gestor de biblioteca de archivos MP3 para recordatorios)
 ```
+
+> **📌 Estructura de Ramas del Repositorio:**
+> - `main` (esta rama): Versión enfocada y limpia sin componentes de IA, navegación de 4 pestañas (Inicio, Hábitos, Calendario, Perfil) y áreas de vida puras (Salud, Mente, Productividad).
+> - `version-con-ia`: Versión con Asistente Panda Inteligente (`AsistentePandaActivity`), motor conversacional empático offline (`AsistenteMotor`) y mascota Chibi interactiva.
 
 ---
 

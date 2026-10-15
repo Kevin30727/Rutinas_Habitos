@@ -141,66 +141,7 @@
                 </FrameLayout>
             </LinearLayout>
 
-            <!-- 3. Banner del Panda Asistente Acompañante -->
-            <LinearLayout
-                android:id="@+id/card_banner_panda"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_card_destacada_menta"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="24dp">
 
-                <ImageView
-                    android:id="@+id/iv_banner_panda_avatar"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="@drawable/bg_circulo"
-                    android:backgroundTint="@color/white"
-                    android:src="@drawable/ic_panda"
-                    android:padding="6dp"
-                    android:contentDescription="Avatar Panda" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="14dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="PANDA PASTEL · ASISTENTE 🐼"
-                        android:textColor="@color/green_soft"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.1" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="¿Necesitas una nueva rutina amable?"
-                        android:textColor="@color/neutral"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="2dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Toca aquí para conversar con tu asistente local."
-                        android:textColor="@color/text_muted"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_chevron_right"
-                    android:contentDescription="Ir" />
-            </LinearLayout>
 
             <!-- 4. Calendario Semanal Dinámico -->
             <LinearLayout
@@ -333,8 +274,9 @@
                     android:id="@+id/iv_panda_vacio"
                     android:layout_width="64dp"
                     android:layout_height="64dp"
-                    android:src="@drawable/ic_panda"
-                    android:contentDescription="Panda" />
+                    android:src="@drawable/ic_habitos"
+                    app:tint="@color/neutral"
+                    android:contentDescription="Hábitos" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -348,7 +290,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Aún no tienes hábitos registrados.\nHabla con el Panda o presiona '+' para comenzar."
+                    android:text="Aún no tienes hábitos registrados.\nPresiona '+' para crear tu primer hábito."
                     android:textColor="#8D909F"
                     android:textSize="13sp"
                     android:gravity="center"
@@ -397,51 +339,5 @@
         app:itemIconSize="24dp"
         app:menu="@menu/menu_principal"
         app:layout_constraintBottom_toBottomOf="parent" />
-
-    <!-- Burbuja de Diálogo Interactiva del Panda en la barra de navegación -->
-    <LinearLayout
-        android:id="@+id/ll_burbuja_panda_nav"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:elevation="20dp"
-        android:translationY="28dp"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintBottom_toTopOf="@id/iv_panda_chibi_nav"
-        app:layout_constraintStart_toStartOf="@id/iv_panda_chibi_nav"
-        app:layout_constraintEnd_toEndOf="@id/iv_panda_chibi_nav">
-
-        <TextView
-            android:id="@+id/tv_saludo_burbuja_panda"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_burbuja_panda"
-            android:text="¡Buen día! ☀️"
-            android:textColor="@color/neutral"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:elevation="4dp" />
-    </LinearLayout>
-
-    <!-- Mascota Chibi Panda: rompe la cuarta pared apoyando sus patas sobre el BottomNavigationView -->
-    <ImageView
-        android:id="@+id/iv_panda_chibi_nav"
-        android:layout_width="84dp"
-        android:layout_height="58dp"
-        android:layout_marginStart="20dp"
-        android:src="@drawable/ic_panda"
-        android:contentDescription="Asistente Panda"
-        android:elevation="16dp"
-        android:translationY="34dp"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="@null"
-        app:layout_constraintBottom_toTopOf="@id/barra_inferior"
-        app:layout_constraintStart_toStartOf="@id/barra_inferior" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

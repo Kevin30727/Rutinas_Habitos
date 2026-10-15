@@ -140,14 +140,7 @@ public class PerfilActivity extends AppCompatActivity {
             btnTonos.setOnClickListener(v -> startActivity(new Intent(this, TonosActivity.class)));
         }
 
-        // Charlar con Panda
-        View btnCharlarPanda = findViewById(R.id.btn_charlar_panda_perfil);
-        if (btnCharlarPanda != null) {
-            btnCharlarPanda.setOnClickListener(v -> {
-                Intent intent = new Intent(this, AsistentePandaActivity.class);
-                startActivity(intent);
-            });
-        }
+
 
         // Probar Notificación Estándar (Sonido por defecto del sistema)
         View btnProbarDefault = findViewById(R.id.btn_probar_notif_default_directo);

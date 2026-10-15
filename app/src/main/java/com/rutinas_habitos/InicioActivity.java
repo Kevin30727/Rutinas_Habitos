@@ -5,8 +5,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
@@ -15,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -39,22 +36,6 @@ public class InicioActivity extends AppCompatActivity {
     private CircularProgressIndicator cpiHoyFlorece;
     private TextView tvPorcentajeHoy;
     private TextView tvContadorHabitosBadge;
-
-    // Burbuja de saludo del Panda Chibi y auto-desaparición a los 10 segundos
-    private View llBurbujaPandaNav;
-    private final Handler burbujaHandler = new Handler(Looper.getMainLooper());
-    private final Runnable ocultarBurbujaRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (llBurbujaPandaNav != null && llBurbujaPandaNav.getVisibility() == View.VISIBLE) {
-                llBurbujaPandaNav.animate()
-                        .alpha(0f)
-                        .setDuration(400)
-                        .withEndAction(() -> llBurbujaPandaNav.setVisibility(View.GONE))
-                        .start();
-            }
-        }
-    };
 
     private static final int[] IDS_NUM_DIA = {
             R.id.tv_num_dia_1, R.id.tv_num_dia_2, R.id.tv_num_dia_3,
@@ -80,7 +61,6 @@ public class InicioActivity extends AppCompatActivity {
         NotificationHelper.inicializarCanales(this);
 
         initViews();
-        setupPandaAvatars();
         configurarCalendario();
         configurarNavegacion();
 
@@ -109,32 +89,6 @@ public class InicioActivity extends AppCompatActivity {
             tvSaludo.setText("¡Hola, " + sessionManager.getUserName() + "! ✨");
         }
 
-        // Banner del Panda
-        LinearLayout bannerPanda = findViewById(R.id.card_banner_panda);
-        if (bannerPanda != null) {
-            bannerPanda.setOnClickListener(v -> {
-                Intent intent = new Intent(InicioActivity.this, AsistentePandaActivity.class);
-                startActivity(intent);
-            });
-        }
-
-        // Mascota persistente Panda Chibi (apoyando patas sobre el BottomNavigationView)
-        ImageView ivPandaChibiNav = findViewById(R.id.iv_panda_chibi_nav);
-        if (ivPandaChibiNav != null) {
-            ivPandaChibiNav.setOnClickListener(v -> {
-                v.animate().scaleX(1.18f).scaleY(0.85f).setDuration(120).withEndAction(() -> {
-                    v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).withEndAction(() -> {
-                        Intent intent = new Intent(InicioActivity.this, AsistentePandaActivity.class);
-                        startActivity(intent);
-                    }).start();
-                }).start();
-            });
-        }
-
-        // Burbuja de Diálogo sobre el Panda en el navegador (según hora del día)
-        llBurbujaPandaNav = findViewById(R.id.ll_burbuja_panda_nav);
-        actualizarYMostrarBurbujaPanda();
-
         // Floating Action Button
         FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito);
         if (fab != null) {
@@ -143,32 +97,6 @@ public class InicioActivity extends AppCompatActivity {
                 Intent intent = new Intent(InicioActivity.this, CrearHabitoActivity.class);
                 startActivity(intent);
             });
-        }
-    }
-
-    /**
-     * Carga el GIF animado del Panda si el usuario lo colocó en res/drawable
-     */
-    private void setupPandaAvatars() {
-        int gifId = getResources().getIdentifier("panda_animado", "drawable", getPackageName());
-        if (gifId == 0) gifId = getResources().getIdentifier("asistente_panda", "drawable", getPackageName());
-        if (gifId == 0) gifId = getResources().getIdentifier("panda_gif", "drawable", getPackageName());
-
-        if (gifId != 0) {
-            ImageView ivPandaChibiNav = findViewById(R.id.iv_panda_chibi_nav);
-            if (ivPandaChibiNav != null) {
-                Glide.with(this).asGif().load(gifId).fitCenter().into(ivPandaChibiNav);
-            }
-
-            ImageView ivBannerAvatar = findViewById(R.id.iv_banner_panda_avatar);
-            if (ivBannerAvatar != null) {
-                Glide.with(this).asGif().load(gifId).fitCenter().into(ivBannerAvatar);
-            }
-
-            ImageView ivPandaVacio = findViewById(R.id.iv_panda_vacio);
-            if (ivPandaVacio != null) {
-                Glide.with(this).asGif().load(gifId).fitCenter().into(ivPandaVacio);
-            }
         }
     }
 
@@ -183,8 +111,6 @@ public class InicioActivity extends AppCompatActivity {
             tvSaludo.setText("¡Hola, " + sessionManager.getUserName() + "! ✨");
         }
 
-        setupPandaAvatars();
-        actualizarYMostrarBurbujaPanda();
         cargarHabitosDesdeSQLite(userId);
 
         // Aplicar paleta activa de colores al FloatingActionButton
@@ -205,56 +131,6 @@ public class InicioActivity extends AppCompatActivity {
         if (intent != null && intent.getBooleanExtra("from_notification", false)) {
             NotificationHelper.detenerAudio();
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (burbujaHandler != null) {
-            burbujaHandler.removeCallbacks(ocultarBurbujaRunnable);
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (burbujaHandler != null) {
-            burbujaHandler.removeCallbacks(ocultarBurbujaRunnable);
-        }
-    }
-
-    /**
-     * Muestra la burbuja de diálogo sobre el Panda Chibi con un saludo dinámico según la hora.
-     * La burbuja permanece visible durante exactamente 10 segundos (10,000 ms) y luego desaparece suavemente.
-     */
-    private void actualizarYMostrarBurbujaPanda() {
-        if (llBurbujaPandaNav == null) return;
-
-        TextView tvSaludoBurbuja = findViewById(R.id.tv_saludo_burbuja_panda);
-        if (tvSaludoBurbuja != null) {
-            Calendar cal = Calendar.getInstance();
-            int hora = cal.get(Calendar.HOUR_OF_DAY);
-            String saludo;
-            if (hora >= 5 && hora < 12) {
-                saludo = "¡Buen día! ☀️";
-            } else if (hora >= 12 && hora < 19) {
-                saludo = "¡Buena tarde! ⛅";
-            } else {
-                saludo = "¡Buenas noches! 🌙";
-            }
-            tvSaludoBurbuja.setText(saludo);
-        }
-
-        llBurbujaPandaNav.setAlpha(1f);
-        llBurbujaPandaNav.setVisibility(View.VISIBLE);
-        llBurbujaPandaNav.setOnClickListener(v -> {
-            Intent intent = new Intent(InicioActivity.this, AsistentePandaActivity.class);
-            startActivity(intent);
-        });
-
-        // Temporizador de 10 segundos para desvanecer la burbuja
-        burbujaHandler.removeCallbacks(ocultarBurbujaRunnable);
-        burbujaHandler.postDelayed(ocultarBurbujaRunnable, 10000);
     }
 
     private void configurarNavegacion() {
@@ -371,8 +247,10 @@ public class InicioActivity extends AppCompatActivity {
         if ("agua".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_agua;
         else if ("lectura".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_lectura;
         else if ("ejercicio".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_ejercicio;
+        else if ("comida".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_comida;
         else if ("noche".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_noche;
         else if ("corazon".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_corazon;
+        else if ("sol".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_sun;
         else if ("meditacion".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_meditacion;
 
         iv.setImageResource(iconRes);

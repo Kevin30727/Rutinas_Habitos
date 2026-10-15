@@ -330,7 +330,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Crea una nueva rutina con el botón + o conversa con tu Asistente Panda 🌱"
+                        android:text="Crea una nueva rutina con el botón + para comenzar 🌱"
                         android:textColor="@color/text_muted"
                         android:textSize="12sp"
                         android:gravity="center"

@@ -4,19 +4,6 @@ Aplicacion movil nativa para Android orientada a la salud mental, formacion de h
 
 ---
 
-## Tabla de Contenidos
-
-- [Filosofia de Bienestar: Modo Sin Culpa](#filosofia-de-bienestar-modo-sin-culpa)
-- [Sistema de Notificaciones y Gestor de Tonos MP3](#sistema-de-notificaciones-y-gestor-de-tonos-mp3)
-- [Paletas de Colores Pastel Dinamicas](#paletas-de-colores-pastel-dinamicas)
-- [Modulos y Pantallas de la Aplicacion](#modulos-y-pantallas-de-la-aplicacion)
-- [Arquitectura de Base de Datos (SQLite)](#arquitectura-de-base-de-datos-sqlite)
-- [Stack Tecnologico](#stack-tecnologico)
-- [Instalacion y Compilacion](#instalacion-y-compilacion)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-
----
-
 ## Filosofia de Bienestar: Modo Sin Culpa
 
 A diferencia de los gestores tradicionales que penalizan la falta de constancia, Rutinas Pastel implementa un diseno centrado en el cuidado emocional:
@@ -51,19 +38,6 @@ La aplicacion cuenta con un subsistema sonoro configurable para los recordatorio
 
 ---
 
-## Paletas de Colores Pastel Dinamicas
-
-A traves del componente `ThemeHelper`, el usuario puede alternar entre esquemas de color desde la pantalla de Configuracion:
-
-| Paleta | Nombre | Color Primario | Color Suave | Acento |
-| :--- | :--- | :---: | :---: | :---: |
-| Menta | Pastel Neo | `#B8E0D2` | `#EAF7F2` | `#4CA977` |
-| Sakura | Dulce Rosa | `#F8C8DC` | `#FDEDF3` | `#E8A9C2` |
-| Oceano | Cielo Calmo | `#B8D8E8` | `#EBF4F9` | `#6DAFD0` |
-| Lavanda | Lavanda Suave | `#D7D9F8` | `#F1F2FD` | `#8A8FD4` |
-
----
-
 ## Modulos y Pantallas de la Aplicacion
 
 ```
@@ -75,13 +49,9 @@ Rutinas Pastel
 ├── HabitosActivity (Metricas detalladas por areas: Salud, Mente, Productividad)
 ├── CalendarioActivity (Vista mensual y seguimiento por dia)
 ├── PerfilActivity (Resumen de cuenta, accesos a biblioteca de tonos y configuracion)
-├── ConfiguracionActivity (Seleccion de temas, modo sin culpa, exportacion JSON y reinicio de base de datos)
+├── ConfiguracionActivity (Ajustes generales, modo sin culpa, exportacion JSON y reinicio de base de datos)
 └── TonosActivity (Gestion de archivos de audio personalizados)
 ```
-
-> **Estructura de Ramas del Repositorio:**
-> - `main` (rama principal): Version limpia y enfocada en habitos y bienestar, con navegacion de 4 secciones (Inicio, Habitos, Calendario, Perfil) y tres areas de vida (Salud, Mente, Productividad).
-> - `version-con-ia`: Rama que preserva la version con el asistente conversacional.
 
 ---
 

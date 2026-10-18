@@ -9,7 +9,6 @@ public class SessionManager {
     private static final String KEY_USER_ID = "userId";
     private static final String KEY_USER_NAME = "userName";
     private static final String KEY_USER_EMAIL = "userEmail";
-    private static final String KEY_PANDA_ONBOARDED = "pandaOnboarded";
 
     private final SharedPreferences pref;
     private final SharedPreferences.Editor editor;
@@ -43,14 +42,7 @@ public class SessionManager {
         return pref.getString(KEY_USER_EMAIL, "");
     }
 
-    public boolean isPandaOnboarded() {
-        return pref.getBoolean(KEY_PANDA_ONBOARDED, false);
-    }
 
-    public void setPandaOnboarded(boolean onboarded) {
-        editor.putBoolean(KEY_PANDA_ONBOARDED, onboarded);
-        editor.apply();
-    }
 
     public void cerrarSesion() {
         editor.clear();

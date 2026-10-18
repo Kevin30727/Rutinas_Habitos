@@ -102,7 +102,7 @@ public class PerfilActivity extends AppCompatActivity {
             if (tvCorreo != null) tvCorreo.setText(sessionManager.getUserEmail());
         }
 
-        // 2. Meta de bienestar activa desde la tabla PerfilAsistente
+        // 2. Meta de bienestar activa desde la tabla AjustesUsuario
         String meta = dbHelper.obtenerMetaBienestar(userId);
         if (tvMetaBienestar != null) {
             tvMetaBienestar.setText("Meta activa: " + meta);

@@ -43,11 +43,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Asistente Panda (Acompañante de Bienvenida) -->
-        <activity
-            android:name=".AsistentePandaActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+
 
         <!-- Pantallas Principales -->
         <activity

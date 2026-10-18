@@ -271,7 +271,7 @@
                 android:layout_marginBottom="16dp">
 
                 <ImageView
-                    android:id="@+id/iv_panda_vacio"
+                    android:id="@+id/iv_icono_vacio"
                     android:layout_width="64dp"
                     android:layout_height="64dp"
                     android:src="@drawable/ic_habitos"

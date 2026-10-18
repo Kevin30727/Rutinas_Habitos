@@ -16,9 +16,9 @@ import java.util.Locale;
  * SQLiteOpenHelper Dinámico para "Rutinas Pastel".
  * 
  * Cumplimiento de Requerimientos:
- * 1. Tablas oficiales: Usuario, PerfilAsistente, Habito, RegistroDiario.
+ * 1. Tablas oficiales: Usuario, AjustesUsuario, Habito, RegistroDiario, TonoPersonalizado.
  * 2. Cero datos estáticos / hardcodeados: las tablas nacen completamente vacías.
- * 3. Inserción dinámica por transacción basada exclusivamente en los datos captados por el Asistente.
+ * 3. Persistencia de datos 100% relacional en SQLite.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -33,11 +33,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_USER_PASSWORD = "password";
     public static final String COL_USER_FECHA = "fecha_registro";
 
-    // 2. Tabla PerfilAsistente
-    public static final String TABLE_PERFIL_ASISTENTE = "PerfilAsistente";
+    // 2. Tabla AjustesUsuario
+    public static final String TABLE_AJUSTES_USUARIO = "AjustesUsuario";
     public static final String COL_PERFIL_ID = "id";
     public static final String COL_PERFIL_USER_ID = "usuario_id";
-    public static final String COL_PERFIL_TONO = "tono_asistente";
     public static final String COL_PERFIL_MODO_SIN_CULPA = "modo_sin_culpa";
     public static final String COL_PERFIL_META_BIENESTAR = "meta_bienestar";
     public static final String COL_PERFIL_ULTIMA_INTERACCION = "ultima_interaccion";
@@ -90,7 +89,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Constantes de compatibilidad hacia atrás
     public static final String TABLE_USUARIOS = TABLE_USUARIO;
     public static final String TABLE_HABITOS = TABLE_HABITO;
-    public static final String TABLE_AJUSTES = TABLE_PERFIL_ASISTENTE;
+    public static final String TABLE_AJUSTES = TABLE_AJUSTES_USUARIO;
     public static final String COL_AJUSTE_USER_ID = COL_PERFIL_USER_ID;
     public static final String COL_AJUSTE_MODO_SIN_CULPA = COL_PERFIL_MODO_SIN_CULPA;
     public static final String COL_AJUSTE_MONEDA = COL_PERFIL_MONEDA;
@@ -121,10 +120,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_USER_FECHA + " TEXT NOT NULL" +
                 ");";
 
-        String createPerfilAsistente = "CREATE TABLE " + TABLE_PERFIL_ASISTENTE + " (" +
+        String createAjustesUsuario = "CREATE TABLE " + TABLE_AJUSTES_USUARIO + " (" +
                 COL_PERFIL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_PERFIL_USER_ID + " INTEGER NOT NULL, " +
-                COL_PERFIL_TONO + " TEXT DEFAULT 'Cálido y Amable', " +
                 COL_PERFIL_MODO_SIN_CULPA + " INTEGER DEFAULT 1, " +
                 COL_PERFIL_META_BIENESTAR + " TEXT, " +
                 COL_PERFIL_ULTIMA_INTERACCION + " TEXT, " +
@@ -181,7 +179,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ");";
 
         db.execSQL(createUsuario);
-        db.execSQL(createPerfilAsistente);
+        db.execSQL(createAjustesUsuario);
         db.execSQL(createHabito);
         db.execSQL(createRegistroDiario);
         db.execSQL(createTonoPersonalizado);
@@ -216,100 +214,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_REGISTRO_DIARIO);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_HABITO);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PERFIL_ASISTENTE);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_AJUSTES_USUARIO);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USUARIO);
         onCreate(db);
     }
 
-    // =========================================================================
-    // REQUERIMIENTO 3: INSERCIÓN DINÁMICA DE USUARIO Y HÁBITOS DESDE EL ASISTENTE
-    // =========================================================================
 
-    /**
-     * Inserta dinámicamente el primer usuario y todos los hábitos detectados por el Asistente
-     * utilizando una única transacción atómica con parámetros seguros.
-     * Cero datos hardcodeados: todo proviene de las variables captadas en la interacción.
-     */
-    public long registrarUsuarioYHabitosDesdeAsistente(
-            String nombreUsuario,
-            String correo,
-            String password,
-            String metaBienestar,
-            List<AsistenteMotor.RutinaPropuesta> rutinasDetectadas
-    ) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.beginTransaction();
-        long usuarioId = -1;
-
-        try {
-            SimpleDateFormat sdfCompleto = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-            SimpleDateFormat sdfDia = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            String ahora = sdfCompleto.format(new Date());
-            String hoy = sdfDia.format(new Date());
-
-            // 1. Insertar Usuario
-            ContentValues cvUser = new ContentValues();
-            cvUser.put(COL_USER_NOMBRE, nombreUsuario.trim());
-            cvUser.put(COL_USER_CORREO, correo.trim().toLowerCase());
-            cvUser.put(COL_USER_PASSWORD, password);
-            cvUser.put(COL_USER_FECHA, ahora);
-            usuarioId = db.insertOrThrow(TABLE_USUARIO, null, cvUser);
-
-            // 2. Insertar PerfilAsistente vinculado
-            ContentValues cvPerfil = new ContentValues();
-            cvPerfil.put(COL_PERFIL_USER_ID, usuarioId);
-            cvPerfil.put(COL_PERFIL_TONO, "Cálido y Amable");
-            cvPerfil.put(COL_PERFIL_MODO_SIN_CULPA, 1);
-            cvPerfil.put(COL_PERFIL_META_BIENESTAR, metaBienestar != null ? metaBienestar : "Bienestar integral");
-            cvPerfil.put(COL_PERFIL_ULTIMA_INTERACCION, ahora);
-            cvPerfil.put(COL_PERFIL_VASOS_AGUA, 0);
-            cvPerfil.put(COL_PERFIL_META_AGUA, 8);
-            cvPerfil.put(COL_PERFIL_MONEDA, "USD");
-            db.insertOrThrow(TABLE_PERFIL_ASISTENTE, null, cvPerfil);
-
-            // 3. Insertar dinámicamente cada hábito detectado por el Asistente
-            if (rutinasDetectadas != null && !rutinasDetectadas.isEmpty()) {
-                for (AsistenteMotor.RutinaPropuesta r : rutinasDetectadas) {
-                    ContentValues cvHab = new ContentValues();
-                    cvHab.put(COL_HAB_USUARIO_ID, usuarioId);
-                    cvHab.put(COL_HAB_NOMBRE, r.getNombre());
-                    cvHab.put(COL_HAB_DESCRIPCION, r.getDescripcion());
-                    cvHab.put(COL_HAB_ICONO, r.getIcono());
-                    cvHab.put(COL_HAB_COLOR, r.getColorHex());
-                    cvHab.put(COL_HAB_AREA, r.getAreaVida());
-                    cvHab.put(COL_HAB_FRECUENCIA, r.getFrecuencia());
-                    cvHab.put(COL_HAB_DIAS, "L,M,M,J,V,S,D");
-                    cvHab.put(COL_HAB_TIPO_META, "cantidad");
-                    cvHab.put(COL_HAB_META_CANTIDAD, r.getMetaCantidad());
-                    cvHab.put(COL_HAB_UNIDAD, r.getUnidad());
-                    cvHab.put(COL_HAB_HORA, r.getHoraSugerida());
-                    cvHab.put(COL_HAB_RECORDATORIO, 1);
-                    cvHab.put(COL_HAB_RACHA, 0);
-                    cvHab.put(COL_HAB_COMPLETADO, 0);
-                    cvHab.put(COL_HAB_PROGRESO, 0);
-                    cvHab.put(COL_HAB_FECHA_CREACION, hoy);
-
-                    long habitoId = db.insertOrThrow(TABLE_HABITO, null, cvHab);
-
-                    // 4. Inicializar primer RegistroDiario para seguimiento de hoy
-                    ContentValues cvReg = new ContentValues();
-                    cvReg.put(COL_REG_HABITO_ID, habitoId);
-                    cvReg.put(COL_REG_USUARIO_ID, usuarioId);
-                    cvReg.put(COL_REG_FECHA, hoy);
-                    cvReg.put(COL_REG_COMPLETADO, 0);
-                    cvReg.put(COL_REG_PROGRESO, 0);
-                    cvReg.put(COL_REG_NOTAS, "Iniciado con Asistente Panda");
-                    db.insert(TABLE_REGISTRO_DIARIO, null, cvReg);
-                }
-            }
-
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
-
-        return usuarioId;
-    }
 
     // =========================================================================
     // GESTIÓN DE USUARIOS
@@ -329,14 +239,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (id != -1) {
             ContentValues cvPerfil = new ContentValues();
             cvPerfil.put(COL_PERFIL_USER_ID, id);
-            cvPerfil.put(COL_PERFIL_TONO, "Cálido y Amable");
             cvPerfil.put(COL_PERFIL_MODO_SIN_CULPA, 1);
             cvPerfil.put(COL_PERFIL_META_BIENESTAR, "Equilibrio y calma");
             cvPerfil.put(COL_PERFIL_ULTIMA_INTERACCION, sdf.format(new Date()));
             cvPerfil.put(COL_PERFIL_VASOS_AGUA, 0);
             cvPerfil.put(COL_PERFIL_META_AGUA, 8);
             cvPerfil.put(COL_PERFIL_MONEDA, "USD");
-            db.insert(TABLE_PERFIL_ASISTENTE, null, cvPerfil);
+            db.insert(TABLE_AJUSTES_USUARIO, null, cvPerfil);
         }
         return id;
     }
@@ -529,16 +438,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Método mantenido para compatibilidad pero no inserta datos hardcodeados
     public void insertarHabitosPorDefecto(long usuarioId) {
         // Cero datos estáticos: la app no inserta datos fijos por defecto.
-        // Los hábitos nacen a partir de la interacción con el Asistente o creación manual del usuario.
+        // Los hábitos nacen a partir de la creación personalizada del usuario.
     }
 
     // =========================================================================
-    // AJUSTES Y PERFIL ASISTENTE
+    // AJUSTES Y PREFERENCIAS DE BIENESTAR
     // =========================================================================
 
     public boolean obtenerModoSinCulpa(long usuarioId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + COL_PERFIL_MODO_SIN_CULPA + " FROM " + TABLE_PERFIL_ASISTENTE + " WHERE " + COL_PERFIL_USER_ID + " = ?";
+        String query = "SELECT " + COL_PERFIL_MODO_SIN_CULPA + " FROM " + TABLE_AJUSTES_USUARIO + " WHERE " + COL_PERFIL_USER_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(usuarioId)});
         boolean modo = true;
         if (cursor.moveToFirst()) {
@@ -552,16 +461,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COL_PERFIL_MODO_SIN_CULPA, activo ? 1 : 0);
-        int rows = db.update(TABLE_PERFIL_ASISTENTE, cv, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
+        int rows = db.update(TABLE_AJUSTES_USUARIO, cv, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
         if (rows == 0) {
             cv.put(COL_PERFIL_USER_ID, usuarioId);
-            db.insert(TABLE_PERFIL_ASISTENTE, null, cv);
+            db.insert(TABLE_AJUSTES_USUARIO, null, cv);
         }
     }
 
     public String obtenerMoneda(long usuarioId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + COL_PERFIL_MONEDA + " FROM " + TABLE_PERFIL_ASISTENTE + " WHERE " + COL_PERFIL_USER_ID + " = ?";
+        String query = "SELECT " + COL_PERFIL_MONEDA + " FROM " + TABLE_AJUSTES_USUARIO + " WHERE " + COL_PERFIL_USER_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(usuarioId)});
         String moneda = "USD";
         if (cursor.moveToFirst()) {
@@ -575,12 +484,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COL_PERFIL_MONEDA, moneda);
-        db.update(TABLE_PERFIL_ASISTENTE, cv, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
+        db.update(TABLE_AJUSTES_USUARIO, cv, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
     }
 
     public int obtenerVasosAgua(long usuarioId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + COL_PERFIL_VASOS_AGUA + " FROM " + TABLE_PERFIL_ASISTENTE + " WHERE " + COL_PERFIL_USER_ID + " = ?";
+        String query = "SELECT " + COL_PERFIL_VASOS_AGUA + " FROM " + TABLE_AJUSTES_USUARIO + " WHERE " + COL_PERFIL_USER_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(usuarioId)});
         int vasos = 0;
         if (cursor.moveToFirst()) {
@@ -594,10 +503,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COL_PERFIL_VASOS_AGUA, vasos);
-        int rows = db.update(TABLE_PERFIL_ASISTENTE, cv, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
+        int rows = db.update(TABLE_AJUSTES_USUARIO, cv, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
         if (rows == 0) {
             cv.put(COL_PERFIL_USER_ID, usuarioId);
-            db.insert(TABLE_PERFIL_ASISTENTE, null, cv);
+            db.insert(TABLE_AJUSTES_USUARIO, null, cv);
         }
     }
 
@@ -668,7 +577,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public String obtenerMetaBienestar(long usuarioId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + COL_PERFIL_META_BIENESTAR + " FROM " + TABLE_PERFIL_ASISTENTE + " WHERE " + COL_PERFIL_USER_ID + " = ?";
+        String query = "SELECT " + COL_PERFIL_META_BIENESTAR + " FROM " + TABLE_AJUSTES_USUARIO + " WHERE " + COL_PERFIL_USER_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(usuarioId)});
         String meta = "Equilibrio y calma interior";
         if (cursor.moveToFirst()) {
@@ -685,10 +594,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COL_PERFIL_META_BIENESTAR, meta);
-        int rows = db.update(TABLE_PERFIL_ASISTENTE, cv, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
+        int rows = db.update(TABLE_AJUSTES_USUARIO, cv, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
         if (rows == 0) {
             cv.put(COL_PERFIL_USER_ID, usuarioId);
-            db.insert(TABLE_PERFIL_ASISTENTE, null, cv);
+            db.insert(TABLE_AJUSTES_USUARIO, null, cv);
         }
     }
 

@@ -5,18 +5,18 @@ public class Habito {
     private long usuarioId;
     private String nombre;
     private String descripcion;
-    private String icono; // "meditacion", "agua", "lectura", "ejercicio", "comida", "sueno", "corazon", "sol"
-    private String color; // hex string e.g. "#B8E0D2"
-    private String areaVida; // "Salud", "Mente", "Foco"
-    private String tipoFrecuencia; // "Diario", "Flexible"
-    private String diasSemana; // "L,M,M,J,V,S"
-    private String tipoMeta; // "simple", "cantidad"
-    private int metaCantidad; // e.g. 15
-    private String unidad; // "min", "páginas", "vasos", "ml", "veces"
-    private String horaRecordatorio; // "08:00 AM"
+    private String icono;
+    private String color;
+    private String areaVida;
+    private String tipoFrecuencia;
+    private String diasSemana;
+    private String tipoMeta;
+    private int metaCantidad;
+    private String unidad;
+    private String horaRecordatorio;
     private boolean recordatorioActivo;
-    private String tipoSonidoNotificacion; // "default", "relajante" o custom URI
-    private int duracionSonidoSegundos; // 10, 30, 60, 180, 300 segundos
+    private String tipoSonidoNotificacion;
+    private int duracionSonidoSegundos;
     private int rachaDias;
     private boolean completadoHoy;
     private int progresoActual;
@@ -34,7 +34,7 @@ public class Habito {
         this.horaRecordatorio = "08:00 AM";
         this.recordatorioActivo = true;
         this.tipoSonidoNotificacion = "default";
-        this.duracionSonidoSegundos = 30; // 30 seg por defecto
+        this.duracionSonidoSegundos = 30;
         this.rachaDias = 0;
         this.completadoHoy = false;
         this.progresoActual = 0;

@@ -15,30 +15,16 @@ import androidx.appcompat.widget.SwitchCompat;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 
-/**
- * Pantalla de Perfil Relacional y Centro de Configuración para "Rutinas Pastel".
- * 
- * Funcionalidades:
- * 1. Visualización de datos relacionales SQLite: Nombre, correo, fecha de registro,
- *    meta de bienestar, total de hábitos, hábitos completados hoy, mejor racha.
- * 2. Botón de Configuración Funcional: Modificación en tiempo real del Modo Sin Culpa (persiste en SQLite),
- *    edición de meta de bienestar y gestión de recordatorios.
- * 3. Pruebas interactivas del sistema de notificaciones:
- *    - Notificación estándar con tono nativo de Android.
- *    - Notificación personalizable con melodía armónica relajante (528Hz Solfeggio) y campana tibetana.
- */
 public class PerfilActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
     private SessionManager sessionManager;
 
-    // Vistas de perfil relacional
     private TextView tvNombre;
     private TextView tvCorreo;
     private TextView tvFechaRegistro;
     private TextView tvMetaBienestar;
 
-    // Métricas en tiempo real
     private TextView tvTotalHabitos;
     private TextView tvHabitosHoy;
     private TextView tvMejorRacha;
@@ -85,7 +71,6 @@ public class PerfilActivity extends AppCompatActivity {
         long userId = sessionManager.getUserId();
         if (userId <= 0) userId = 1;
 
-        // 1. Datos personales del usuario desde la tabla Usuario de SQLite
         Usuario usuario = dbHelper.obtenerUsuarioPorId(userId);
         if (usuario != null) {
             if (tvNombre != null) tvNombre.setText(usuario.getNombre());
@@ -102,13 +87,11 @@ public class PerfilActivity extends AppCompatActivity {
             if (tvCorreo != null) tvCorreo.setText(sessionManager.getUserEmail());
         }
 
-        // 2. Meta de bienestar activa desde la tabla AjustesUsuario
         String meta = dbHelper.obtenerMetaBienestar(userId);
         if (tvMetaBienestar != null) {
             tvMetaBienestar.setText("Meta activa: " + meta);
         }
 
-        // 3. Métricas relacionales calculadas desde las tablas Habito y RegistroDiario
         int totalHabitos = dbHelper.obtenerTotalHabitos(userId);
         int habitosCompletadosHoy = dbHelper.obtenerHabitosCompletadosHoy(userId);
         int mejorRacha = dbHelper.obtenerMejorRacha(userId);
@@ -123,7 +106,7 @@ public class PerfilActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        // Abrir pantalla de configuración funcional
+
         View btnConfigTop = findViewById(R.id.btn_abrir_configuracion_top);
         if (btnConfigTop != null) {
             btnConfigTop.setOnClickListener(v -> startActivity(new Intent(this, ConfiguracionActivity.class)));
@@ -134,15 +117,11 @@ public class PerfilActivity extends AppCompatActivity {
             btnConfigCard.setOnClickListener(v -> startActivity(new Intent(this, ConfiguracionActivity.class)));
         }
 
-        // Abrir Gestor de Tonos Personalizados (Subir y Ver MP3s)
         View btnTonos = findViewById(R.id.btn_abrir_tonos_personalizados);
         if (btnTonos != null) {
             btnTonos.setOnClickListener(v -> startActivity(new Intent(this, TonosActivity.class)));
         }
 
-
-
-        // Probar Notificación Estándar (Sonido por defecto del sistema)
         View btnProbarDefault = findViewById(R.id.btn_probar_notif_default_directo);
         if (btnProbarDefault != null) {
             btnProbarDefault.setOnClickListener(v -> {
@@ -155,7 +134,6 @@ public class PerfilActivity extends AppCompatActivity {
             });
         }
 
-        // Probar Notificación con Melodía Relajante MP3 / 528Hz
         View btnProbarRelajante = findViewById(R.id.btn_probar_notif_relajante_directo);
         if (btnProbarRelajante != null) {
             btnProbarRelajante.setOnClickListener(v -> {
@@ -169,19 +147,12 @@ public class PerfilActivity extends AppCompatActivity {
             });
         }
 
-        // Cerrar sesión
         View btnCerrarSesion = findViewById(R.id.btn_cerrar_sesion);
         if (btnCerrarSesion != null) {
             btnCerrarSesion.setOnClickListener(v -> confirmarCerrarSesion());
         }
     }
 
-    /**
-     * Diálogo modal funcional para configurar la aplicación:
-     * - Activar/Desactivar Modo Sin Culpa (persistido en SQLite).
-     * - Editar meta de bienestar del usuario (persistido en SQLite).
-     * - Probar sonidos del sistema de notificaciones.
-     */
     private void mostrarDialogoConfiguracion() {
         final long userId = sessionManager.getUserId() > 0 ? sessionManager.getUserId() : 1;
 
@@ -193,7 +164,6 @@ public class PerfilActivity extends AppCompatActivity {
         int pad = dpToPx(20);
         layout.setPadding(pad, pad, pad, pad);
 
-        // Switch Modo Sin Culpa
         SwitchCompat switchSinCulpa = new SwitchCompat(this);
         switchSinCulpa.setText("Modo Sin Culpa (Protección de rachas)");
         switchSinCulpa.setTextSize(14f);
@@ -208,7 +178,6 @@ public class PerfilActivity extends AppCompatActivity {
         tvDescSinCulpa.setPadding(0, dpToPx(2), 0, dpToPx(16));
         layout.addView(tvDescSinCulpa);
 
-        // Edición de Meta de Bienestar
         TextView lblMeta = new TextView(this);
         lblMeta.setText("Meta de Bienestar Personal:");
         lblMeta.setTextSize(13f);
@@ -222,7 +191,6 @@ public class PerfilActivity extends AppCompatActivity {
         etMeta.setTextSize(14f);
         layout.addView(etMeta);
 
-        // Botones de prueba de notificación dentro del diálogo
         MaterialButton btnTestDefault = new MaterialButton(this);
         btnTestDefault.setText("🔔 Probar tono estándar");
         btnTestDefault.setTextSize(12f);

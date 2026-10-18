@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/background_app">
 
-    <!-- Encabezado Superior -->
     <LinearLayout
         android:id="@+id/ll_tonos_header"
         android:layout_width="match_parent"
@@ -66,7 +65,6 @@
             android:paddingHorizontal="20dp"
             android:paddingTop="10dp">
 
-            <!-- Botón Destacado: Subir MP3 -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_subir_audio"
                 android:layout_width="match_parent"
@@ -89,14 +87,12 @@
                 android:letterSpacing="0.08"
                 android:layout_marginBottom="12dp" />
 
-            <!-- Contenedor dinámico de tonos -->
             <LinearLayout
                 android:id="@+id/ll_lista_tonos_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
 
-            <!-- Estado Vacío -->
             <LinearLayout
                 android:id="@+id/ll_estado_vacio_tonos"
                 android:layout_width="match_parent"

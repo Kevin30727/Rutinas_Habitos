@@ -25,19 +25,6 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Locale;
 
-/**
- * Gestor Central de Notificaciones y Alarmas para "Rutinas Pastel".
- * 
- * Funcionalidades clave:
- * 1. Programación exacta de alarmas diarias (AlarmManager + HabitoReminderReceiver) según la hora configurada.
- * 2. Soporte para 3 modalidades de sonido reales:
- *    - Estándar: Tono por defecto de Android.
- *    - Relajante: Melodía armónica 528Hz Solfeggio / campana tibetana (res/raw/melodia_relajante).
- *    - Personalizado: Canción / pista de audio MP3 subida por el usuario.
- * 3. Temporizador de duración de reproducción de música (10s, 30s, 1m, 3m, 5m).
- * 4. Botón de acción directo en la notificación para cancelar la alerta y silenciar el sonido de inmediato.
- * 5. Cancelación y reprogramación de alarmas al editar o eliminar hábitos.
- */
 public class NotificationHelper {
 
     private static final String TAG = "NotificationHelper";
@@ -53,15 +40,11 @@ public class NotificationHelper {
     private static Handler audioTimeoutHandler;
     private static Runnable audioTimeoutRunnable;
 
-    /**
-     * Inicializa los canales de notificación en Android 8.0 (API 26) o superior.
-     */
     public static void inicializarCanales(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = context.getSystemService(NotificationManager.class);
             if (manager == null) return;
 
-            // 1. Canal por defecto (Sonido de sistema)
             CharSequence nombreDefault = "Recordatorios de Hábitos (Estándar)";
             String descDefault = "Notificaciones con el tono clásico del sistema Android para tus hábitos diarios.";
             NotificationChannel canalDefault = new NotificationChannel(
@@ -79,7 +62,6 @@ public class NotificationHelper {
             canalDefault.setSound(defaultSoundUri, audioAttrDefault);
             manager.createNotificationChannel(canalDefault);
 
-            // 2. Canal con Melodía Relajante (Armónica 528Hz)
             CharSequence nombreArmonica = "Recordatorios Relajantes (Melodía Armónica)";
             String descArmonica = "Notificaciones suaves y armoniosas para cultivar la calma y constancia.";
             NotificationChannel canalArmonica = new NotificationChannel(
@@ -101,7 +83,6 @@ public class NotificationHelper {
             }
             manager.createNotificationChannel(canalArmonica);
 
-            // 3. Canal con Música MP3 Personalizada
             CharSequence nombreCustom = "Recordatorios con Música Personalizada (MP3)";
             String descCustom = "Notificaciones que reproducen tu propia música o canciones MP3 elegidas.";
             NotificationChannel canalCustom = new NotificationChannel(
@@ -111,23 +92,17 @@ public class NotificationHelper {
             );
             canalCustom.setDescription(descCustom);
             canalCustom.enableVibration(true);
-            // El canal no reproduce ding genérico para dejar que el archivo MP3 suene con claridad
+
             canalCustom.setSound(null, null);
             manager.createNotificationChannel(canalCustom);
         }
     }
 
-    /**
-     * Retorna el URI del sonido en res/raw/melodia_relajante.
-     */
     public static Uri getMelodiaRelajanteSoundUri(Context context) {
         return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
                 context.getPackageName() + "/" + R.raw.melodia_relajante);
     }
 
-    /**
-     * Verifica si se cuenta con permiso de notificación (Android 13+).
-     */
     public static boolean tienePermisoNotificaciones(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             return ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
@@ -136,9 +111,6 @@ public class NotificationHelper {
         return true;
     }
 
-    /**
-     * Parsea una cadena de hora ("08:00 AM", "05:30 PM", "14:30") y retorna [horaEn24h, minuto].
-     */
     public static int[] parsearHoraMinuto(String horaStr) {
         int hora = 8;
         int minuto = 0;
@@ -170,9 +142,6 @@ public class NotificationHelper {
         return new int[]{hora, minuto};
     }
 
-    /**
-     * Formatea los segundos a texto amigable ("10 seg", "30 seg", "1 min", "3 min", "5 min").
-     */
     public static String formatearTextoDuracion(int segundos) {
         if (segundos == 10) return "10 seg";
         if (segundos == 30) return "30 seg";
@@ -183,14 +152,9 @@ public class NotificationHelper {
         return (segundos / 60) + " min";
     }
 
-    /**
-     * Programa una alarma exacta con AlarmManager para un hábito específico.
-     * Si la hora ya pasó hoy, se programa para mañana a la misma hora.
-     */
     public static void programarAlarmaHabito(Context context, Habito habito) {
         if (context == null || habito == null) return;
 
-        // Si el hábito tiene el recordatorio desactivado, cancelamos la alarma
         if (!habito.isRecordatorioActivo()) {
             cancelarAlarmaHabito(context, (int) habito.getId());
             return;
@@ -206,7 +170,6 @@ public class NotificationHelper {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-        // Si la hora ya pasó en el día de hoy, programar para mañana a la misma hora
         if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
             calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
@@ -251,9 +214,6 @@ public class NotificationHelper {
         }
     }
 
-    /**
-     * Cancela la alarma programada para un hábito.
-     */
     public static void cancelarAlarmaHabito(Context context, int habitoId) {
         if (context == null || habitoId <= 0) return;
         try {
@@ -276,15 +236,10 @@ public class NotificationHelper {
         }
     }
 
-    /**
-     * Dispara una notificación real en el teléfono con el sonido y duración seleccionados.
-     * Incluye botón interactivo directo en la barra de notificación para cancelar la alerta y silenciar la música.
-     */
     public static void dispararNotificacionHabito(Context context, long habitoId, String nombreHabito, String tipoSonido, int duracionSegundos) {
         if (context == null) return;
         inicializarCanales(context);
 
-        // 1. PendingIntent al hacer clic sobre el cuerpo de la notificación (abre InicioActivity y silencia)
         Intent intent = new Intent(context, InicioActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra("from_notification", true);
@@ -297,7 +252,6 @@ public class NotificationHelper {
         int notifId = (int) (habitoId > 0 ? habitoId : System.currentTimeMillis() % 100000);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, notifId, intent, pendingFlags);
 
-        // 2. PendingIntent para el BOTÓN DE ACCIÓN: "Cancelar Notificación" (silencia música y descarta notificación)
         Intent cancelIntent = new Intent(context, HabitoReminderReceiver.class);
         cancelIntent.setAction(HabitoReminderReceiver.ACTION_CANCELAR_NOTIFICACION);
         cancelIntent.putExtra(HabitoReminderReceiver.EXTRA_HABITO_ID, habitoId);
@@ -338,7 +292,7 @@ public class NotificationHelper {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setContentIntent(pendingIntent)
-                .setDeleteIntent(cancelPendingIntent) // Si desliza para borrar, también se detiene la música
+                .setDeleteIntent(cancelPendingIntent)
                 .setAutoCancel(true)
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel, "⏹ Cancelar Notificación", cancelPendingIntent)
                 .setDefaults(NotificationCompat.DEFAULT_VIBRATE | NotificationCompat.DEFAULT_LIGHTS);
@@ -362,16 +316,10 @@ public class NotificationHelper {
         }
     }
 
-    /**
-     * Sobrecarga de compatibilidad para dispararNotificacionHabito con duración estándar de 30 segundos.
-     */
     public static void dispararNotificacionHabito(Context context, long habitoId, String nombreHabito, String tipoSonido) {
         dispararNotificacionHabito(context, habitoId, nombreHabito, tipoSonido, 30);
     }
 
-    /**
-     * Envía una notificación usando el canal por defecto (Sonido estándar de Android).
-     */
     public static void enviarNotificacionDefault(Context context, String titulo, String mensaje) {
         inicializarCanales(context);
 
@@ -401,9 +349,6 @@ public class NotificationHelper {
         }
     }
 
-    /**
-     * Envía una notificación usando el canal con melodía relajante personalizada (Audio 528Hz).
-     */
     public static void enviarNotificacionMelodiaRelajante(Context context, String titulo, String mensaje) {
         inicializarCanales(context);
 
@@ -437,9 +382,6 @@ public class NotificationHelper {
         }
     }
 
-    /**
-     * Reproduce inmediatamente el tono estándar de notificación en el dispositivo (modo preview/prueba).
-     */
     public static void reproducirDefaultPreview(Context context) {
         try {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -451,9 +393,6 @@ public class NotificationHelper {
         }
     }
 
-    /**
-     * Reproduce inmediatamente la melodía relajante en modo preview (una sola reproducción breve).
-     */
     public static void reproducirMelodiaRelajantePreview(Context context) {
         try {
             detenerAudio();
@@ -474,9 +413,6 @@ public class NotificationHelper {
         }
     }
 
-    /**
-     * Reproduce la melodía relajante durante un tiempo específico en milisegundos (en bucle hasta timeout).
-     */
     public static void reproducirMelodiaRelajanteConDuracion(Context context, long duracionMs) {
         try {
             detenerAudio();
@@ -497,9 +433,6 @@ public class NotificationHelper {
         }
     }
 
-    /**
-     * Reproduce un archivo de audio personalizado en modo preview (una sola reproducción).
-     */
     public static void reproducirAudioPersonalizado(Context context, String rutaArchivo) {
         try {
             detenerAudio();
@@ -525,9 +458,6 @@ public class NotificationHelper {
         }
     }
 
-    /**
-     * Reproduce un archivo de audio personalizado en bucle durante la duración especificada.
-     */
     public static void reproducirAudioPersonalizadoConDuracion(Context context, String rutaArchivo, long duracionMs) {
         try {
             detenerAudio();
@@ -553,9 +483,6 @@ public class NotificationHelper {
         }
     }
 
-    /**
-     * Programa la detención automática del audio al cumplirse el tiempo seleccionado.
-     */
     public static void programarDetencionAudio(long duracionMs) {
         cancelarTimeoutAudio();
         if (duracionMs <= 0) return;
@@ -570,9 +497,6 @@ public class NotificationHelper {
         audioTimeoutHandler.postDelayed(audioTimeoutRunnable, duracionMs);
     }
 
-    /**
-     * Cancela cualquier temporizador pendiente de detención de audio.
-     */
     private static void cancelarTimeoutAudio() {
         if (audioTimeoutHandler != null && audioTimeoutRunnable != null) {
             audioTimeoutHandler.removeCallbacks(audioTimeoutRunnable);
@@ -580,9 +504,6 @@ public class NotificationHelper {
         }
     }
 
-    /**
-     * Detiene inmediatamente cualquier reproducción de audio en curso y cancela temporizadores.
-     */
     public static void detenerAudio() {
         cancelarTimeoutAudio();
         try {

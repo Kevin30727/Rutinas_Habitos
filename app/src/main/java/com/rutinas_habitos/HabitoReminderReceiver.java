@@ -8,16 +8,6 @@ import androidx.core.app.NotificationManagerCompat;
 
 import java.util.List;
 
-/**
- * Receptor de Alarma para Recordatorios de Hábitos.
- * 
- * Se ejecuta de manera exacta a la hora configurada por el usuario para:
- * 1. Disparar una notificación real en la barra de estado con el tono configurado
- *    (estándar, melodía armónica 528Hz o música MP3 personalizada) y duración elegida.
- * 2. Permitir al usuario cancelar la notificación y silenciar la música al instante.
- * 3. Re-programar automáticamente la alarma para el día siguiente si el hábito sigue activo.
- * 4. Restaurar las alarmas tras el reinicio del dispositivo (BOOT_COMPLETED).
- */
 public class HabitoReminderReceiver extends BroadcastReceiver {
 
     private static final String TAG = "HabitoReminderReceiver";
@@ -34,15 +24,13 @@ public class HabitoReminderReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (context == null || intent == null) return;
 
-        // 1. Manejo del botón "Cancelar Notificación" (detiene la música y cancela la notificación)
         if (ACTION_CANCELAR_NOTIFICACION.equals(intent.getAction())) {
             long habitoId = intent.getLongExtra(EXTRA_HABITO_ID, -1);
             Log.d(TAG, "Cancelando notificación y silenciando música para hábito id=" + habitoId);
             try {
-                // Detener inmediatamente cualquier reproducción de audio en curso
+
                 NotificationHelper.detenerAudio();
 
-                // Quitar la notificación de la barra de estado del sistema
                 NotificationManagerCompat manager = NotificationManagerCompat.from(context);
                 if (habitoId > 0) {
                     manager.cancel((int) habitoId);
@@ -55,7 +43,6 @@ public class HabitoReminderReceiver extends BroadcastReceiver {
             return;
         }
 
-        // 2. Soporte para restauración automática tras reinicio del teléfono
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             try {
                 DatabaseHelper dbHelper = DatabaseHelper.getInstance(context);
@@ -88,10 +75,8 @@ public class HabitoReminderReceiver extends BroadcastReceiver {
             nombre = "Mi Hábito Pastel";
         }
 
-        // 3. Disparar la notificación real en el teléfono con el sonido y duración elegidos
         NotificationHelper.dispararNotificacionHabito(context, habitoId, nombre, tipoSonido, duracionSegundos);
 
-        // 4. Re-programar para el día siguiente si el hábito existe y tiene recordatorio activo
         try {
             DatabaseHelper dbHelper = DatabaseHelper.getInstance(context);
             Habito habito = dbHelper.obtenerHabitoPorId(habitoId);

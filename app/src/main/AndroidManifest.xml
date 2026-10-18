@@ -20,7 +20,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Rutinas_Habitos">
 
-        <!-- Splash Screen con GIF (Pantalla de Entrada) -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -32,7 +31,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Autenticación -->
         <activity
             android:name=".LoginActivity"
             android:exported="false"
@@ -43,9 +41,6 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-
-
-        <!-- Pantallas Principales -->
         <activity
             android:name=".InicioActivity"
             android:exported="false"
@@ -81,7 +76,6 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Receptor de Recordatorios de Hábitos (Alarma y Notificación Real) -->
         <receiver
             android:name=".HabitoReminderReceiver"
             android:enabled="true"

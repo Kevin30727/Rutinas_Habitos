@@ -38,12 +38,10 @@ import java.util.Locale;
 
 public class CrearHabitoActivity extends AppCompatActivity {
 
-    // Vistas de Encabezado y Acción
     private TextView tvTituloPantallaCrear;
     private MaterialButton btnGuardarHabito;
     private MaterialButton btnEliminarHabito;
 
-    // Vistas de Preview
     private View vPreviewColorCirculo;
     private ImageView ivPreviewIcono;
     private TextView tvPreviewArea;
@@ -51,7 +49,6 @@ public class CrearHabitoActivity extends AppCompatActivity {
     private TextView tvPreviewNombre;
     private TextView tvPreviewMeta;
 
-    // Formulario
     private EditText etNombre;
     private TextView tvMetaNumero;
     private TextView tvMetaUnidadLabel;
@@ -66,7 +63,6 @@ public class CrearHabitoActivity extends AppCompatActivity {
     private SwitchCompat switchRecordatorio;
     private TextView tvResumenDias;
 
-    // Selector de Sonido de Notificación
     private TextView btnSonidoDefault;
     private TextView btnSonidoRelajante;
     private TextView btnSonidoCustom;
@@ -75,22 +71,19 @@ public class CrearHabitoActivity extends AppCompatActivity {
     private TextView tvNombreTonoCustomActual;
     private MaterialButton btnElegirTonoCustom;
 
-    // Selector de Duración de Sonido / Música
     private TextView tvDuracionMusicaSeleccionada;
     private TextView chipDuracion10s;
     private TextView chipDuracion30s;
     private TextView chipDuracion1m;
     private TextView chipDuracion3m;
     private TextView chipDuracion5m;
-    private int duracionSonidoSeleccionada = 30; // 10, 30, 60, 180, 300 segundos
+    private int duracionSonidoSeleccionada = 30;
 
-    // Botones de Frecuencia y Meta
     private TextView btnFrecDiario;
     private TextView btnFrecFlexible;
     private TextView btnMetaSimple;
     private TextView btnMetaCantidad;
 
-    // Estado del Hábito
     private long editHabitoId = -1;
     private String iconoSeleccionado = "meditacion";
     private String colorSeleccionado = "#B8E0D2";
@@ -151,7 +144,6 @@ public class CrearHabitoActivity extends AppCompatActivity {
         setupDiasIniciales();
         setupListeners();
 
-        // Verificar si es modo edición
         editHabitoId = getIntent().getLongExtra("EXTRA_HABITO_ID", -1);
         if (editHabitoId != -1) {
             cargarHabitoParaEdicion(editHabitoId);
@@ -223,7 +215,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        // Actualizar nombre en vivo
+
         etNombre.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -233,7 +225,6 @@ public class CrearHabitoActivity extends AppCompatActivity {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        // Selección de Iconos
         setupIconSelector(R.id.ic_sel_meditacion, "meditacion", R.drawable.ic_meditacion);
         setupIconSelector(R.id.ic_sel_agua, "agua", R.drawable.ic_agua);
         setupIconSelector(R.id.ic_sel_lectura, "lectura", R.drawable.ic_lectura);
@@ -243,7 +234,6 @@ public class CrearHabitoActivity extends AppCompatActivity {
         setupIconSelector(R.id.ic_sel_corazon, "corazon", R.drawable.ic_corazon);
         setupIconSelector(R.id.ic_sel_sol, "sol", R.drawable.ic_sun);
 
-        // Selección de Colores
         setupColorSelector(R.id.color_sel_1, "#B8E0D2");
         setupColorSelector(R.id.color_sel_2, "#B8D8E8");
         setupColorSelector(R.id.color_sel_3, "#F8C8DC");
@@ -251,12 +241,10 @@ public class CrearHabitoActivity extends AppCompatActivity {
         setupColorSelector(R.id.color_sel_5, "#C3E8D7");
         setupColorSelector(R.id.color_sel_6, "#F8D4D4");
 
-        // Selección de Áreas
         setupAreaSelector(R.id.chip_area_salud, "Salud & Calma");
         setupAreaSelector(R.id.chip_area_mente, "Mente & Serenidad");
         setupAreaSelector(R.id.chip_area_foco, "Foco & Productividad");
 
-        // Frecuencia
         btnFrecDiario.setOnClickListener(v -> {
             frecuenciaSeleccionada = "Diario";
             actualizarVistaFrecuencia();
@@ -267,7 +255,6 @@ public class CrearHabitoActivity extends AppCompatActivity {
             actualizarVistaFrecuencia();
         });
 
-        // Días de la semana
         setupDiaToggle(R.id.btn_dia_l, "L");
         setupDiaToggle(R.id.btn_dia_m, "M");
         setupDiaToggle(R.id.btn_dia_x, "X");
@@ -276,7 +263,6 @@ public class CrearHabitoActivity extends AppCompatActivity {
         setupDiaToggle(R.id.btn_dia_s, "S");
         setupDiaToggle(R.id.btn_dia_d, "D");
 
-        // Medición de Meta (Simple vs Cantidad)
         btnMetaSimple.setOnClickListener(v -> {
             tipoMetaSeleccionada = "simple";
             actualizarVistaMetaTipo();
@@ -287,7 +273,6 @@ public class CrearHabitoActivity extends AppCompatActivity {
             actualizarVistaMetaTipo();
         });
 
-        // Contador + y -
         findViewById(R.id.btn_meta_menos).setOnClickListener(v -> {
             if (cantidadMeta > 1) {
                 cantidadMeta--;
@@ -302,14 +287,12 @@ public class CrearHabitoActivity extends AppCompatActivity {
             actualizarPreview();
         });
 
-        // Unidades
         setupUnidad(R.id.u_min, "minutos");
         setupUnidad(R.id.u_paginas, "páginas");
         setupUnidad(R.id.u_vasos, "vasos");
         setupUnidad(R.id.u_ml, "ml");
         setupUnidad(R.id.u_veces, "veces");
 
-        // Activación y Toggle de Recordatorio
         switchRecordatorio.setOnCheckedChangeListener((buttonView, isChecked) -> {
             actualizarEstadoRecordatorio(isChecked);
             if (isChecked) {
@@ -317,17 +300,14 @@ public class CrearHabitoActivity extends AppCompatActivity {
             }
         });
 
-        // Selector Interactivo de Hora de Notificación
         btnSeleccionarHoraRecordatorio.setOnClickListener(v -> mostrarSelectorHora());
         tvHoraRecordatorio.setOnClickListener(v -> mostrarSelectorHora());
 
-        // Opciones Rápidas de Horario
         if (chipHoraManana != null) chipHoraManana.setOnClickListener(v -> setHora("08:00 AM"));
         if (chipHoraMediodia != null) chipHoraMediodia.setOnClickListener(v -> setHora("12:30 PM"));
         if (chipHoraTarde != null) chipHoraTarde.setOnClickListener(v -> setHora("05:00 PM"));
         if (chipHoraNoche != null) chipHoraNoche.setOnClickListener(v -> setHora("09:00 PM"));
 
-        // Selector de Sonido de Notificación
         btnSonidoDefault.setOnClickListener(v -> {
             tipoSonidoSeleccionado = "default";
             actualizarVistaSonido();
@@ -352,20 +332,16 @@ public class CrearHabitoActivity extends AppCompatActivity {
 
         btnElegirTonoCustom.setOnClickListener(v -> mostrarDialogoSeleccionarTono());
 
-        // Selector de Duración de Sonido / Música
         if (chipDuracion10s != null) chipDuracion10s.setOnClickListener(v -> setDuracionSonido(10));
         if (chipDuracion30s != null) chipDuracion30s.setOnClickListener(v -> setDuracionSonido(30));
         if (chipDuracion1m != null) chipDuracion1m.setOnClickListener(v -> setDuracionSonido(60));
         if (chipDuracion3m != null) chipDuracion3m.setOnClickListener(v -> setDuracionSonido(180));
         if (chipDuracion5m != null) chipDuracion5m.setOnClickListener(v -> setDuracionSonido(300));
 
-        // Previsualizar el audio seleccionado
         btnPreviewSonidoHabito.setOnClickListener(v -> previsualizarAudio());
 
-        // Guardar o Actualizar
         btnGuardarHabito.setOnClickListener(v -> guardarHabito());
 
-        // Eliminar Hábito (Modo Edición)
         btnEliminarHabito.setOnClickListener(v -> confirmarEliminarHabito());
     }
 
@@ -511,12 +487,10 @@ public class CrearHabitoActivity extends AppCompatActivity {
             return;
         }
 
-        // Títulos de modo edición
         if (tvTituloPantallaCrear != null) tvTituloPantallaCrear.setText("Editar Hábito");
         btnGuardarHabito.setText("✓ Guardar Cambios");
         btnEliminarHabito.setVisibility(View.VISIBLE);
 
-        // Cargar campos
         etNombre.setText(h.getNombre());
         iconoSeleccionado = (h.getIcono() != null && !h.getIcono().isEmpty()) ? h.getIcono() : "meditacion";
         colorSeleccionado = (h.getColor() != null && !h.getColor().isEmpty()) ? h.getColor() : "#B8E0D2";
@@ -559,7 +533,6 @@ public class CrearHabitoActivity extends AppCompatActivity {
         }
         setDuracionSonido(h.getDuracionSonidoSegundos());
 
-        // Sincronizar UI
         actualizarVistaIcono();
         vPreviewColorCirculo.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(colorSeleccionado)));
         actualizarVistaArea();
@@ -671,7 +644,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
     }
 
     private void actualizarVistaSonido() {
-        // Resetear todos los chips de sonido
+
         btnSonidoDefault.setBackgroundResource(R.drawable.bg_chip_normal);
         btnSonidoDefault.setTextColor(Color.parseColor("#8D909F"));
         btnSonidoRelajante.setBackgroundResource(R.drawable.bg_chip_normal);

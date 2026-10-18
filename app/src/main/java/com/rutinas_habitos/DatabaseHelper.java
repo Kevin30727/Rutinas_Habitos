@@ -12,20 +12,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * SQLiteOpenHelper Dinámico para "Rutinas Pastel".
- * 
- * Cumplimiento de Requerimientos:
- * 1. Tablas oficiales: Usuario, AjustesUsuario, Habito, RegistroDiario, TonoPersonalizado.
- * 2. Cero datos estáticos / hardcodeados: las tablas nacen completamente vacías.
- * 3. Persistencia de datos 100% relacional en SQLite.
- */
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "rutinas_habitos.db";
-    private static final int DATABASE_VERSION = 2; // Actualizado para esquema dinámico limpio
+    private static final int DATABASE_VERSION = 2;
 
-    // 1. Tabla Usuario
     public static final String TABLE_USUARIO = "Usuario";
     public static final String COL_USER_ID = "id";
     public static final String COL_USER_NOMBRE = "nombre";
@@ -33,7 +24,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_USER_PASSWORD = "password";
     public static final String COL_USER_FECHA = "fecha_registro";
 
-    // 2. Tabla AjustesUsuario
     public static final String TABLE_AJUSTES_USUARIO = "AjustesUsuario";
     public static final String COL_PERFIL_ID = "id";
     public static final String COL_PERFIL_USER_ID = "usuario_id";
@@ -44,7 +34,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_PERFIL_META_AGUA = "meta_agua";
     public static final String COL_PERFIL_MONEDA = "moneda";
 
-    // 3. Tabla Habito
     public static final String TABLE_HABITO = "Habito";
     public static final String COL_HAB_ID = "id";
     public static final String COL_HAB_USUARIO_ID = "usuario_id";
@@ -67,7 +56,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_HAB_SONIDO = "tipo_sonido";
     public static final String COL_HAB_DURACION_SONIDO = "duracion_sonido";
 
-    // 4. Tabla RegistroDiario
     public static final String TABLE_REGISTRO_DIARIO = "RegistroDiario";
     public static final String COL_REG_ID = "id";
     public static final String COL_REG_HABITO_ID = "habito_id";
@@ -77,7 +65,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_REG_PROGRESO = "progreso_cantidad";
     public static final String COL_REG_NOTAS = "notas";
 
-    // 5. Tabla TonoPersonalizado (Audios MP3 subidos por el usuario)
     public static final String TABLE_TONO_PERSONALIZADO = "TonoPersonalizado";
     public static final String COL_TONO_ID = "id";
     public static final String COL_TONO_USER_ID = "usuario_id";
@@ -86,7 +73,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_TONO_DURACION = "duracion";
     public static final String COL_TONO_FECHA = "fecha_subida";
 
-    // Constantes de compatibilidad hacia atrás
     public static final String TABLE_USUARIOS = TABLE_USUARIO;
     public static final String TABLE_HABITOS = TABLE_HABITO;
     public static final String TABLE_AJUSTES = TABLE_AJUSTES_USUARIO;
@@ -111,7 +97,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // Tablas nacen completamente vacías (Cero registros hardcodeados)
+
         String createUsuario = "CREATE TABLE " + TABLE_USUARIO + " (" +
                 COL_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_USER_NOMBRE + " TEXT NOT NULL, " +
@@ -219,12 +205,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-
-
-    // =========================================================================
-    // GESTIÓN DE USUARIOS
-    // =========================================================================
-
     public long registrarUsuario(String nombre, String correo, String password) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -276,10 +256,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return existe;
     }
-
-    // =========================================================================
-    // GESTIÓN DE HÁBITOS DINÁMICOS
-    // =========================================================================
 
     public long insertarHabito(Habito habito) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -435,15 +411,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.delete(TABLE_HABITO, COL_HAB_USUARIO_ID + " = ?", new String[]{String.valueOf(usuarioId)});
     }
 
-    // Método mantenido para compatibilidad pero no inserta datos hardcodeados
     public void insertarHabitosPorDefecto(long usuarioId) {
-        // Cero datos estáticos: la app no inserta datos fijos por defecto.
-        // Los hábitos nacen a partir de la creación personalizada del usuario.
-    }
 
-    // =========================================================================
-    // AJUSTES Y PREFERENCIAS DE BIENESTAR
-    // =========================================================================
+    }
 
     public boolean obtenerModoSinCulpa(long usuarioId) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -517,10 +487,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void actualizarModoSinCulpa(long usuarioId, boolean activo) {
         guardarModoSinCulpa(usuarioId, activo);
     }
-
-    // =========================================================================
-    // CONSULTAS RELACIONALES DINÁMICAS (PERFIL Y MÉTRICAS REALES)
-    // =========================================================================
 
     public Usuario obtenerUsuarioPorId(long usuarioId) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -600,10 +566,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.insert(TABLE_AJUSTES_USUARIO, null, cv);
         }
     }
-
-    // =========================================================================
-    // MÉTODOS PARA TONOS PERSONALIZADOS (MP3)
-    // =========================================================================
 
     public long insertarTonoPersonalizado(TonoAudio tono) {
         SQLiteDatabase db = this.getWritableDatabase();

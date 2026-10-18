@@ -21,7 +21,6 @@
             android:paddingTop="20dp"
             android:paddingBottom="170dp">
 
-            <!-- 1. Encabezado Superior -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -66,7 +65,6 @@
                     android:background="@drawable/bg_racha_dias" />
             </LinearLayout>
 
-            <!-- 2. Tarjeta Hoy florece (Dinámica con SQLite) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -141,9 +139,6 @@
                 </FrameLayout>
             </LinearLayout>
 
-
-
-            <!-- 4. Calendario Semanal Dinámico -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -229,7 +224,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 5. Título: Hábitos de hoy (Cero datos estáticos) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -258,7 +252,6 @@
                     android:letterSpacing="0.1" />
             </LinearLayout>
 
-            <!-- Estado Vacío cuando SQLite no tiene hábitos -->
             <LinearLayout
                 android:id="@+id/ll_estado_vacio_habitos"
                 android:layout_width="match_parent"
@@ -297,7 +290,6 @@
                     android:layout_marginTop="6dp" />
             </LinearLayout>
 
-            <!-- Contenedor Dinámico para Hábitos desde SQLite Exclusivamente -->
             <LinearLayout
                 android:id="@+id/ll_habitos_dinamicos_container"
                 android:layout_width="match_parent"
@@ -307,7 +299,6 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Botón Flotante para crear nuevo hábito -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_nuevo_habito"
         android:layout_width="wrap_content"
@@ -321,7 +312,6 @@
         app:layout_constraintBottom_toTopOf="@+id/barra_inferior"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Barra inferior flotante -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/barra_inferior"
         style="@style/Widget.MaterialComponents.BottomNavigationView"

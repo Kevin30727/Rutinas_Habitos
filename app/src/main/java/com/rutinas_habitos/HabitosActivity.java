@@ -52,7 +52,6 @@ public class HabitosActivity extends AppCompatActivity {
         super.onResume();
         cargarMetricasYHabitosSQLite();
 
-        // Aplicar paleta activa de colores al FloatingActionButton
         FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito_progreso);
         if (fab != null) {
             fab.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(this)));
@@ -84,7 +83,6 @@ public class HabitosActivity extends AppCompatActivity {
         int habitosCompletados = dbHelper.obtenerHabitosCompletadosHoy(userId);
         int mejorRacha = dbHelper.obtenerMejorRacha(userId);
 
-        // 1. Tasa de Éxito Circular
         int tasaExito = totalHabitos > 0 ? (habitosCompletados * 100 / totalHabitos) : 0;
         if (cpiRendimiento != null) {
             cpiRendimiento.setProgress(tasaExito);
@@ -93,12 +91,10 @@ public class HabitosActivity extends AppCompatActivity {
             tvPorcentajeExito.setText(tasaExito + "%");
         }
 
-        // 2. Racha de Oro
         if (tvRachaDias != null) {
             tvRachaDias.setText(mejorRacha + " días consecutivos");
         }
 
-        // 3. Hábitos reales desde SQLite
         List<Habito> lista = dbHelper.obtenerHabitosPorUsuario(userId);
 
         if (llListaHabitosEstrella != null) {
@@ -117,7 +113,6 @@ public class HabitosActivity extends AppCompatActivity {
             }
         }
 
-        // 4. Métricas por Áreas de Vida (Salud, Mente, Productividad)
         calcularMetricasPorAreas(lista);
     }
 
@@ -174,7 +169,6 @@ public class HabitosActivity extends AppCompatActivity {
         marginParams.bottomMargin = dpToPx(12);
         row.setLayoutParams(marginParams);
 
-        // Icono circular
         ImageView iv = new ImageView(this);
         int iconSize = dpToPx(44);
         iv.setLayoutParams(new LinearLayout.LayoutParams(iconSize, iconSize));
@@ -199,7 +193,6 @@ public class HabitosActivity extends AppCompatActivity {
         iv.setPadding(dpToPx(11), dpToPx(11), dpToPx(11), dpToPx(11));
         row.addView(iv);
 
-        // Textos
         LinearLayout textLayout = new LinearLayout(this);
         textLayout.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams lpText = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
@@ -227,7 +220,6 @@ public class HabitosActivity extends AppCompatActivity {
         textLayout.addView(tvEstado);
         row.addView(textLayout);
 
-        // Chip de Racha
         TextView tvRachaChip = new TextView(this);
         tvRachaChip.setText("🔥 " + h.getRachaDias() + " DÍAS");
         tvRachaChip.setTextColor(Color.parseColor("#2D3142"));
@@ -237,7 +229,6 @@ public class HabitosActivity extends AppCompatActivity {
         tvRachaChip.setBackgroundResource(R.drawable.bg_card_destacada_menta);
         row.addView(tvRachaChip);
 
-        // Click para abrir en modo edición (CRUD completo)
         row.setOnClickListener(v -> {
             Intent intent = new Intent(this, CrearHabitoActivity.class);
             intent.putExtra("EXTRA_HABITO_ID", h.getId());

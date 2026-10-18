@@ -98,14 +98,12 @@ public class TonosActivity extends AppCompatActivity {
         params.setMargins(0, 0, 0, dpToPx(10));
         row.setLayoutParams(params);
 
-        // Icono musical
         TextView tvIcon = new TextView(this);
         tvIcon.setText("🎵");
         tvIcon.setTextSize(22f);
         tvIcon.setPadding(0, 0, dpToPx(12), 0);
         row.addView(tvIcon);
 
-        // Textos (Nombre y Fecha)
         LinearLayout textLayout = new LinearLayout(this);
         textLayout.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams lpText = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
@@ -127,7 +125,6 @@ public class TonosActivity extends AppCompatActivity {
 
         row.addView(textLayout);
 
-        // Botón Escuchar / Parar
         TextView btnPlay = new TextView(this);
         btnPlay.setText(tonoIdReproduciendo == tono.getId() ? "⏹ Parar" : "▶ Escuchar");
         btnPlay.setTextColor(Color.parseColor("#4CA977"));
@@ -138,7 +135,6 @@ public class TonosActivity extends AppCompatActivity {
         btnPlay.setOnClickListener(v -> toggleReproduccion(tono, btnPlay));
         row.addView(btnPlay);
 
-        // Botón Eliminar
         ImageView btnEliminar = new ImageView(this);
         btnEliminar.setImageResource(R.drawable.ic_delete);
         btnEliminar.setColorFilter(Color.parseColor("#E05D5D"));
@@ -230,7 +226,6 @@ public class TonosActivity extends AppCompatActivity {
                 }
             }
 
-            // Registrar en SQLite
             String fechaHoy = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
             TonoAudio nuevoTono = new TonoAudio();
             nuevoTono.setUsuarioId(userId);

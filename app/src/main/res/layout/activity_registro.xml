@@ -19,7 +19,6 @@
             android:paddingVertical="32dp"
             android:gravity="center">
 
-            <!-- Logo / Avatar -->
             <FrameLayout
                 android:layout_width="80dp"
                 android:layout_height="80dp"
@@ -67,7 +66,6 @@
                 android:layout_marginTop="6dp"
                 android:layout_marginBottom="28dp" />
 
-            <!-- Formulario -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -161,7 +159,6 @@
                     android:inputType="textPassword"
                     android:layout_marginBottom="22dp" />
 
-                <!-- Botón Registrarse -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_crear_cuenta"
                     android:layout_width="match_parent"

@@ -30,7 +30,6 @@ public class InicioActivity extends AppCompatActivity {
     private LinearLayout llHabitosDinamicosContainer;
     private LinearLayout llEstadoVacioHabitos;
 
-    // Métricas dinámicas superiores
     private TextView tvHabitosListosResumen;
     private TextView tvDescripcionResumen;
     private CircularProgressIndicator cpiHoyFlorece;
@@ -83,13 +82,11 @@ public class InicioActivity extends AppCompatActivity {
         tvPorcentajeHoy = findViewById(R.id.tv_porcentaje_hoy);
         tvContadorHabitosBadge = findViewById(R.id.tv_contador_habitos_badge);
 
-        // Saludo personalizado
         TextView tvSaludo = findViewById(R.id.tv_saludo_usuario);
         if (tvSaludo != null) {
             tvSaludo.setText("¡Hola, " + sessionManager.getUserName() + "! ✨");
         }
 
-        // Floating Action Button
         FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito);
         if (fab != null) {
             fab.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(this)));
@@ -113,7 +110,6 @@ public class InicioActivity extends AppCompatActivity {
 
         cargarHabitosDesdeSQLite(userId);
 
-        // Aplicar paleta activa de colores al FloatingActionButton
         FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito);
         if (fab != null) {
             fab.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(this)));
@@ -162,10 +158,6 @@ public class InicioActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Carga de hábitos dinámica desde SQLite (Cero datos estáticos).
-     * Calcula métricas reales y actualiza las tarjetas superiores.
-     */
     private void cargarHabitosDesdeSQLite(long userId) {
         if (llHabitosDinamicosContainer == null) return;
         llHabitosDinamicosContainer.removeAllViews();
@@ -234,7 +226,6 @@ public class InicioActivity extends AppCompatActivity {
         params.setMargins(0, 0, 0, dpToPx(14));
         row.setLayoutParams(params);
 
-        // Icono circular
         ImageView iv = new ImageView(this);
         int size = dpToPx(48);
         LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(size, size);
@@ -256,7 +247,6 @@ public class InicioActivity extends AppCompatActivity {
         iv.setImageResource(iconRes);
         iv.setColorFilter(Color.parseColor("#2D3142"));
 
-        // Textos del hábito
         LinearLayout llText = new LinearLayout(this);
         llText.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
@@ -285,14 +275,12 @@ public class InicioActivity extends AppCompatActivity {
         llText.addView(tvTitulo);
         llText.addView(tvSub);
 
-        // Estado Badge ("Hecho" / "Pendiente")
         TextView tvBadge = new TextView(this);
         tvBadge.setTextSize(12);
         tvBadge.setTypeface(null, android.graphics.Typeface.BOLD);
         tvBadge.setPadding(dpToPx(14), dpToPx(8), dpToPx(14), dpToPx(8));
         actualizarBadgeEstado(tvBadge, h.isCompletadoHoy());
 
-        // Toggle interactivo con recálculo dinámico de estadísticas
         row.setOnClickListener(v -> {
             boolean nuevoEstado = !h.isCompletadoHoy();
             h.setCompletadoHoy(nuevoEstado);
@@ -307,7 +295,6 @@ public class InicioActivity extends AppCompatActivity {
             }
             actualizarBadgeEstado(tvBadge, nuevoEstado);
 
-            // Recalcular el porcentaje superior
             List<Habito> actuales = dbHelper.obtenerHabitosPorUsuario(userId);
             int comp = 0;
             for (Habito hab : actuales) {
@@ -318,7 +305,6 @@ public class InicioActivity extends AppCompatActivity {
             Toast.makeText(this, nuevoEstado ? "¡Hábito cumplido! 🌱✨" : "Hábito marcado como pendiente", Toast.LENGTH_SHORT).show();
         });
 
-        // Opciones de edición y eliminación (CRUD completo)
         row.setOnLongClickListener(v -> {
             new AlertDialog.Builder(this)
                     .setTitle(h.getNombre())

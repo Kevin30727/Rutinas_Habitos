@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@color/background_app">
 
-    <!-- ImageView GIF que ocupa toda la pantalla completa (Full Screen Splash) -->
     <ImageView
         android:id="@+id/iv_splash_gif"
         android:layout_width="match_parent"

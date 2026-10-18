@@ -66,7 +66,6 @@ public class CalendarioActivity extends AppCompatActivity {
         super.onResume();
         cargarHabitosDelDia();
 
-        // Aplicar paleta activa de colores al FloatingActionButton
         FloatingActionButton fab = findViewById(R.id.btn_nuevo_habito_cal);
         if (fab != null) {
             fab.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(this)));
@@ -118,7 +117,6 @@ public class CalendarioActivity extends AppCompatActivity {
         marginParams.bottomMargin = dpToPx(10);
         row.setLayoutParams(marginParams);
 
-        // Checkbox circular interactivo
         ImageView ivCheck = new ImageView(this);
         int checkSize = dpToPx(32);
         ivCheck.setLayoutParams(new LinearLayout.LayoutParams(checkSize, checkSize));
@@ -134,7 +132,6 @@ public class CalendarioActivity extends AppCompatActivity {
         }
         ivCheck.setPadding(dpToPx(7), dpToPx(7), dpToPx(7), dpToPx(7));
 
-        // Títulos
         LinearLayout textLayout = new LinearLayout(this);
         textLayout.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams lpText = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
@@ -158,7 +155,6 @@ public class CalendarioActivity extends AppCompatActivity {
         tvSubtitulo.setTextSize(12f);
         textLayout.addView(tvSubtitulo);
 
-        // Emoji / Icono decorativo de área
         TextView tvEmoji = new TextView(this);
         String emoji = "🌱";
         if ("Salud".equalsIgnoreCase(h.getAreaVida())) emoji = "💧";
@@ -169,7 +165,6 @@ public class CalendarioActivity extends AppCompatActivity {
         tvEmoji.setText(emoji);
         tvEmoji.setTextSize(16f);
 
-        // Listener para togglear estado en SQLite
         row.setOnClickListener(v -> {
             boolean nuevoEstado = !h.isCompletadoHoy();
             h.setCompletadoHoy(nuevoEstado);
@@ -347,7 +342,6 @@ public class CalendarioActivity extends AppCompatActivity {
                 int dia = i - espaciosVacios + 1;
                 tvNum.setText(String.valueOf(dia));
 
-                // Indicador visual dinámico
                 if (dia == diaSeleccionadoActual) {
                     tvNum.setBackgroundResource(R.drawable.bg_dia_seleccionado_calendario);
                     tvNum.setTypeface(null, android.graphics.Typeface.BOLD);
@@ -355,7 +349,6 @@ public class CalendarioActivity extends AppCompatActivity {
                     punto.setBackgroundResource(R.drawable.bg_punto_completo);
                 }
 
-                // Interactividad al tocar un día
                 final int diaTocado = dia;
                 celda.setOnClickListener(v -> {
                     diaSeleccionadoActual = diaTocado;

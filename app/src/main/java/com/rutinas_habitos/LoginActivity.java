@@ -64,7 +64,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void ingresarDemo() {
-        // Usuario demo predeterminado
+
         String correoDemo = "sofia@rutinapastel.com";
         Usuario demo = dbHelper.autenticarUsuario(correoDemo, "123456");
         long userId;

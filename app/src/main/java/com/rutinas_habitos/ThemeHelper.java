@@ -8,15 +8,6 @@ import android.view.View;
 import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-/**
- * Gestor dinámico de paleta de colores para "Rutinas Pastel".
- * 
- * Permite cambiar y aplicar inmediatamente en toda la app la paleta elegida:
- * - Menta (Pastel Neo)
- * - Sakura (Dulce Rosa)
- * - Océano (Cielo Calmo)
- * - Lavanda (Lavanda Suave)
- */
 public class ThemeHelper {
 
     public static final String PREFS_NAME = "rutinas_pastel_config";
@@ -37,7 +28,7 @@ public class ThemeHelper {
         if ("sakura".equals(p)) return Color.parseColor("#F8C8DC");
         if ("oceano".equals(p)) return Color.parseColor("#B8D8E8");
         if ("lavanda".equals(p)) return Color.parseColor("#D7D9F8");
-        return Color.parseColor("#B8E0D2"); // menta
+        return Color.parseColor("#B8E0D2");
     }
 
     public static int getColorAcentoOscuro(Context context) {
@@ -45,7 +36,7 @@ public class ThemeHelper {
         if ("sakura".equals(p)) return Color.parseColor("#E8A9C2");
         if ("oceano".equals(p)) return Color.parseColor("#6DAFD0");
         if ("lavanda".equals(p)) return Color.parseColor("#8A8FD4");
-        return Color.parseColor("#4CA977"); // menta
+        return Color.parseColor("#4CA977");
     }
 
     public static int getColorFondoSuave(Context context) {
@@ -53,12 +44,9 @@ public class ThemeHelper {
         if ("sakura".equals(p)) return Color.parseColor("#FDEDF3");
         if ("oceano".equals(p)) return Color.parseColor("#EBF4F9");
         if ("lavanda".equals(p)) return Color.parseColor("#F1F2FD");
-        return Color.parseColor("#EAF7F2"); // menta
+        return Color.parseColor("#EAF7F2");
     }
 
-    /**
-     * Aplica la paleta activa a componentes comunes (FAB, botones principales, tarjetas).
-     */
     public static void aplicarPaletaEnVista(Context context, FloatingActionButton fab, View bannerOHeader) {
         int colorPrimario = getColorPrimario(context);
         int colorFondoSuave = getColorFondoSuave(context);

@@ -42,8 +42,6 @@ public class SessionManager {
         return pref.getString(KEY_USER_EMAIL, "");
     }
 
-
-
     public void cerrarSesion() {
         editor.clear();
         editor.apply();

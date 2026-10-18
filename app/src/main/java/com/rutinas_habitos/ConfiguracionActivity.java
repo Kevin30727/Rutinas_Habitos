@@ -19,16 +19,6 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-/**
- * Actividad dedicada a la Configuración General de "Rutinas Pastel".
- * 
- * Funcionalidades:
- * 1. Preferencias de Ritmo: Modo Sin Culpa (persistido en SQLite), Meta de Bienestar, Alertas.
- * 2. Apariencia & Armonía Visual: Selección interactiva de Paleta Pastel (Pastel Neo, Dulce Sakura, Océano Calmo, Lavanda Suave) y Modo Descanso Visual.
- * 3. Gestión de Datos: Exportación completa de hábitos en JSON y restablecimiento total de hábitos en SQLite.
- * 4. Sistema de Notificaciones: Prueba en vivo de canal estándar y canal con melodía armónica relajante (528Hz Solfeggio).
- * 5. Gestión de Cuenta: Cierre seguro de sesión.
- */
 public class ConfiguracionActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "rutinas_pastel_config";
@@ -41,12 +31,10 @@ public class ConfiguracionActivity extends AppCompatActivity {
     private SharedPreferences configPrefs;
     private long userId;
 
-    // Vistas - Ritmo
     private SwitchCompat switchSinCulpa;
     private TextView tvMetaSubtitulo;
     private SwitchCompat switchRecordatorios;
 
-    // Vistas - Paleta
     private LinearLayout optMenta;
     private LinearLayout optSakura;
     private LinearLayout optOceano;
@@ -95,29 +83,25 @@ public class ConfiguracionActivity extends AppCompatActivity {
     }
 
     private void cargarConfiguracionActual() {
-        // 1. Modo Sin Culpa desde SQLite
+
         boolean sinCulpa = dbHelper.obtenerModoSinCulpa(userId);
         switchSinCulpa.setChecked(sinCulpa);
 
-        // 2. Meta de bienestar desde SQLite
         String meta = dbHelper.obtenerMetaBienestar(userId);
         tvMetaSubtitulo.setText(meta != null && !meta.isEmpty() ? meta : "Paz interior y consistencia");
 
-        // 3. Recordatorios
         boolean notifActivas = configPrefs.getBoolean(KEY_NOTIF_ACTIVAS, true);
         switchRecordatorios.setChecked(notifActivas);
 
-        // 4. Paleta seleccionada
         String paleta = configPrefs.getString(KEY_PALETA, "menta");
         actualizarUIPaleta(paleta);
 
-        // 5. Descanso visual
         boolean descanso = configPrefs.getBoolean(KEY_DESCANSO_VISUAL, false);
         switchDescansoVisual.setChecked(descanso);
     }
 
     private void setupListeners() {
-        // Toggle Modo Sin Culpa
+
         switchSinCulpa.setOnCheckedChangeListener((buttonView, isChecked) -> {
             dbHelper.actualizarModoSinCulpa(userId, isChecked);
             Toast.makeText(this, isChecked ?
@@ -125,34 +109,27 @@ public class ConfiguracionActivity extends AppCompatActivity {
                     "Modo Sin Culpa desactivado", Toast.LENGTH_SHORT).show();
         });
 
-        // Editar Meta de Bienestar
         findViewById(R.id.card_config_meta).setOnClickListener(v -> mostrarDialogoEditarMeta());
 
-        // Toggle Recordatorios
         switchRecordatorios.setOnCheckedChangeListener((buttonView, isChecked) -> {
             configPrefs.edit().putBoolean(KEY_NOTIF_ACTIVAS, isChecked).apply();
             Toast.makeText(this, isChecked ? "Recordatorios conscientes activados 🔔" : "Recordatorios pausados", Toast.LENGTH_SHORT).show();
         });
 
-        // Selector de Paleta de Colores
         optMenta.setOnClickListener(v -> seleccionarPaleta("menta", "Pastel Neo (Menta)"));
         optSakura.setOnClickListener(v -> seleccionarPaleta("sakura", "Dulce Sakura (Rosa)"));
         optOceano.setOnClickListener(v -> seleccionarPaleta("oceano", "Océano Calmo (Azul)"));
         optLavanda.setOnClickListener(v -> seleccionarPaleta("lavanda", "Lavanda Suave"));
 
-        // Toggle Descanso Visual
         switchDescansoVisual.setOnCheckedChangeListener((buttonView, isChecked) -> {
             configPrefs.edit().putBoolean(KEY_DESCANSO_VISUAL, isChecked).apply();
             Toast.makeText(this, isChecked ? "Descanso visual activado ✨ Tonos relajantes" : "Descanso visual desactivado", Toast.LENGTH_SHORT).show();
         });
 
-        // Exportar Respaldo de Hábitos JSON
         findViewById(R.id.btn_exportar_habitos).setOnClickListener(v -> exportarHabitosJSON());
 
-        // Vaciar Base de Datos (Reset)
         findViewById(R.id.btn_vaciar_habitos).setOnClickListener(v -> confirmarVaciarHabitos());
 
-        // Probar Tono Estándar
         findViewById(R.id.btn_test_notif_default).setOnClickListener(v -> {
             NotificationHelper.reproducirDefaultPreview(this);
             NotificationHelper.enviarNotificacionDefault(
@@ -163,7 +140,6 @@ public class ConfiguracionActivity extends AppCompatActivity {
             Toast.makeText(this, "Enviando alerta con sonido estándar de Android", Toast.LENGTH_SHORT).show();
         });
 
-        // Probar Melodía Relajante 528Hz
         findViewById(R.id.btn_test_notif_relajante).setOnClickListener(v -> {
             NotificationHelper.reproducirMelodiaRelajantePreview(this);
             NotificationHelper.enviarNotificacionMelodiaRelajante(
@@ -174,7 +150,6 @@ public class ConfiguracionActivity extends AppCompatActivity {
             Toast.makeText(this, "🎵 Reproduciendo melodía relajante armónica", Toast.LENGTH_SHORT).show();
         });
 
-        // Cerrar Sesión
         findViewById(R.id.btn_config_cerrar_sesion).setOnClickListener(v -> confirmarCerrarSesion());
     }
 
@@ -186,13 +161,12 @@ public class ConfiguracionActivity extends AppCompatActivity {
     }
 
     private void actualizarUIPaleta(String clave) {
-        // Resetear todas las opciones a estado inactivo
+
         resetPaletaCard(optMenta, tvCheckMenta);
         resetPaletaCard(optSakura, tvCheckSakura);
         resetPaletaCard(optOceano, tvCheckOceano);
         resetPaletaCard(optLavanda, tvCheckLavanda);
 
-        // Destacar la seleccionada
         if ("sakura".equals(clave)) {
             activarPaletaCard(optSakura, tvCheckSakura, R.drawable.bg_card_destacada_rosa, "#E8A9C2");
         } else if ("oceano".equals(clave)) {
@@ -200,7 +174,7 @@ public class ConfiguracionActivity extends AppCompatActivity {
         } else if ("lavanda".equals(clave)) {
             activarPaletaCard(optLavanda, tvCheckLavanda, R.drawable.bg_tarjeta_redondeada, "#8F94D6");
         } else {
-            // Menta por defecto
+
             activarPaletaCard(optMenta, tvCheckMenta, R.drawable.bg_card_destacada_menta, "#4CA977");
         }
     }

@@ -21,7 +21,6 @@
             android:paddingTop="20dp"
             android:paddingBottom="160dp">
 
-            <!-- 1. Top Bar (Avatar y Título) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -69,7 +68,6 @@
                     android:padding="4dp"/>
             </LinearLayout>
 
-            <!-- 2. Controles de Mes y Selector -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -164,7 +162,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 3. Leyenda de Estados -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -182,7 +179,6 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pendiente" android:textSize="10sp" android:textColor="@color/neutral"/>
             </LinearLayout>
 
-            <!-- 4. Tarjeta del Calendario (Dinámico) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -212,7 +208,6 @@
                 </GridLayout>
             </LinearLayout>
 
-            <!-- 5. Cabecera de Día Seleccionado -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -258,7 +253,6 @@
                     android:backgroundTint="#B8E0D2" />
             </LinearLayout>
 
-            <!-- 6. Tarjeta de Hábitos Diarios -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -293,14 +287,12 @@
                         android:textSize="12sp" />
                 </LinearLayout>
 
-                <!-- Contenedor dinámico SQLite -->
                 <LinearLayout
                     android:id="@+id/ll_contenedor_habitos_calendario"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical" />
 
-                <!-- Estado vacío cuando no hay hábitos -->
                 <LinearLayout
                     android:id="@+id/ll_estado_vacio_calendario"
                     android:layout_width="match_parent"
@@ -341,7 +333,6 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Botón Flotante -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_nuevo_habito_cal"
         android:layout_width="wrap_content"
@@ -355,7 +346,6 @@
         app:layout_constraintBottom_toTopOf="@+id/barra_inferior"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Barra Inferior -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/barra_inferior"
         style="@style/Widget.MaterialComponents.BottomNavigationView"

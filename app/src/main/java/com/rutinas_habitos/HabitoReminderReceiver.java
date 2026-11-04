@@ -3,9 +3,11 @@ package com.rutinas_habitos;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import androidx.core.app.NotificationManagerCompat;
 
+import java.util.Calendar;
 import java.util.List;
 
 public class HabitoReminderReceiver extends BroadcastReceiver {
@@ -28,9 +30,7 @@ public class HabitoReminderReceiver extends BroadcastReceiver {
             long habitoId = intent.getLongExtra(EXTRA_HABITO_ID, -1);
             Log.d(TAG, "Cancelando notificación y silenciando música para hábito id=" + habitoId);
             try {
-
                 NotificationHelper.detenerAudio();
-
                 NotificationManagerCompat manager = NotificationManagerCompat.from(context);
                 if (habitoId > 0) {
                     manager.cancel((int) habitoId);
@@ -62,29 +62,64 @@ public class HabitoReminderReceiver extends BroadcastReceiver {
             return;
         }
 
+        SharedPreferences configPrefs = context.getSharedPreferences(ThemeHelper.PREFS_NAME, Context.MODE_PRIVATE);
+        boolean notificacionesActivas = configPrefs.getBoolean("notificaciones_activas", true);
+        if (!notificacionesActivas) {
+            Log.d(TAG, "Notificaciones pausadas desde configuración general.");
+            return;
+        }
+
         long habitoId = intent.getLongExtra(EXTRA_HABITO_ID, -1);
         String nombre = intent.getStringExtra(EXTRA_HABITO_NOMBRE);
         String tipoSonido = intent.getStringExtra(EXTRA_TIPO_SONIDO);
         int duracionSegundos = intent.getIntExtra(EXTRA_DURACION_SEGUNDOS, 30);
         String hora = intent.getStringExtra(EXTRA_HORA);
 
-        Log.d(TAG, "Recordatorio recibido para hábito id=" + habitoId + " nombre=" + nombre
-                + " duracion=" + duracionSegundos + "s hora=" + hora);
+        DatabaseHelper dbHelper = DatabaseHelper.getInstance(context);
+        Habito habito = dbHelper.obtenerHabitoPorId(habitoId);
 
-        if (nombre == null || nombre.isEmpty()) {
-            nombre = "Mi Hábito Pastel";
+        boolean tocaHoy = true;
+        if (habito != null) {
+            tocaHoy = esDiaActivo(habito.getDiasSemana(), Calendar.getInstance());
         }
 
-        NotificationHelper.dispararNotificacionHabito(context, habitoId, nombre, tipoSonido, duracionSegundos);
+        if (tocaHoy) {
+            if (nombre == null || nombre.isEmpty()) {
+                nombre = habito != null ? habito.getNombre() : "Mi Hábito Pastel";
+            }
+            NotificationHelper.dispararNotificacionHabito(context, habitoId, nombre, tipoSonido, duracionSegundos);
+        } else {
+            Log.d(TAG, "Hoy no está marcado en los días activos del hábito '" + nombre + "'");
+        }
 
         try {
-            DatabaseHelper dbHelper = DatabaseHelper.getInstance(context);
-            Habito habito = dbHelper.obtenerHabitoPorId(habitoId);
             if (habito != null && habito.isRecordatorioActivo()) {
                 NotificationHelper.programarAlarmaHabito(context, habito);
             }
         } catch (Exception e) {
             Log.e(TAG, "Error re-programando alarma diaria: " + e.getMessage());
         }
+    }
+
+    public static boolean esDiaActivo(String diasSemana, Calendar cal) {
+        if (diasSemana == null || diasSemana.trim().isEmpty()) {
+            return true;
+        }
+        int day = cal.get(Calendar.DAY_OF_WEEK);
+        String letra = "L";
+        switch (day) {
+            case Calendar.MONDAY: letra = "L"; break;
+            case Calendar.TUESDAY: letra = "M"; break;
+            case Calendar.WEDNESDAY: letra = "X"; break;
+            case Calendar.THURSDAY: letra = "J"; break;
+            case Calendar.FRIDAY: letra = "V"; break;
+            case Calendar.SATURDAY: letra = "S"; break;
+            case Calendar.SUNDAY: letra = "D"; break;
+        }
+        String[] partes = diasSemana.split(",");
+        for (String p : partes) {
+            if (p.trim().equalsIgnoreCase(letra)) return true;
+        }
+        return false;
     }
 }

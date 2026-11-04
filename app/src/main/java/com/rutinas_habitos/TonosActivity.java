@@ -49,6 +49,7 @@ public class TonosActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeHelper.aplicarTema(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tonos);
 

@@ -173,6 +173,12 @@ public class NotificationHelper {
         if (calendar.getTimeInMillis() <= System.currentTimeMillis()) {
             calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
+        for (int i = 0; i < 7; i++) {
+            if (HabitoReminderReceiver.esDiaActivo(habito.getDiasSemana(), calendar)) {
+                break;
+            }
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+        }
 
         Intent intent = new Intent(context, HabitoReminderReceiver.class);
         intent.putExtra(HabitoReminderReceiver.EXTRA_HABITO_ID, habito.getId());

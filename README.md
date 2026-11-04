@@ -1,6 +1,6 @@
 # Rutinas Pastel - Gestion de Habitos y Bienestar
 
-Aplicacion movil nativa para Android orientada a la salud mental, formacion de habitos y bienestar personal. Su enfoque prioriza la constancia sin generar estres ni ansiedad, ofreciendo una interfaz visual en tonos pastel, persistencia de datos relacional en SQLite y un sistema de notificaciones personalizables con audio MP3 y duracion configurable.
+Aplicacion movil nativa para Android orientada a la salud mental, formacion de habitos y bienestar personal. Su enfoque prioriza la constancia sin generar estres ni ansiedad, ofreciendo navegacion fluida con desplazamiento horizontal (ViewPager2), interfaz visual personalizable en paletas pastel, persistencia de datos relacional en SQLite y un sistema de notificaciones conscientes con audio MP3 y duracion configurable.
 
 ---
 
@@ -9,8 +9,44 @@ Aplicacion movil nativa para Android orientada a la salud mental, formacion de h
 A diferencia de los gestores tradicionales que penalizan la falta de constancia, Rutinas Pastel implementa un diseno centrado en el cuidado emocional:
 
 - **Tolerancia y Continuidad:** Si no es posible completar un habito en un dia determinado, el sistema no aplica penalizaciones punitivas y permite retomar la rutina al dia siguiente de manera natural.
-- **Micro-habitos Progresivos:** Se promueve la definicion de metas accesibles y graduales (como beber un vaso de agua, leer 5 minutos o realizar pausas de respiracion).
-- **Entorno Visual Neutro:** Se prescinde de colores de alerta estridentes; todos los componentes utilizan gamas suaves en escala pastel para reducir la fatiga visual.
+- **Micro-habitos Progresivos:** Se promueve la definicion de metas accesibles y graduales con contadores incrementales directos (+ / -) para vasos de agua, minutos o paginas.
+- **Entorno Visual Neutro y Descanso Visual:** Diseno con colores relajantes y modo descanso visual para reducir la fatiga en sesiones nocturnas.
+
+---
+
+## Navegacion y Desplazamiento Fluido
+
+La pantalla principal (`InicioActivity`) integra un contenedor `ViewPager2` sincronizado con la barra de navegacion inferior (`BottomNavigationView`):
+
+- **Scroll Horizontal:** Permite deslizarse libremente entre las 4 secciones principales mediante gestos tactiles continuos o seleccionando los iconos inferiores sin recargas bruscas.
+- **Persistencia de Estado:** Las pantallas preservan su posicion y actualizan su contenido dinamicamente en cada transicion.
+- **4 Secciones Integradas:**
+  1. **Inicio (`InicioFragment`):** Resumen del dia, progreso de florecimiento, racha activa y lista interactiva de habitos con contadores incrementales.
+  2. **Habitos (`HabitosFragment`):** Grafico de barras semanal dinámico, desglose porcentual por areas (Salud, Mente, Productividad) y habitos destacados.
+  3. **Calendario (`CalendarioFragment`):** Cuadricula mensual con indicadores de cumplimiento por dia y visualizacion de registros historicos.
+  4. **Perfil (`PerfilFragment`):** Resumen de constancia, metricas globales, acceso a la biblioteca de tonos y configuracion general.
+
+---
+
+## Modulo de Configuracion y Personalizacion
+
+La pantalla de ajustes (`ConfiguracionActivity`) proporciona control completo sobre la experiencia:
+
+1. **Selector de Paletas de Color:**
+   - Pastel Neo (Menta)
+   - Dulce Sakura (Rosa)
+   - Oceano Calmo (Azul)
+   - Lavanda Suave (Violeta)
+   - Aplica dinamicamente sobre temas Material 3, barra de navegacion, botones de accion y cabeceras.
+2. **Modo Descanso Visual:**
+   - Activa el modo oscuro adaptativo sin perder la suavidad de las tonalidades pastel.
+3. **Interruptor Maestro de Notificaciones:**
+   - Habilita o pausa todas las alarmas programadas en el sistema.
+4. **Respaldo y Restauracion JSON:**
+   - Exporta toda la coleccion de habitos del usuario en formato JSON para compartir o guardar.
+   - Permite importar y restaurar copias de seguridad de habitos de manera inmediata.
+5. **Reinicio Seguro:**
+   - Opcion para vaciar y restablecer habitos con dialogo de confirmacion.
 
 ---
 
@@ -33,8 +69,8 @@ La aplicacion cuenta con un subsistema sonoro configurable para los recordatorio
    - Lista interactiva de archivos cargados con opciones para reproducir, detener y eliminar tanto de la base de datos como del disco.
 6. **Programacion Horaria:**
    - Selector horario mediante dialogo nativo `TimePickerDialog`.
-   - Accesos rapidos para momentos frecuentes del dia: Mañana (08:00 AM), Mediodia (12:30 PM), Tarde (05:00 PM) y Noche (09:00 PM).
-   - Interruptor individual de activacion o desactivacion por cada habito.
+   - Accesos rapidos para momentos frecuentes del dia: Manana (08:00 AM), Mediodia (12:30 PM), Tarde (05:00 PM) y Noche (09:00 PM).
+   - Selector de dias de la semana activos con verificacion antes de activar la alarma.
 
 ---
 
@@ -44,13 +80,14 @@ La aplicacion cuenta con un subsistema sonoro configurable para los recordatorio
 Rutinas Pastel
 ├── SplashActivity (Pantalla de bienvenida inicial)
 ├── LoginActivity y RegistroActivity (Autenticacion local con SQLite)
-├── InicioActivity (Resumen diario, progreso general y seguimiento semanal)
-├── CrearHabitoActivity (Creacion y edicion de habitos con configuracion de audio y horarios)
-├── HabitosActivity (Metricas detalladas por areas: Salud, Mente, Productividad)
-├── CalendarioActivity (Vista mensual y seguimiento por dia)
-├── PerfilActivity (Resumen de cuenta, accesos a biblioteca de tonos y configuracion)
-├── ConfiguracionActivity (Ajustes generales, modo sin culpa, exportacion JSON y reinicio de base de datos)
-└── TonosActivity (Gestion de archivos de audio personalizados)
+├── InicioActivity (Host ViewPager2 con navegacion horizontal fluida)
+│   ├── InicioFragment (Dashboard diario y contadores directos)
+│   ├── HabitosFragment (Metricas detalladas y grafico semanal)
+│   ├── CalendarioFragment (Vista mensual e historial de registros)
+│   └── PerfilFragment (Estadisticas y accesos principales)
+├── CrearHabitoActivity (Creacion y edicion de habitos con audio, metas y dias)
+├── ConfiguracionActivity (Paletas, modo descanso, exportacion/restauracion JSON)
+└── TonosActivity (Gestion y reproduccion de audios personalizados)
 ```
 
 ---
@@ -81,7 +118,6 @@ erDiagram
         TEXT meta_bienestar
         INTEGER vasos_agua
         INTEGER meta_agua
-        TEXT moneda
     }
 
     HABITO {
@@ -99,6 +135,9 @@ erDiagram
         TEXT hora_recordatorio
         INTEGER recordatorio_activo
         TEXT tipo_sonido_notificacion
+        TEXT ruta_tono_personalizado
+        TEXT nombre_tono_personalizado
+        INTEGER duracion_sonido_segundos
         INTEGER racha_dias
         INTEGER completado_hoy
         INTEGER progreso_actual
@@ -131,10 +170,11 @@ erDiagram
 
 - **Lenguaje:** Java 17
 - **Plataforma:** Android SDK (minSdkVersion 24, targetSdkVersion 34+)
+- **Navegacion:** ViewPager2 y Google BottomNavigationView
 - **Librerias de Interfaz:** AndroidX AppCompat, Material Components 3, ConstraintLayout
 - **Multimedia y Animaciones:** Glide 4.16.0, Android MediaPlayer y RingtoneManager
-- **Almacenamiento Local:** SQLiteOpenHelper (relacional) y SharedPreferences (sesion)
-- **Sistema de Compilacion:** Gradle con soporte para Kotlin DSL / Groovy
+- **Almacenamiento Local:** SQLiteOpenHelper (relacional con claves foraneas) y SharedPreferences
+- **Sistema de Compilacion:** Gradle
 
 ---
 
@@ -164,44 +204,3 @@ erDiagram
    ```bash
    ./gradlew installDebug
    ```
-
----
-
-## Estructura del Proyecto
-
-```
-Rutinas_Habitos/
-├── app/
-│   ├── src/
-│   │   └── main/
-│   │       ├── AndroidManifest.xml
-│   │       ├── java/com/rutinas_habitos/
-│   │       │   ├── CalendarioActivity.java
-│   │       │   ├── ConfiguracionActivity.java
-│   │       │   ├── CrearHabitoActivity.java
-│   │       │   ├── DatabaseHelper.java
-│   │       │   ├── Habito.java
-│   │       │   ├── HabitoReminderReceiver.java
-│   │       │   ├── HabitosActivity.java
-│   │       │   ├── InicioActivity.java
-│   │       │   ├── LoginActivity.java
-│   │       │   ├── NotificationHelper.java
-│   │       │   ├── PerfilActivity.java
-│   │       │   ├── RegistroActivity.java
-│   │       │   ├── SessionManager.java
-│   │       │   ├── SplashActivity.java
-│   │       │   ├── ThemeHelper.java
-│   │       │   ├── TonoAudio.java
-│   │       │   ├── TonosActivity.java
-│   │       │   └── Usuario.java
-│   │       └── res/
-│   │           ├── color/
-│   │           ├── drawable/
-│   │           ├── layout/
-│   │           ├── raw/
-│   │           └── values/
-├── build.gradle
-├── gradle.properties
-├── settings.gradle
-└── README.md
-```

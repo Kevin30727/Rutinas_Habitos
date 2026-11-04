@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_app">
+
+    <LinearLayout
+        android:id="@+id/ll_habitos_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="10dp">
+
+        <ImageView
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="@drawable/bg_tarjeta_redondeada"
+            android:src="@drawable/ic_check"
+            android:padding="8dp"
+            android:contentDescription="Logo" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RUTINAS PASTEL"
+                android:textColor="@color/text_muted"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Progreso &amp; Hábitos"
+                android:textColor="@color/neutral"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="120dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:padding="4dp"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:id="@+id/filtro_semana"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Semana"
+                    android:textColor="@color/neutral"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:background="@drawable/bg_selector_activo"
+                    android:paddingVertical="8dp" />
+
+                <TextView
+                    android:id="@+id/filtro_mes"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Mes"
+                    android:textColor="@color/text_muted"
+                    android:textSize="13sp"
+                    android:gravity="center"
+                    android:paddingVertical="8dp" />
+
+                <TextView
+                    android:id="@+id/filtro_anio"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Año"
+                    android:textColor="@color/text_muted"
+                    android:textSize="13sp"
+                    android:gravity="center"
+                    android:paddingVertical="8dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:elevation="2dp"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Rendimiento General"
+                            android:textColor="@color/neutral"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_rango_fechas_semana"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Progreso de hábitos activos"
+                            android:textColor="@color/text_muted"
+                            android:textSize="12sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_porcentaje_exito_habitos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0%"
+                        android:textColor="@color/neutral"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/cpi_rendimiento_habitos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:progress="0"
+                    app:indicatorSize="110dp"
+                    app:trackThickness="10dp"
+                    app:indicatorColor="@color/primary"
+                    app:trackColor="@color/mint_light"
+                    app:trackCornerRadius="5dp"
+                    android:layout_marginBottom="14dp"/>
+
+                <TextView
+                    android:id="@+id/tv_racha_dias_habitos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="0 días de racha activa"
+                    android:textColor="@color/text_muted"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:elevation="2dp"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Actividad Semanal"
+                            android:textColor="@color/neutral"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Lunes a Domingo"
+                            android:textColor="@color/text_muted"
+                            android:textSize="12sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_highlight_semanal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🌱 Semana en curso"
+                        android:textColor="#2D3142"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="5dp"
+                        android:background="@drawable/bg_chip_normal" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="130dp"
+                    android:orientation="horizontal"
+                    android:gravity="bottom"
+                    android:weightSum="7">
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="bottom|center_horizontal">
+                        <View android:id="@+id/bar_lunes" android:layout_width="20dp" android:layout_height="20dp" android:background="@drawable/bg_boton_circular" android:backgroundTint="@color/primary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="L" android:textColor="@color/text_muted" android:textSize="11sp" android:layout_marginTop="6dp" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="bottom|center_horizontal">
+                        <View android:id="@+id/bar_martes" android:layout_width="20dp" android:layout_height="20dp" android:background="@drawable/bg_boton_circular" android:backgroundTint="@color/primary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="M" android:textColor="@color/text_muted" android:textSize="11sp" android:layout_marginTop="6dp" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="bottom|center_horizontal">
+                        <View android:id="@+id/bar_miercoles" android:layout_width="20dp" android:layout_height="20dp" android:background="@drawable/bg_boton_circular" android:backgroundTint="@color/primary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="X" android:textColor="@color/text_muted" android:textSize="11sp" android:layout_marginTop="6dp" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="bottom|center_horizontal">
+                        <View android:id="@+id/bar_jueves" android:layout_width="20dp" android:layout_height="20dp" android:background="@drawable/bg_boton_circular" android:backgroundTint="@color/primary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="J" android:textColor="@color/neutral" android:textSize="11sp" android:textStyle="bold" android:layout_marginTop="6dp" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="bottom|center_horizontal">
+                        <View android:id="@+id/bar_viernes" android:layout_width="20dp" android:layout_height="20dp" android:background="@drawable/bg_boton_circular" android:backgroundTint="@color/primary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="V" android:textColor="@color/text_muted" android:textSize="11sp" android:layout_marginTop="6dp" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="bottom|center_horizontal">
+                        <View android:id="@+id/bar_sabado" android:layout_width="20dp" android:layout_height="20dp" android:background="@drawable/bg_boton_circular" android:backgroundTint="@color/primary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="S" android:textColor="@color/text_muted" android:textSize="11sp" android:layout_marginTop="6dp" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="bottom|center_horizontal">
+                        <View android:id="@+id/bar_domingo" android:layout_width="20dp" android:layout_height="20dp" android:background="@drawable/bg_boton_circular" android:backgroundTint="@color/primary" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="D" android:textColor="@color/text_muted" android:textSize="11sp" android:layout_marginTop="6dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_tarjeta_redondeada"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:elevation="2dp"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Por Áreas de Vida"
+                    android:textColor="@color/neutral"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Salud &amp; Vitalidad"
+                    android:textColor="@color/neutral"
+                    android:textSize="13sp" />
+
+                <ProgressBar
+                    android:id="@+id/pb_salud"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp"
+                    android:progress="0"
+                    android:progressTint="@color/primary"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mente &amp; Serenidad"
+                    android:textColor="@color/neutral"
+                    android:textSize="13sp" />
+
+                <ProgressBar
+                    android:id="@+id/pb_mente"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp"
+                    android:progress="0"
+                    android:progressTint="@color/secondary"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Productividad Serena"
+                    android:textColor="@color/neutral"
+                    android:textSize="13sp" />
+
+                <ProgressBar
+                    android:id="@+id/pb_productividad"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp"
+                    android:progress="0"
+                    android:progressTint="@color/tertiary"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mis Hábitos Estrella"
+                android:textColor="@color/neutral"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout
+                android:id="@+id/ll_lista_habitos_estrella"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

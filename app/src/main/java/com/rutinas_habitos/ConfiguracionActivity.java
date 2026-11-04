@@ -47,6 +47,7 @@ public class ConfiguracionActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeHelper.aplicarTema(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_configuracion);
 
@@ -83,7 +84,6 @@ public class ConfiguracionActivity extends AppCompatActivity {
     }
 
     private void cargarConfiguracionActual() {
-
         boolean sinCulpa = dbHelper.obtenerModoSinCulpa(userId);
         switchSinCulpa.setChecked(sinCulpa);
 
@@ -93,15 +93,14 @@ public class ConfiguracionActivity extends AppCompatActivity {
         boolean notifActivas = configPrefs.getBoolean(KEY_NOTIF_ACTIVAS, true);
         switchRecordatorios.setChecked(notifActivas);
 
-        String paleta = configPrefs.getString(KEY_PALETA, "menta");
+        String paleta = ThemeHelper.getPaletaActual(this);
         actualizarUIPaleta(paleta);
 
-        boolean descanso = configPrefs.getBoolean(KEY_DESCANSO_VISUAL, false);
+        boolean descanso = ThemeHelper.isDescansoVisual(this);
         switchDescansoVisual.setChecked(descanso);
     }
 
     private void setupListeners() {
-
         switchSinCulpa.setOnCheckedChangeListener((buttonView, isChecked) -> {
             dbHelper.actualizarModoSinCulpa(userId, isChecked);
             Toast.makeText(this, isChecked ?
@@ -113,7 +112,20 @@ public class ConfiguracionActivity extends AppCompatActivity {
 
         switchRecordatorios.setOnCheckedChangeListener((buttonView, isChecked) -> {
             configPrefs.edit().putBoolean(KEY_NOTIF_ACTIVAS, isChecked).apply();
-            Toast.makeText(this, isChecked ? "Recordatorios conscientes activados 🔔" : "Recordatorios pausados", Toast.LENGTH_SHORT).show();
+            List<Habito> habitos = dbHelper.obtenerHabitosPorUsuario(userId);
+            if (isChecked) {
+                for (Habito h : habitos) {
+                    if (h.isRecordatorioActivo()) {
+                        NotificationHelper.programarAlarmaHabito(this, h);
+                    }
+                }
+                Toast.makeText(this, "Recordatorios conscientes activados 🔔", Toast.LENGTH_SHORT).show();
+            } else {
+                for (Habito h : habitos) {
+                    NotificationHelper.cancelarAlarmaHabito(this, (int) h.getId());
+                }
+                Toast.makeText(this, "Recordatorios pausados en toda la app", Toast.LENGTH_SHORT).show();
+            }
         });
 
         optMenta.setOnClickListener(v -> seleccionarPaleta("menta", "Pastel Neo (Menta)"));
@@ -122,11 +134,24 @@ public class ConfiguracionActivity extends AppCompatActivity {
         optLavanda.setOnClickListener(v -> seleccionarPaleta("lavanda", "Lavanda Suave"));
 
         switchDescansoVisual.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            configPrefs.edit().putBoolean(KEY_DESCANSO_VISUAL, isChecked).apply();
-            Toast.makeText(this, isChecked ? "Descanso visual activado ✨ Tonos relajantes" : "Descanso visual desactivado", Toast.LENGTH_SHORT).show();
+            ThemeHelper.guardarDescansoVisual(this, isChecked);
+            Toast.makeText(this, isChecked ? "Descanso visual activado ✨" : "Descanso visual desactivado", Toast.LENGTH_SHORT).show();
         });
 
         findViewById(R.id.btn_exportar_habitos).setOnClickListener(v -> exportarHabitosJSON());
+
+        View cardExportar = (View) findViewById(R.id.btn_exportar_habitos).getParent();
+        if (cardExportar instanceof LinearLayout) {
+            LinearLayout container = (LinearLayout) cardExportar;
+            TextView btnRestaurar = new TextView(this);
+            btnRestaurar.setText("📥 Restaurar Copia de Seguridad JSON");
+            btnRestaurar.setTextColor(Color.parseColor("#4CA977"));
+            btnRestaurar.setTextSize(13f);
+            btnRestaurar.setTypeface(null, android.graphics.Typeface.BOLD);
+            btnRestaurar.setPadding(0, dpToPx(12), 0, 0);
+            btnRestaurar.setOnClickListener(v -> mostrarDialogoRestaurarJSON());
+            container.addView(btnRestaurar);
+        }
 
         findViewById(R.id.btn_vaciar_habitos).setOnClickListener(v -> confirmarVaciarHabitos());
 
@@ -155,13 +180,11 @@ public class ConfiguracionActivity extends AppCompatActivity {
 
     private void seleccionarPaleta(String clave, String nombreAmigable) {
         ThemeHelper.guardarPaleta(this, clave);
-        configPrefs.edit().putString(KEY_PALETA, clave).apply();
         actualizarUIPaleta(clave);
         Toast.makeText(this, "Paleta " + nombreAmigable + " aplicada ✨", Toast.LENGTH_SHORT).show();
     }
 
     private void actualizarUIPaleta(String clave) {
-
         resetPaletaCard(optMenta, tvCheckMenta);
         resetPaletaCard(optSakura, tvCheckSakura);
         resetPaletaCard(optOceano, tvCheckOceano);
@@ -174,7 +197,6 @@ public class ConfiguracionActivity extends AppCompatActivity {
         } else if ("lavanda".equals(clave)) {
             activarPaletaCard(optLavanda, tvCheckLavanda, R.drawable.bg_tarjeta_redondeada, "#8F94D6");
         } else {
-
             activarPaletaCard(optMenta, tvCheckMenta, R.drawable.bg_card_destacada_menta, "#4CA977");
         }
     }
@@ -235,7 +257,6 @@ public class ConfiguracionActivity extends AppCompatActivity {
             JSONArray arr = new JSONArray();
             for (Habito h : habitos) {
                 JSONObject obj = new JSONObject();
-                obj.put("id", h.getId());
                 obj.put("nombre", h.getNombre());
                 obj.put("icono", h.getIcono());
                 obj.put("color", h.getColor());
@@ -271,11 +292,75 @@ public class ConfiguracionActivity extends AppCompatActivity {
         }
     }
 
+    private void mostrarDialogoRestaurarJSON() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Restaurar Copia de Seguridad");
+
+        final EditText input = new EditText(this);
+        input.setHint("Pega aquí el contenido JSON de tu copia de seguridad...");
+        input.setMinLines(5);
+        input.setMaxLines(10);
+        input.setPadding(dpToPx(16), dpToPx(14), dpToPx(16), dpToPx(14));
+        builder.setView(input);
+
+        builder.setPositiveButton("Restaurar", (dialog, which) -> {
+            String jsonRaw = input.getText().toString().trim();
+            if (jsonRaw.isEmpty()) {
+                Toast.makeText(this, "Por favor ingresa el texto JSON", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                JSONObject root = new JSONObject(jsonRaw);
+                JSONArray arr = root.optJSONArray("habitos");
+                if (arr == null) {
+                    Toast.makeText(this, "El JSON no contiene la lista de hábitos", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                int count = 0;
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    Habito h = new Habito();
+                    h.setUsuarioId(userId);
+                    h.setNombre(obj.optString("nombre", "Hábito Restaurado"));
+                    h.setIcono(obj.optString("icono", "meditacion"));
+                    h.setColor(obj.optString("color", "#B8E0D2"));
+                    h.setAreaVida(obj.optString("areaVida", "Salud"));
+                    h.setTipoFrecuencia(obj.optString("tipoFrecuencia", "Diario"));
+                    h.setDiasSemana(obj.optString("diasSemana", "L,M,X,J,V,S,D"));
+                    h.setTipoMeta(obj.optString("tipoMeta", "simple"));
+                    h.setMetaCantidad(obj.optInt("metaCantidad", 1));
+                    h.setUnidad(obj.optString("unidad", "veces"));
+                    h.setHoraRecordatorio(obj.optString("horaRecordatorio", "08:00 AM"));
+                    h.setRecordatorioActivo(true);
+                    h.setTipoSonidoNotificacion(obj.optString("tipoSonidoNotificacion", "default"));
+                    h.setDuracionSonidoSegundos(30);
+
+                    long id = dbHelper.insertarHabito(h);
+                    if (id != -1) {
+                        h.setId(id);
+                        NotificationHelper.programarAlarmaHabito(this, h);
+                        count++;
+                    }
+                }
+                Toast.makeText(this, "¡Se restauraron " + count + " hábitos correctamente! 🌱✨", Toast.LENGTH_LONG).show();
+            } catch (Exception e) {
+                Toast.makeText(this, "Error al procesar JSON: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Cancelar", null);
+        builder.show();
+    }
+
     private void confirmarVaciarHabitos() {
         new AlertDialog.Builder(this)
                 .setTitle("⚠️ Reiniciar Hábitos")
                 .setMessage("¿Estás completamente seguro de que deseas eliminar TODOS tus hábitos creados en SQLite?\n\nEsta acción borrará tus registros y estadísticas de racha para comenzar de nuevo.")
                 .setPositiveButton("Sí, vaciar todo", (dialog, which) -> {
+                    List<Habito> habitos = dbHelper.obtenerHabitosPorUsuario(userId);
+                    for (Habito h : habitos) {
+                        NotificationHelper.cancelarAlarmaHabito(this, (int) h.getId());
+                    }
                     dbHelper.vaciarTodosLosHabitos(userId);
                     Toast.makeText(this, "Base de datos reiniciada. Se han eliminado todos los hábitos 🌱", Toast.LENGTH_LONG).show();
                 })

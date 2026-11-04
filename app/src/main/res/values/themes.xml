@@ -1,8 +1,29 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <style name="Base.Theme.Rutinas_Habitos" parent="Theme.Material3.DayNight.NoActionBar">
-
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorTertiary">@color/tertiary</item>
     </style>
 
     <style name="Theme.Rutinas_Habitos" parent="Base.Theme.Rutinas_Habitos" />
+
+    <style name="Theme.Rutinas_Habitos.Menta" parent="Theme.Rutinas_Habitos">
+        <item name="colorPrimary">#B8E0D2</item>
+        <item name="colorSecondary">#EAF7F2</item>
+    </style>
+
+    <style name="Theme.Rutinas_Habitos.Sakura" parent="Theme.Rutinas_Habitos">
+        <item name="colorPrimary">#F8C8DC</item>
+        <item name="colorSecondary">#FDEDF3</item>
+    </style>
+
+    <style name="Theme.Rutinas_Habitos.Oceano" parent="Theme.Rutinas_Habitos">
+        <item name="colorPrimary">#B8D8E8</item>
+        <item name="colorSecondary">#EBF4F9</item>
+    </style>
+
+    <style name="Theme.Rutinas_Habitos.Lavanda" parent="Theme.Rutinas_Habitos">
+        <item name="colorPrimary">#D7D9F8</item>
+        <item name="colorSecondary">#F1F2FD</item>
+    </style>
 </resources>

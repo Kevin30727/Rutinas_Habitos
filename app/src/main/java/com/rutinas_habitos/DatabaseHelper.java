@@ -8,14 +8,17 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "rutinas_habitos.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public static final String TABLE_USUARIO = "Usuario";
     public static final String COL_USER_ID = "id";
@@ -32,7 +35,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_PERFIL_ULTIMA_INTERACCION = "ultima_interaccion";
     public static final String COL_PERFIL_VASOS_AGUA = "vasos_agua";
     public static final String COL_PERFIL_META_AGUA = "meta_agua";
-    public static final String COL_PERFIL_MONEDA = "moneda";
 
     public static final String TABLE_HABITO = "Habito";
     public static final String COL_HAB_ID = "id";
@@ -78,7 +80,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TABLE_AJUSTES = TABLE_AJUSTES_USUARIO;
     public static final String COL_AJUSTE_USER_ID = COL_PERFIL_USER_ID;
     public static final String COL_AJUSTE_MODO_SIN_CULPA = COL_PERFIL_MODO_SIN_CULPA;
-    public static final String COL_AJUSTE_MONEDA = COL_PERFIL_MONEDA;
     public static final String COL_AJUSTE_VASOS = COL_PERFIL_VASOS_AGUA;
     public static final String COL_AJUSTE_META_AGUA = COL_PERFIL_META_AGUA;
 
@@ -96,8 +97,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db) {
+    public void onConfigure(SQLiteDatabase db) {
+        super.onConfigure(db);
+        db.setForeignKeyConstraintsEnabled(true);
+    }
 
+    @Override
+    public void onCreate(SQLiteDatabase db) {
         String createUsuario = "CREATE TABLE " + TABLE_USUARIO + " (" +
                 COL_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_USER_NOMBRE + " TEXT NOT NULL, " +
@@ -114,7 +120,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_PERFIL_ULTIMA_INTERACCION + " TEXT, " +
                 COL_PERFIL_VASOS_AGUA + " INTEGER DEFAULT 0, " +
                 COL_PERFIL_META_AGUA + " INTEGER DEFAULT 8, " +
-                COL_PERFIL_MONEDA + " TEXT DEFAULT 'USD', " +
                 "FOREIGN KEY(" + COL_PERFIL_USER_ID + ") REFERENCES " + TABLE_USUARIO + "(" + COL_USER_ID + ") ON DELETE CASCADE" +
                 ");";
 
@@ -176,12 +181,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         super.onOpen(db);
         try {
             db.execSQL("ALTER TABLE " + TABLE_HABITO + " ADD COLUMN " + COL_HAB_SONIDO + " TEXT DEFAULT 'default'");
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
         try {
             db.execSQL("ALTER TABLE " + TABLE_HABITO + " ADD COLUMN " + COL_HAB_DURACION_SONIDO + " INTEGER DEFAULT 30");
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
         try {
             db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_TONO_PERSONALIZADO + " (" +
                     COL_TONO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -192,8 +195,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COL_TONO_FECHA + " TEXT NOT NULL, " +
                     "FOREIGN KEY(" + COL_TONO_USER_ID + ") REFERENCES " + TABLE_USUARIO + "(" + COL_USER_ID + ") ON DELETE CASCADE" +
                     ");");
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
+        try {
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_REGISTRO_DIARIO + " (" +
+                    COL_REG_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COL_REG_HABITO_ID + " INTEGER NOT NULL, " +
+                    COL_REG_USUARIO_ID + " INTEGER NOT NULL, " +
+                    COL_REG_FECHA + " TEXT NOT NULL, " +
+                    COL_REG_COMPLETADO + " INTEGER NOT NULL DEFAULT 0, " +
+                    COL_REG_PROGRESO + " INTEGER DEFAULT 0, " +
+                    COL_REG_NOTAS + " TEXT, " +
+                    "FOREIGN KEY(" + COL_REG_HABITO_ID + ") REFERENCES " + TABLE_HABITO + "(" + COL_HAB_ID + ") ON DELETE CASCADE, " +
+                    "FOREIGN KEY(" + COL_REG_USUARIO_ID + ") REFERENCES " + TABLE_USUARIO + "(" + COL_USER_ID + ") ON DELETE CASCADE" +
+                    ");");
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -201,6 +216,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_REGISTRO_DIARIO);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_HABITO);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_AJUSTES_USUARIO);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TONO_PERSONALIZADO);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USUARIO);
         onCreate(db);
     }
@@ -224,7 +240,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cvPerfil.put(COL_PERFIL_ULTIMA_INTERACCION, sdf.format(new Date()));
             cvPerfil.put(COL_PERFIL_VASOS_AGUA, 0);
             cvPerfil.put(COL_PERFIL_META_AGUA, 8);
-            cvPerfil.put(COL_PERFIL_MONEDA, "USD");
             db.insert(TABLE_AJUSTES_USUARIO, null, cvPerfil);
         }
         return id;
@@ -394,25 +409,217 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return rows > 0;
     }
 
-    public void toggleHabitoCompletado(long habitoId, boolean completado) {
+    public void toggleHabitoCompletado(long habitoId, long usuarioId, boolean completado) {
         SQLiteDatabase db = this.getWritableDatabase();
+        Habito h = obtenerHabitoPorId(habitoId);
+        int nuevaRacha = 0;
+        int nuevoProgreso = 0;
+
+        if (h != null) {
+            nuevaRacha = h.getRachaDias();
+            if (completado) {
+                nuevaRacha = Math.max(1, nuevaRacha + 1);
+                nuevoProgreso = h.getMetaCantidad() > 0 ? h.getMetaCantidad() : 1;
+            } else {
+                nuevaRacha = Math.max(0, nuevaRacha - 1);
+                nuevoProgreso = 0;
+            }
+        }
+
         ContentValues cv = new ContentValues();
         cv.put(COL_HAB_COMPLETADO, completado ? 1 : 0);
+        cv.put(COL_HAB_PROGRESO, nuevoProgreso);
+        cv.put(COL_HAB_RACHA, nuevaRacha);
         db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
+
+        String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        registrarProgresoDiario(habitoId, usuarioId, hoy, completado, nuevoProgreso, "");
+    }
+
+    public void toggleHabitoCompletado(long habitoId, boolean completado) {
+        Habito h = obtenerHabitoPorId(habitoId);
+        long userId = h != null ? h.getUsuarioId() : 1;
+        toggleHabitoCompletado(habitoId, userId, completado);
+    }
+
+    public int ajustarProgresoHabito(long habitoId, long usuarioId, int delta) {
+        Habito h = obtenerHabitoPorId(habitoId);
+        if (h == null) return 0;
+
+        int meta = h.getMetaCantidad() > 0 ? h.getMetaCantidad() : 1;
+        int nuevoProgreso = Math.max(0, h.getProgresoActual() + delta);
+        boolean completado = nuevoProgreso >= meta;
+
+        int nuevaRacha = h.getRachaDias();
+        if (completado && !h.isCompletadoHoy()) {
+            nuevaRacha = Math.max(1, nuevaRacha + 1);
+        } else if (!completado && h.isCompletadoHoy()) {
+            nuevaRacha = Math.max(0, nuevaRacha - 1);
+        }
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COL_HAB_PROGRESO, nuevoProgreso);
+        cv.put(COL_HAB_COMPLETADO, completado ? 1 : 0);
+        cv.put(COL_HAB_RACHA, nuevaRacha);
+        db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
+
+        String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        registrarProgresoDiario(habitoId, usuarioId, hoy, completado, nuevoProgreso, "");
+
+        return nuevoProgreso;
+    }
+
+    public void registrarProgresoDiario(long habitoId, long usuarioId, String fecha, boolean completado, int progreso, String notas) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COL_REG_HABITO_ID, habitoId);
+        cv.put(COL_REG_USUARIO_ID, usuarioId);
+        cv.put(COL_REG_FECHA, fecha);
+        cv.put(COL_REG_COMPLETADO, completado ? 1 : 0);
+        cv.put(COL_REG_PROGRESO, progreso);
+        cv.put(COL_REG_NOTAS, notas != null ? notas : "");
+
+        int rows = db.update(TABLE_REGISTRO_DIARIO, cv,
+                COL_REG_HABITO_ID + " = ? AND " + COL_REG_FECHA + " = ?",
+                new String[]{String.valueOf(habitoId), fecha});
+        if (rows == 0) {
+            db.insert(TABLE_REGISTRO_DIARIO, null, cv);
+        }
+    }
+
+    public void verificarYResetearDia(long usuarioId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+
+        String ultimaFecha = "";
+        Cursor c = db.rawQuery("SELECT " + COL_PERFIL_ULTIMA_INTERACCION + " FROM " + TABLE_AJUSTES_USUARIO +
+                " WHERE " + COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
+        if (c.moveToFirst()) {
+            ultimaFecha = c.getString(0);
+        }
+        c.close();
+
+        if (ultimaFecha != null && !ultimaFecha.isEmpty() && ultimaFecha.length() >= 10) {
+            String subFecha = ultimaFecha.substring(0, 10);
+            if (!subFecha.equals(hoy)) {
+                boolean modoSinCulpa = obtenerModoSinCulpa(usuarioId);
+                List<Habito> habitos = obtenerHabitosPorUsuario(usuarioId);
+                for (Habito h : habitos) {
+                    ContentValues cv = new ContentValues();
+                    if (!h.isCompletadoHoy() && !modoSinCulpa) {
+                        cv.put(COL_HAB_RACHA, 0);
+                    }
+                    cv.put(COL_HAB_COMPLETADO, 0);
+                    cv.put(COL_HAB_PROGRESO, 0);
+                    db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(h.getId())});
+                }
+            }
+        }
+
+        ContentValues cvPerfil = new ContentValues();
+        cvPerfil.put(COL_PERFIL_ULTIMA_INTERACCION, hoy);
+        int rows = db.update(TABLE_AJUSTES_USUARIO, cvPerfil, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
+        if (rows == 0) {
+            cvPerfil.put(COL_PERFIL_USER_ID, usuarioId);
+            db.insert(TABLE_AJUSTES_USUARIO, null, cvPerfil);
+        }
+    }
+
+    public List<Habito> obtenerHabitosConEstadoFecha(long usuarioId, String fecha) {
+        List<Habito> lista = obtenerHabitosPorUsuario(usuarioId);
+        String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        if (fecha.equals(hoy)) {
+            return lista;
+        }
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        for (Habito h : lista) {
+            Cursor c = db.rawQuery("SELECT " + COL_REG_COMPLETADO + ", " + COL_REG_PROGRESO +
+                    " FROM " + TABLE_REGISTRO_DIARIO +
+                    " WHERE " + COL_REG_HABITO_ID + " = ? AND " + COL_REG_FECHA + " = ?",
+                    new String[]{String.valueOf(h.getId()), fecha});
+            if (c.moveToFirst()) {
+                h.setCompletadoHoy(c.getInt(0) == 1);
+                h.setProgresoActual(c.getInt(1));
+            } else {
+                h.setCompletadoHoy(false);
+                h.setProgresoActual(0);
+            }
+            c.close();
+        }
+        return lista;
+    }
+
+    public Set<Integer> obtenerDiasConRegistroMes(long usuarioId, int anio, int mes) {
+        Set<Integer> dias = new HashSet<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String mesStr = String.format(Locale.ROOT, "%04d-%02d", anio, mes);
+        Cursor c = db.rawQuery("SELECT DISTINCT " + COL_REG_FECHA + " FROM " + TABLE_REGISTRO_DIARIO +
+                " WHERE " + COL_REG_USUARIO_ID + " = ? AND " + COL_REG_FECHA + " LIKE ? AND " + COL_REG_COMPLETADO + " = 1",
+                new String[]{String.valueOf(usuarioId), mesStr + "%"});
+        if (c.moveToFirst()) {
+            do {
+                String f = c.getString(0);
+                if (f != null && f.length() >= 10) {
+                    try {
+                        int d = Integer.parseInt(f.substring(8, 10));
+                        dias.add(d);
+                    } catch (Exception ignored) {}
+                }
+            } while (c.moveToNext());
+        }
+        c.close();
+        return dias;
+    }
+
+    public int[] obtenerCompletadosSemanaActual(long usuarioId) {
+        int[] resultado = new int[7];
+        Calendar cal = Calendar.getInstance();
+        cal.setFirstDayOfWeek(Calendar.MONDAY);
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String hoy = sdf.format(new Date());
+
+        int totalHabitos = obtenerTotalHabitos(usuarioId);
+        if (totalHabitos == 0) return resultado;
+
+        for (int i = 0; i < 7; i++) {
+            String fecha = sdf.format(cal.getTime());
+            int completados = 0;
+            if (fecha.equals(hoy)) {
+                completados = obtenerHabitosCompletadosHoy(usuarioId);
+            } else {
+                Cursor c = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_REGISTRO_DIARIO +
+                        " WHERE " + COL_REG_USUARIO_ID + " = ? AND " + COL_REG_FECHA + " = ? AND " + COL_REG_COMPLETADO + " = 1",
+                        new String[]{String.valueOf(usuarioId), fecha});
+                if (c.moveToFirst()) {
+                    completados = c.getInt(0);
+                }
+                c.close();
+            }
+            int pct = (completados * 100) / totalHabitos;
+            resultado[i] = Math.min(100, pct);
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        return resultado;
     }
 
     public void eliminarHabito(long habitoId) {
         SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_REGISTRO_DIARIO, COL_REG_HABITO_ID + " = ?", new String[]{String.valueOf(habitoId)});
         db.delete(TABLE_HABITO, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
     }
 
     public int vaciarTodosLosHabitos(long usuarioId) {
         SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_REGISTRO_DIARIO, COL_REG_USUARIO_ID + " = ?", new String[]{String.valueOf(usuarioId)});
         return db.delete(TABLE_HABITO, COL_HAB_USUARIO_ID + " = ?", new String[]{String.valueOf(usuarioId)});
     }
 
     public void insertarHabitosPorDefecto(long usuarioId) {
-
     }
 
     public boolean obtenerModoSinCulpa(long usuarioId) {
@@ -438,23 +645,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public String obtenerMoneda(long usuarioId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + COL_PERFIL_MONEDA + " FROM " + TABLE_AJUSTES_USUARIO + " WHERE " + COL_PERFIL_USER_ID + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(usuarioId)});
-        String moneda = "USD";
-        if (cursor.moveToFirst()) {
-            moneda = cursor.getString(0);
-        }
-        cursor.close();
-        return moneda;
-    }
-
-    public void guardarMoneda(long usuarioId, String moneda) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put(COL_PERFIL_MONEDA, moneda);
-        db.update(TABLE_AJUSTES_USUARIO, cv, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
+    public void actualizarModoSinCulpa(long usuarioId, boolean activo) {
+        guardarModoSinCulpa(usuarioId, activo);
     }
 
     public int obtenerVasosAgua(long usuarioId) {
@@ -482,10 +674,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void actualizarVasosAgua(long usuarioId, int vasos) {
         guardarVasosAgua(usuarioId, vasos);
-    }
-
-    public void actualizarModoSinCulpa(long usuarioId, boolean activo) {
-        guardarModoSinCulpa(usuarioId, activo);
     }
 
     public Usuario obtenerUsuarioPorId(long usuarioId) {

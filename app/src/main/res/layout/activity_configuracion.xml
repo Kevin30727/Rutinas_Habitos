@@ -248,7 +248,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Pastel Neo (Menta &amp; Serenidad)"
+                        android:text="Verde Esmeralda (Energía &amp; Menta)"
                         android:textColor="@color/neutral"
                         android:textSize="13.5sp"
                         android:textStyle="bold"
@@ -285,7 +285,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Dulce Sakura (Rosa Pastel)"
+                        android:text="Rosa Neón (Sakura &amp; Vitalidad)"
                         android:textColor="@color/neutral"
                         android:textSize="13.5sp"
                         android:layout_marginStart="12dp" />
@@ -320,7 +320,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Océano Calmo (Cielo Suave)"
+                        android:text="Azul Eléctrico (Océano &amp; Claridad)"
                         android:textColor="@color/neutral"
                         android:textSize="13.5sp"
                         android:layout_marginStart="12dp" />
@@ -354,7 +354,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Lavanda Suave (Paz Interior)"
+                        android:text="Violeta Vibrante (Lavanda &amp; Enfoque)"
                         android:textColor="@color/neutral"
                         android:textSize="13.5sp"
                         android:layout_marginStart="12dp" />

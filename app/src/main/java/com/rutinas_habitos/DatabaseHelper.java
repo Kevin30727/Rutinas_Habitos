@@ -410,6 +410,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void toggleHabitoCompletado(long habitoId, long usuarioId, boolean completado) {
+        String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        toggleHabitoEnFecha(habitoId, usuarioId, hoy, completado);
+    }
+
+    public void toggleHabitoEnFecha(long habitoId, long usuarioId, String fecha, boolean completado) {
         SQLiteDatabase db = this.getWritableDatabase();
         Habito h = obtenerHabitoPorId(habitoId);
         int nuevaRacha = 0;
@@ -417,23 +422,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (h != null) {
             nuevaRacha = h.getRachaDias();
+            int meta = h.getMetaCantidad() > 0 ? h.getMetaCantidad() : 1;
             if (completado) {
                 nuevaRacha = Math.max(1, nuevaRacha + 1);
-                nuevoProgreso = h.getMetaCantidad() > 0 ? h.getMetaCantidad() : 1;
+                nuevoProgreso = meta;
             } else {
                 nuevaRacha = Math.max(0, nuevaRacha - 1);
                 nuevoProgreso = 0;
             }
         }
 
-        ContentValues cv = new ContentValues();
-        cv.put(COL_HAB_COMPLETADO, completado ? 1 : 0);
-        cv.put(COL_HAB_PROGRESO, nuevoProgreso);
-        cv.put(COL_HAB_RACHA, nuevaRacha);
-        db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
-
         String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        registrarProgresoDiario(habitoId, usuarioId, hoy, completado, nuevoProgreso, "");
+        if (fecha != null && fecha.equals(hoy)) {
+            ContentValues cv = new ContentValues();
+            cv.put(COL_HAB_COMPLETADO, completado ? 1 : 0);
+            cv.put(COL_HAB_PROGRESO, nuevoProgreso);
+            cv.put(COL_HAB_RACHA, nuevaRacha);
+            db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
+        }
+
+        registrarProgresoDiario(habitoId, usuarioId, fecha, completado, nuevoProgreso, "");
     }
 
     public void toggleHabitoCompletado(long habitoId, boolean completado) {
@@ -447,7 +455,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (h == null) return 0;
 
         int meta = h.getMetaCantidad() > 0 ? h.getMetaCantidad() : 1;
-        int nuevoProgreso = Math.max(0, h.getProgresoActual() + delta);
+        int nuevoProgreso = Math.min(meta, Math.max(0, h.getProgresoActual() + delta));
         boolean completado = nuevoProgreso >= meta;
 
         int nuevaRacha = h.getRachaDias();

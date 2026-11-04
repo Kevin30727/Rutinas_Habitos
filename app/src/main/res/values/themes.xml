@@ -8,22 +8,22 @@
     <style name="Theme.Rutinas_Habitos" parent="Base.Theme.Rutinas_Habitos" />
 
     <style name="Theme.Rutinas_Habitos.Menta" parent="Theme.Rutinas_Habitos">
-        <item name="colorPrimary">#B8E0D2</item>
-        <item name="colorSecondary">#EAF7F2</item>
+        <item name="colorPrimary">#00C853</item>
+        <item name="colorSecondary">#E8F5E9</item>
     </style>
 
     <style name="Theme.Rutinas_Habitos.Sakura" parent="Theme.Rutinas_Habitos">
-        <item name="colorPrimary">#F8C8DC</item>
-        <item name="colorSecondary">#FDEDF3</item>
+        <item name="colorPrimary">#FF4081</item>
+        <item name="colorSecondary">#FFE4EC</item>
     </style>
 
     <style name="Theme.Rutinas_Habitos.Oceano" parent="Theme.Rutinas_Habitos">
-        <item name="colorPrimary">#B8D8E8</item>
-        <item name="colorSecondary">#EBF4F9</item>
+        <item name="colorPrimary">#00B0FF</item>
+        <item name="colorSecondary">#E1F5FE</item>
     </style>
 
     <style name="Theme.Rutinas_Habitos.Lavanda" parent="Theme.Rutinas_Habitos">
-        <item name="colorPrimary">#D7D9F8</item>
-        <item name="colorSecondary">#F1F2FD</item>
+        <item name="colorPrimary">#7C4DFF</item>
+        <item name="colorSecondary">#EDE7F6</item>
     </style>
 </resources>

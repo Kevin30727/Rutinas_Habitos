@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.Gravity;
-import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -273,21 +272,41 @@ public class InicioFragment extends Fragment {
             tvProgreso.setPadding(dpToPx(12), 0, dpToPx(12), 0);
 
             TextView btnMas = new TextView(ctx);
-            btnMas.setText("＋");
-            btnMas.setTextSize(18f);
-            btnMas.setTextColor(Color.parseColor("#2D3142"));
-            btnMas.setGravity(Gravity.CENTER);
-            btnMas.setBackgroundResource(R.drawable.bg_circulo);
-            btnMas.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(ctx)));
             LinearLayout.LayoutParams pBtnMas = new LinearLayout.LayoutParams(dpToPx(34), dpToPx(34));
             btnMas.setLayoutParams(pBtnMas);
+            btnMas.setGravity(Gravity.CENTER);
+            btnMas.setBackgroundResource(R.drawable.bg_circulo);
+
+            final Runnable refrescarBotonBloqueo = () -> {
+                boolean estaBloqueado = h.getProgresoActual() >= h.getMetaCantidad();
+                if (estaBloqueado) {
+                    btnMas.setText("🔒");
+                    btnMas.setTextSize(14f);
+                    btnMas.setTextColor(Color.parseColor("#8D909F"));
+                    btnMas.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#E4E7EB")));
+                    btnMas.setAlpha(0.7f);
+                } else {
+                    btnMas.setText("＋");
+                    btnMas.setTextSize(18f);
+                    btnMas.setTextColor(Color.parseColor("#2D3142"));
+                    btnMas.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(ctx)));
+                    btnMas.setAlpha(1.0f);
+                }
+            };
+
+            refrescarBotonBloqueo.run();
 
             btnMenos.setOnClickListener(v -> {
-                v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                if (h.getProgresoActual() <= 0) {
+                    VibrationHelper.vibrarClick(ctx);
+                    return;
+                }
+                VibrationHelper.vibrarClick(ctx);
                 int nuevoP = dbHelper.ajustarProgresoHabito(h.getId(), userId, -1);
                 h.setProgresoActual(nuevoP);
                 boolean comp = nuevoP >= h.getMetaCantidad();
                 h.setCompletadoHoy(comp);
+
                 tvProgreso.setText(nuevoP + " / " + h.getMetaCantidad() + " " + h.getUnidad());
                 actualizarBadgeEstado(tvBadge, comp);
                 iv.setBackgroundResource(comp ? R.drawable.bg_circulo : R.drawable.bg_circulo_inactivo);
@@ -297,26 +316,38 @@ public class InicioFragment extends Fragment {
                 } else {
                     tvTitulo.setPaintFlags(tvTitulo.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                 }
+
+                refrescarBotonBloqueo.run();
                 actualizarResumenGlobal(userId);
             });
 
             btnMas.setOnClickListener(v -> {
-                v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                if (h.getProgresoActual() >= h.getMetaCantidad()) {
+                    VibrationHelper.vibrarBloqueo(ctx);
+                    Toast.makeText(ctx, "🔒 Meta completada (" + h.getMetaCantidad() + "/" + h.getMetaCantidad() + " " + h.getUnidad() + "). Bloqueado al alcanzar el objetivo.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 int nuevoP = dbHelper.ajustarProgresoHabito(h.getId(), userId, 1);
                 h.setProgresoActual(nuevoP);
                 boolean comp = nuevoP >= h.getMetaCantidad();
                 h.setCompletadoHoy(comp);
+
                 tvProgreso.setText(nuevoP + " / " + h.getMetaCantidad() + " " + h.getUnidad());
                 actualizarBadgeEstado(tvBadge, comp);
                 iv.setBackgroundResource(comp ? R.drawable.bg_circulo : R.drawable.bg_circulo_inactivo);
                 tvTitulo.setTextColor(Color.parseColor(comp ? "#8D909F" : "#2D3142"));
+
                 if (comp) {
                     tvTitulo.setPaintFlags(tvTitulo.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                    v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    Toast.makeText(ctx, "¡Meta alcanzada para " + h.getNombre() + "! 🎉🌱", Toast.LENGTH_SHORT).show();
+                    VibrationHelper.vibrarExito(ctx);
+                    Toast.makeText(ctx, "¡Meta de " + h.getNombre() + " alcanzada (" + nuevoP + "/" + h.getMetaCantidad() + ")! 🎉🔒", Toast.LENGTH_SHORT).show();
                 } else {
+                    VibrationHelper.vibrarClick(ctx);
                     tvTitulo.setPaintFlags(tvTitulo.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                 }
+
+                refrescarBotonBloqueo.run();
                 actualizarResumenGlobal(userId);
             });
 
@@ -327,23 +358,21 @@ public class InicioFragment extends Fragment {
         }
 
         topRow.setOnClickListener(v -> {
-            v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
             boolean nuevoEstado = !h.isCompletadoHoy();
             h.setCompletadoHoy(nuevoEstado);
             dbHelper.toggleHabitoCompletado(h.getId(), userId, nuevoEstado);
 
-            iv.setBackgroundResource(nuevoEstado ? R.drawable.bg_circulo : R.drawable.bg_circulo_inactivo);
-            tvTitulo.setTextColor(Color.parseColor(nuevoEstado ? "#8D909F" : "#2D3142"));
             if (nuevoEstado) {
-                tvTitulo.setPaintFlags(tvTitulo.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                h.setProgresoActual(h.getMetaCantidad() > 0 ? h.getMetaCantidad() : 1);
+                VibrationHelper.vibrarExito(ctx);
+                Toast.makeText(ctx, "¡" + h.getNombre() + " cumplido! 🎉✨", Toast.LENGTH_SHORT).show();
             } else {
-                tvTitulo.setPaintFlags(tvTitulo.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                h.setProgresoActual(0);
+                VibrationHelper.vibrarClick(ctx);
+                Toast.makeText(ctx, h.getNombre() + " marcado como pendiente", Toast.LENGTH_SHORT).show();
             }
-            actualizarBadgeEstado(tvBadge, nuevoEstado);
-            actualizarResumenGlobal(userId);
 
-            Toast.makeText(ctx, nuevoEstado ? "¡Hábito cumplido! 🌱✨" : "Hábito marcado como pendiente", Toast.LENGTH_SHORT).show();
+            cargarHabitosDesdeSQLite(userId);
         });
 
         row.setOnLongClickListener(v -> {
@@ -374,28 +403,22 @@ public class InicioFragment extends Fragment {
             if (hab.isCompletadoHoy()) comp++;
         }
         actualizarResumenSuperior(comp, actuales.size());
-
-        int racha = dbHelper.obtenerMejorRacha(userId);
-        if (tvRachaDiasHeader != null) {
-            tvRachaDiasHeader.setText("🔥 " + racha + " DÍAS");
-        }
     }
 
     private void actualizarBadgeEstado(TextView tvBadge, boolean completado) {
+        Context ctx = getContext();
+        if (ctx == null) return;
         if (completado) {
-            tvBadge.setText("Hecho");
-            tvBadge.setTextColor(Color.parseColor("#2D3142"));
-            tvBadge.setBackgroundResource(R.drawable.bg_card_destacada_menta);
+            tvBadge.setText("✓ Hecho");
+            tvBadge.setTextColor(Color.WHITE);
+            tvBadge.setBackgroundResource(R.drawable.bg_circulo);
+            tvBadge.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(ctx)));
         } else {
             tvBadge.setText("Pendiente");
-            tvBadge.setTextColor(Color.parseColor("#2D3142"));
-            tvBadge.setBackgroundResource(R.drawable.bg_etiqueta_pendiente);
+            tvBadge.setTextColor(Color.parseColor("#8D909F"));
+            tvBadge.setBackgroundResource(R.drawable.bg_chip_normal);
+            tvBadge.setBackgroundTintList(null);
         }
-    }
-
-    private int dpToPx(int dp) {
-        if (getContext() == null) return dp * 2;
-        return (int) (dp * getResources().getDisplayMetrics().density);
     }
 
     private void configurarCalendario(View root) {
@@ -444,11 +467,20 @@ public class InicioFragment extends Fragment {
             if (esHoy && bgDia != null && tvLetra != null) {
                 bgDia.setBackgroundResource(R.drawable.bg_tarjeta_redondeada);
                 bgDia.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(requireContext())));
-                tvLetra.setTextColor(Color.parseColor("#2D3142"));
+                tvLetra.setTextColor(Color.WHITE);
                 tvLetra.setTypeface(null, android.graphics.Typeface.BOLD);
+                if (tvNumero != null) {
+                    tvNumero.setTextColor(Color.WHITE);
+                    tvNumero.setTypeface(null, android.graphics.Typeface.BOLD);
+                }
             }
 
             iterador.add(Calendar.DAY_OF_MONTH, 1);
         }
+    }
+
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 }

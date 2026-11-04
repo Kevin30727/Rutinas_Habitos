@@ -1,7 +1,6 @@
 package com.rutinas_habitos;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,11 +12,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -29,7 +26,7 @@ public class HabitosFragment extends Fragment {
     private DatabaseHelper dbHelper;
     private SessionManager sessionManager;
 
-    private CircularProgressIndicator cpiRendimiento;
+    private ProgressBar pbRendimiento;
     private TextView tvPorcentajeExito;
     private TextView tvRachaDias;
     private LinearLayout llListaHabitosEstrella;
@@ -38,8 +35,8 @@ public class HabitosFragment extends Fragment {
     private ProgressBar pbSalud, pbMente, pbProductividad;
 
     private View barLunes, barMartes, barMiercoles, barJueves, barViernes, barSabado, barDomingo;
-    private TextView tvHighlightSemanal;
-    private TextView tvRangoFechasSemana;
+    private TextView tvValLunes, tvValMartes, tvValMiercoles, tvValJueves, tvValViernes, tvValSabado, tvValDomingo;
+    private TextView tvHighlightSemanal, tvRangoFechasSemana;
 
     @Nullable
     @Override
@@ -50,13 +47,13 @@ public class HabitosFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         Context ctx = requireContext();
         dbHelper = DatabaseHelper.getInstance(ctx);
         sessionManager = new SessionManager(ctx);
 
         initViews(view);
         setupFiltros(view);
-        setupAcciones(view);
     }
 
     @Override
@@ -66,7 +63,7 @@ public class HabitosFragment extends Fragment {
     }
 
     private void initViews(View root) {
-        cpiRendimiento = root.findViewById(R.id.cpi_rendimiento_habitos);
+        pbRendimiento = root.findViewById(R.id.pb_rendimiento_habitos);
         tvPorcentajeExito = root.findViewById(R.id.tv_porcentaje_exito_habitos);
         tvRachaDias = root.findViewById(R.id.tv_racha_dias_habitos);
         llListaHabitosEstrella = root.findViewById(R.id.ll_lista_habitos_estrella);
@@ -88,6 +85,14 @@ public class HabitosFragment extends Fragment {
         barSabado = root.findViewById(R.id.bar_sabado);
         barDomingo = root.findViewById(R.id.bar_domingo);
 
+        tvValLunes = root.findViewById(R.id.tv_val_lunes);
+        tvValMartes = root.findViewById(R.id.tv_val_martes);
+        tvValMiercoles = root.findViewById(R.id.tv_val_miercoles);
+        tvValJueves = root.findViewById(R.id.tv_val_jueves);
+        tvValViernes = root.findViewById(R.id.tv_val_viernes);
+        tvValSabado = root.findViewById(R.id.tv_val_sabado);
+        tvValDomingo = root.findViewById(R.id.tv_val_domingo);
+
         tvHighlightSemanal = root.findViewById(R.id.tv_highlight_semanal);
         tvRangoFechasSemana = root.findViewById(R.id.tv_rango_fechas_semana);
     }
@@ -102,16 +107,17 @@ public class HabitosFragment extends Fragment {
         int mejorRacha = dbHelper.obtenerMejorRacha(userId);
 
         int tasaExito = totalHabitos > 0 ? (habitosCompletados * 100 / totalHabitos) : 0;
-        if (cpiRendimiento != null) {
-            cpiRendimiento.setProgress(tasaExito);
-            cpiRendimiento.setIndicatorColor(ThemeHelper.getColorPrimario(requireContext()));
+        if (pbRendimiento != null) {
+            pbRendimiento.setProgress(tasaExito);
+            pbRendimiento.setProgressTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(requireContext())));
         }
         if (tvPorcentajeExito != null) {
             tvPorcentajeExito.setText(tasaExito + "%");
+            tvPorcentajeExito.setTextColor(ThemeHelper.getColorPrimario(requireContext()));
         }
 
         if (tvRachaDias != null) {
-            tvRachaDias.setText(mejorRacha + " días de racha activa");
+            tvRachaDias.setText("🔥 " + mejorRacha + " días de racha activa");
         }
 
         actualizarGraficoSemanal(userId);
@@ -140,6 +146,7 @@ public class HabitosFragment extends Fragment {
     private void actualizarGraficoSemanal(long userId) {
         int[] pcts = dbHelper.obtenerCompletadosSemanaActual(userId);
         View[] bars = {barLunes, barMartes, barMiercoles, barJueves, barViernes, barSabado, barDomingo};
+        TextView[] valTexts = {tvValLunes, tvValMartes, tvValMiercoles, tvValJueves, tvValViernes, tvValSabado, tvValDomingo};
         String[] diasNombre = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
 
         int maxIdx = 0;
@@ -153,18 +160,28 @@ public class HabitosFragment extends Fragment {
                 maxVal = pct;
                 maxIdx = i;
             }
+
+            if (valTexts[i] != null) {
+                valTexts[i].setText(pct + "%");
+                valTexts[i].setTextColor(pct > 0 ? ThemeHelper.getColorPrimario(requireContext()) : Color.parseColor("#8D909F"));
+            }
+
             if (bars[i] != null) {
-                int minHeight = dpToPx(16);
-                int maxHeight = dpToPx(96);
+                int minHeight = dpToPx(18);
+                int maxHeight = dpToPx(110);
                 int h = minHeight + (int) ((maxHeight - minHeight) * (pct / 100.0f));
                 LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) bars[i].getLayoutParams();
                 lp.height = h;
                 bars[i].setLayoutParams(lp);
 
                 if (pct >= 80) {
-                    bars[i].setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorAcentoOscuro(requireContext())));
-                } else {
                     bars[i].setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(requireContext())));
+                } else if (pct > 0) {
+                    bars[i].setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(requireContext())));
+                    bars[i].setAlpha(0.8f);
+                } else {
+                    bars[i].setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#E0E3E8")));
+                    bars[i].setAlpha(1.0f);
                 }
             }
         }
@@ -173,8 +190,12 @@ public class HabitosFragment extends Fragment {
         if (tvHighlightSemanal != null) {
             if (maxVal > 0) {
                 tvHighlightSemanal.setText("⭐ " + diasNombre[maxIdx] + ": " + maxVal + "%");
+                tvHighlightSemanal.setTextColor(Color.WHITE);
+                tvHighlightSemanal.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(requireContext())));
             } else {
-                tvHighlightSemanal.setText("🌱 Semana activa");
+                tvHighlightSemanal.setText("🌱 Semana en curso");
+                tvHighlightSemanal.setTextColor(Color.parseColor("#2D3142"));
+                tvHighlightSemanal.setBackgroundTintList(null);
             }
         }
 
@@ -218,7 +239,10 @@ public class HabitosFragment extends Fragment {
         int pProd = totProd > 0 ? (compProd * 100 / totProd) : 0;
 
         if (tvPctSalud != null) tvPctSalud.setText(pSalud + "%");
-        if (pbSalud != null) pbSalud.setProgress(pSalud);
+        if (pbSalud != null) {
+            pbSalud.setProgress(pSalud);
+            pbSalud.setProgressTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(requireContext())));
+        }
 
         if (tvPctMente != null) tvPctMente.setText(pMente + "%");
         if (pbMente != null) pbMente.setProgress(pMente);
@@ -248,23 +272,27 @@ public class HabitosFragment extends Fragment {
         iv.setBackgroundResource(R.drawable.bg_circulo);
 
         try {
-            iv.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(h.getColor())));
-        } catch (Exception ignored) {
+            int c = Color.parseColor(h.getColor());
+            iv.setBackgroundTintList(ColorStateList.valueOf(c));
+        } catch (Exception e) {
             iv.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(ctx)));
         }
 
-        int iconRes = R.drawable.ic_meditacion;
-        if ("agua".equals(h.getIcono())) iconRes = R.drawable.ic_agua;
-        else if ("lectura".equals(h.getIcono())) iconRes = R.drawable.ic_lectura;
-        else if ("ejercicio".equals(h.getIcono())) iconRes = R.drawable.ic_ejercicio;
-        else if ("comida".equals(h.getIcono())) iconRes = R.drawable.ic_comida;
-        else if ("noche".equals(h.getIcono())) iconRes = R.drawable.ic_noche;
-        else if ("corazon".equals(h.getIcono())) iconRes = R.drawable.ic_corazon;
-        else if ("sol".equals(h.getIcono())) iconRes = R.drawable.ic_sun;
+        int p = dpToPx(11);
+        iv.setPadding(p, p, p, p);
+
+        int iconRes = R.drawable.ic_check;
+        if ("agua".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_agua;
+        else if ("lectura".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_lectura;
+        else if ("ejercicio".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_ejercicio;
+        else if ("comida".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_comida;
+        else if ("noche".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_noche;
+        else if ("corazon".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_corazon;
+        else if ("sol".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_sun;
+        else if ("meditacion".equalsIgnoreCase(h.getIcono())) iconRes = R.drawable.ic_meditacion;
 
         iv.setImageResource(iconRes);
-        iv.setPadding(dpToPx(11), dpToPx(11), dpToPx(11), dpToPx(11));
-        row.addView(iv);
+        iv.setColorFilter(Color.parseColor("#2D3142"));
 
         LinearLayout textLayout = new LinearLayout(ctx);
         textLayout.setOrientation(LinearLayout.VERTICAL);
@@ -272,35 +300,34 @@ public class HabitosFragment extends Fragment {
         lpText.setMarginStart(dpToPx(14));
         textLayout.setLayoutParams(lpText);
 
-        TextView tvNombre = new TextView(ctx);
-        tvNombre.setText(h.getNombre());
-        tvNombre.setTextColor(Color.parseColor("#2D3142"));
-        tvNombre.setTextSize(15f);
-        tvNombre.setTypeface(null, android.graphics.Typeface.BOLD);
-        textLayout.addView(tvNombre);
+        TextView tvTitulo = new TextView(ctx);
+        tvTitulo.setText(h.getNombre());
+        tvTitulo.setTextColor(Color.parseColor("#2D3142"));
+        tvTitulo.setTextSize(15f);
+        tvTitulo.setTypeface(null, android.graphics.Typeface.BOLD);
+        textLayout.addView(tvTitulo);
 
-        TextView tvEstado = new TextView(ctx);
-        String estadoTexto = h.isCompletadoHoy() ? "✓ Completado hoy" : "Pendiente de cumplir";
-        tvEstado.setText(estadoTexto);
-        tvEstado.setTextColor(Color.parseColor("#8D909F"));
-        tvEstado.setTextSize(12f);
-        textLayout.addView(tvEstado);
+        TextView tvSub = new TextView(ctx);
+        String sub = h.getAreaVida();
+        if (h.getHoraRecordatorio() != null && !h.getHoraRecordatorio().isEmpty()) {
+            sub += " • " + h.getHoraRecordatorio();
+        }
+        tvSub.setText(sub);
+        tvSub.setTextColor(Color.parseColor("#8D909F"));
+        tvSub.setTextSize(12f);
+        textLayout.addView(tvSub);
+
+        TextView tvRacha = new TextView(ctx);
+        tvRacha.setText("🔥 " + h.getRachaDias() + " d");
+        tvRacha.setTextColor(Color.parseColor("#2D3142"));
+        tvRacha.setTextSize(12f);
+        tvRacha.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvRacha.setPadding(dpToPx(10), dpToPx(6), dpToPx(10), dpToPx(6));
+        tvRacha.setBackgroundResource(R.drawable.bg_chip_normal);
+
+        row.addView(iv);
         row.addView(textLayout);
-
-        TextView tvRachaChip = new TextView(ctx);
-        tvRachaChip.setText("🔥 " + h.getRachaDias() + " D");
-        tvRachaChip.setTextColor(Color.parseColor("#2D3142"));
-        tvRachaChip.setTextSize(11f);
-        tvRachaChip.setTypeface(null, android.graphics.Typeface.BOLD);
-        tvRachaChip.setPadding(dpToPx(10), dpToPx(5), dpToPx(10), dpToPx(5));
-        tvRachaChip.setBackgroundResource(R.drawable.bg_card_destacada_menta);
-        row.addView(tvRachaChip);
-
-        row.setOnClickListener(v -> {
-            Intent intent = new Intent(ctx, CrearHabitoActivity.class);
-            intent.putExtra("EXTRA_HABITO_ID", h.getId());
-            startActivity(intent);
-        });
+        row.addView(tvRacha);
 
         return row;
     }
@@ -310,41 +337,32 @@ public class HabitosFragment extends Fragment {
         TextView fMes = root.findViewById(R.id.filtro_mes);
         TextView fAnio = root.findViewById(R.id.filtro_anio);
 
-        if (fSemana != null && fMes != null && fAnio != null) {
-            fSemana.setOnClickListener(v -> {
-                actualizarBotonFiltro(fSemana, fMes, fAnio);
-                cargarMetricasYHabitosSQLite();
-            });
-            fMes.setOnClickListener(v -> {
-                actualizarBotonFiltro(fMes, fSemana, fAnio);
-                cargarMetricasYHabitosSQLite();
-            });
-            fAnio.setOnClickListener(v -> {
-                actualizarBotonFiltro(fAnio, fSemana, fAnio);
-                cargarMetricasYHabitosSQLite();
-            });
-        }
+        View.OnClickListener listener = v -> {
+            VibrationHelper.vibrarClick(requireContext());
+            resetFiltro(fSemana);
+            resetFiltro(fMes);
+            resetFiltro(fAnio);
+            if (v instanceof TextView) {
+                ((TextView) v).setTextColor(Color.parseColor("#2D3142"));
+                ((TextView) v).setTypeface(null, android.graphics.Typeface.BOLD);
+                v.setBackgroundResource(R.drawable.bg_chip_normal);
+            }
+        };
+
+        if (fSemana != null) fSemana.setOnClickListener(listener);
+        if (fMes != null) fMes.setOnClickListener(listener);
+        if (fAnio != null) fAnio.setOnClickListener(listener);
     }
 
-    private void actualizarBotonFiltro(TextView activo, TextView inactivo1, TextView inactivo2) {
-        activo.setBackgroundResource(R.drawable.bg_selector_activo);
-        activo.setTextColor(Color.parseColor("#2D3142"));
-        activo.setTypeface(null, android.graphics.Typeface.BOLD);
-
-        inactivo1.setBackground(null);
-        inactivo1.setTextColor(Color.parseColor("#8D909F"));
-        inactivo1.setTypeface(null, android.graphics.Typeface.NORMAL);
-
-        inactivo2.setBackground(null);
-        inactivo2.setTextColor(Color.parseColor("#8D909F"));
-        inactivo2.setTypeface(null, android.graphics.Typeface.NORMAL);
-    }
-
-    private void setupAcciones(View root) {
+    private void resetFiltro(TextView tv) {
+        if (tv == null) return;
+        tv.setTextColor(Color.parseColor("#8D909F"));
+        tv.setTypeface(null, android.graphics.Typeface.NORMAL);
+        tv.setBackground(null);
     }
 
     private int dpToPx(int dp) {
-        if (getContext() == null) return dp * 2;
-        return (int) (dp * getResources().getDisplayMetrics().density);
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 }

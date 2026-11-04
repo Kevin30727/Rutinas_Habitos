@@ -128,10 +128,10 @@ public class ConfiguracionActivity extends AppCompatActivity {
             }
         });
 
-        optMenta.setOnClickListener(v -> seleccionarPaleta("menta", "Pastel Neo (Menta)"));
-        optSakura.setOnClickListener(v -> seleccionarPaleta("sakura", "Dulce Sakura (Rosa)"));
-        optOceano.setOnClickListener(v -> seleccionarPaleta("oceano", "Océano Calmo (Azul)"));
-        optLavanda.setOnClickListener(v -> seleccionarPaleta("lavanda", "Lavanda Suave"));
+        optMenta.setOnClickListener(v -> seleccionarPaleta("menta", "Verde Esmeralda"));
+        optSakura.setOnClickListener(v -> seleccionarPaleta("sakura", "Rosa Neón"));
+        optOceano.setOnClickListener(v -> seleccionarPaleta("oceano", "Azul Eléctrico"));
+        optLavanda.setOnClickListener(v -> seleccionarPaleta("lavanda", "Violeta Vibrante"));
 
         switchDescansoVisual.setOnCheckedChangeListener((buttonView, isChecked) -> {
             ThemeHelper.guardarDescansoVisual(this, isChecked);
@@ -181,7 +181,8 @@ public class ConfiguracionActivity extends AppCompatActivity {
     private void seleccionarPaleta(String clave, String nombreAmigable) {
         ThemeHelper.guardarPaleta(this, clave);
         actualizarUIPaleta(clave);
-        Toast.makeText(this, "Paleta " + nombreAmigable + " aplicada ✨", Toast.LENGTH_SHORT).show();
+        VibrationHelper.vibrarExito(this);
+        Toast.makeText(this, "¡Paleta " + nombreAmigable + " aplicada! 🎨✨", Toast.LENGTH_SHORT).show();
     }
 
     private void actualizarUIPaleta(String clave) {
@@ -191,13 +192,13 @@ public class ConfiguracionActivity extends AppCompatActivity {
         resetPaletaCard(optLavanda, tvCheckLavanda);
 
         if ("sakura".equals(clave)) {
-            activarPaletaCard(optSakura, tvCheckSakura, R.drawable.bg_card_destacada_rosa, "#E8A9C2");
+            activarPaletaCard(optSakura, tvCheckSakura, R.drawable.bg_card_destacada_rosa, "#FF4081");
         } else if ("oceano".equals(clave)) {
-            activarPaletaCard(optOceano, tvCheckOceano, R.drawable.bg_tarjeta_redondeada, "#92BED4");
+            activarPaletaCard(optOceano, tvCheckOceano, R.drawable.bg_card_destacada_oceano, "#00B0FF");
         } else if ("lavanda".equals(clave)) {
-            activarPaletaCard(optLavanda, tvCheckLavanda, R.drawable.bg_tarjeta_redondeada, "#8F94D6");
+            activarPaletaCard(optLavanda, tvCheckLavanda, R.drawable.bg_card_destacada_lavanda, "#7C4DFF");
         } else {
-            activarPaletaCard(optMenta, tvCheckMenta, R.drawable.bg_card_destacada_menta, "#4CA977");
+            activarPaletaCard(optMenta, tvCheckMenta, R.drawable.bg_card_destacada_menta, "#00C853");
         }
     }
 
@@ -218,8 +219,9 @@ public class ConfiguracionActivity extends AppCompatActivity {
             layout.setBackgroundTintList(null);
         }
         if (tvCheck != null) {
-            tvCheck.setText("✓ Activa");
+            tvCheck.setText("✓ ACTIVA");
             tvCheck.setTextColor(Color.parseColor(colorHex));
+            tvCheck.setTypeface(null, android.graphics.Typeface.BOLD);
         }
     }
 

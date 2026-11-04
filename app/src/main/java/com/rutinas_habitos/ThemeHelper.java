@@ -58,26 +58,26 @@ public class ThemeHelper {
 
     public static int getColorPrimario(Context context) {
         String p = getPaletaActual(context);
-        if ("sakura".equals(p)) return Color.parseColor("#F8C8DC");
-        if ("oceano".equals(p)) return Color.parseColor("#B8D8E8");
-        if ("lavanda".equals(p)) return Color.parseColor("#D7D9F8");
-        return Color.parseColor("#B8E0D2");
+        if ("sakura".equals(p)) return Color.parseColor("#FF4081");
+        if ("oceano".equals(p)) return Color.parseColor("#00B0FF");
+        if ("lavanda".equals(p)) return Color.parseColor("#7C4DFF");
+        return Color.parseColor("#00C853");
     }
 
     public static int getColorAcentoOscuro(Context context) {
         String p = getPaletaActual(context);
-        if ("sakura".equals(p)) return Color.parseColor("#E8A9C2");
-        if ("oceano".equals(p)) return Color.parseColor("#6DAFD0");
-        if ("lavanda".equals(p)) return Color.parseColor("#8A8FD4");
-        return Color.parseColor("#4CA977");
+        if ("sakura".equals(p)) return Color.parseColor("#C2185B");
+        if ("oceano".equals(p)) return Color.parseColor("#0288D1");
+        if ("lavanda".equals(p)) return Color.parseColor("#512DA8");
+        return Color.parseColor("#007E33");
     }
 
     public static int getColorFondoSuave(Context context) {
         String p = getPaletaActual(context);
-        if ("sakura".equals(p)) return Color.parseColor("#FDEDF3");
-        if ("oceano".equals(p)) return Color.parseColor("#EBF4F9");
-        if ("lavanda".equals(p)) return Color.parseColor("#F1F2FD");
-        return Color.parseColor("#EAF7F2");
+        if ("sakura".equals(p)) return Color.parseColor("#FFE4EC");
+        if ("oceano".equals(p)) return Color.parseColor("#E1F5FE");
+        if ("lavanda".equals(p)) return Color.parseColor("#EDE7F6");
+        return Color.parseColor("#E8F5E9");
     }
 
     public static void aplicarPaletaEnVista(Context context, FloatingActionButton fab, View bannerOHeader) {
@@ -95,7 +95,7 @@ public class ThemeHelper {
 
     public static void aplicarEstiloBottomNav(Context context, BottomNavigationView nav) {
         if (nav == null) return;
-        int colorAcento = getColorAcentoOscuro(context);
+        int colorAcento = getColorPrimario(context);
         int[][] states = new int[][]{
                 new int[]{android.R.attr.state_checked},
                 new int[]{-android.R.attr.state_checked}

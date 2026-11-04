@@ -3,6 +3,7 @@ package com.rutinas_habitos;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -111,25 +113,27 @@ public class CalendarioFragment extends Fragment {
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(dpToPx(14), dpToPx(14), dpToPx(14), dpToPx(14));
+        row.setPadding(dpToPx(16), dpToPx(14), dpToPx(16), dpToPx(14));
         row.setBackgroundResource(R.drawable.bg_tarjeta_redondeada);
-        row.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F6F5FA")));
+
+        boolean completado = h.isCompletadoHoy();
+        int colorFondo = completado ? ThemeHelper.getColorFondoSuave(ctx) : Color.parseColor("#F6F5FA");
+        row.setBackgroundTintList(ColorStateList.valueOf(colorFondo));
 
         LinearLayout.LayoutParams marginParams = (LinearLayout.LayoutParams) row.getLayoutParams();
         marginParams.bottomMargin = dpToPx(10);
         row.setLayoutParams(marginParams);
 
         ImageView ivCheck = new ImageView(ctx);
-        int checkSize = dpToPx(32);
+        int checkSize = dpToPx(34);
         ivCheck.setLayoutParams(new LinearLayout.LayoutParams(checkSize, checkSize));
         ivCheck.setBackgroundResource(R.drawable.bg_circulo);
 
-        boolean completado = h.isCompletadoHoy();
         if (completado) {
             ivCheck.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(ctx)));
             ivCheck.setImageResource(R.drawable.ic_check);
         } else {
-            ivCheck.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#E4E7EB")));
+            ivCheck.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#E0E3E8")));
             ivCheck.setImageDrawable(null);
         }
         ivCheck.setPadding(dpToPx(7), dpToPx(7), dpToPx(7), dpToPx(7));
@@ -137,39 +141,51 @@ public class CalendarioFragment extends Fragment {
         LinearLayout textLayout = new LinearLayout(ctx);
         textLayout.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams lpText = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
-        lpText.setMarginStart(dpToPx(12));
+        lpText.setMarginStart(dpToPx(14));
         textLayout.setLayoutParams(lpText);
 
         TextView tvTitulo = new TextView(ctx);
         tvTitulo.setText(h.getNombre());
-        tvTitulo.setTextColor(Color.parseColor("#2D3142"));
-        tvTitulo.setTextSize(14f);
+        tvTitulo.setTextColor(Color.parseColor(completado ? "#7B8094" : "#2D3142"));
+        tvTitulo.setTextSize(15f);
         tvTitulo.setTypeface(null, android.graphics.Typeface.BOLD);
+        if (completado) {
+            tvTitulo.setPaintFlags(tvTitulo.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        }
         textLayout.addView(tvTitulo);
 
         TextView tvSubtitulo = new TextView(ctx);
-        String estadoTexto = completado ? "✓ Cumplido" : "Pendiente";
+        String estadoTexto = completado ? "✓ Completado" : "Pendiente";
+        if ("cantidad".equalsIgnoreCase(h.getTipoMeta())) {
+            estadoTexto += " (" + (completado ? h.getMetaCantidad() : h.getProgresoActual()) + "/" + h.getMetaCantidad() + " " + h.getUnidad() + ")";
+        }
         if (h.getHoraRecordatorio() != null && !h.getHoraRecordatorio().isEmpty()) {
             estadoTexto += " • " + h.getHoraRecordatorio();
         }
         tvSubtitulo.setText(estadoTexto);
-        tvSubtitulo.setTextColor(Color.parseColor("#8D909F"));
+        tvSubtitulo.setTextColor(completado ? ThemeHelper.getColorPrimario(ctx) : Color.parseColor("#8D909F"));
         tvSubtitulo.setTextSize(12f);
         textLayout.addView(tvSubtitulo);
 
         row.addView(ivCheck);
         row.addView(textLayout);
 
-        String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().getTime());
-        if (fecha.equals(hoy)) {
-            row.setOnClickListener(v -> {
-                boolean nuevoEstado = !h.isCompletadoHoy();
-                h.setCompletadoHoy(nuevoEstado);
-                dbHelper.toggleHabitoCompletado(h.getId(), userId, nuevoEstado);
-                cargarHabitosDelDia();
-                generarCalendarioMes();
-            });
-        }
+        row.setOnClickListener(v -> {
+            boolean nuevoEstado = !h.isCompletadoHoy();
+            h.setCompletadoHoy(nuevoEstado);
+            dbHelper.toggleHabitoEnFecha(h.getId(), userId, fecha, nuevoEstado);
+
+            if (nuevoEstado) {
+                VibrationHelper.vibrarExito(ctx);
+                Toast.makeText(ctx, "¡" + h.getNombre() + " completado! 🎉✨", Toast.LENGTH_SHORT).show();
+            } else {
+                VibrationHelper.vibrarClick(ctx);
+                Toast.makeText(ctx, h.getNombre() + " marcado como pendiente", Toast.LENGTH_SHORT).show();
+            }
+
+            cargarHabitosDelDia();
+            generarCalendarioMes();
+        });
 
         return row;
     }
@@ -180,6 +196,7 @@ public class CalendarioFragment extends Fragment {
 
         if (btnAnterior != null) {
             btnAnterior.setOnClickListener(v -> {
+                VibrationHelper.vibrarClick(requireContext());
                 calActual.add(Calendar.MONTH, -1);
                 diaSeleccionadoActual = 1;
                 actualizarCabeceraFecha(diaSeleccionadoActual);
@@ -190,6 +207,7 @@ public class CalendarioFragment extends Fragment {
 
         if (btnSiguiente != null) {
             btnSiguiente.setOnClickListener(v -> {
+                VibrationHelper.vibrarClick(requireContext());
                 calActual.add(Calendar.MONTH, 1);
                 diaSeleccionadoActual = 1;
                 actualizarCabeceraFecha(diaSeleccionadoActual);
@@ -277,12 +295,15 @@ public class CalendarioFragment extends Fragment {
                 tvNum.setText(String.valueOf(dia));
 
                 if (dia == diaSeleccionadoActual) {
-                    tvNum.setBackgroundResource(R.drawable.bg_dia_seleccionado_calendario);
+                    tvNum.setBackgroundResource(R.drawable.bg_circulo);
+                    tvNum.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(requireContext())));
+                    tvNum.setTextColor(Color.WHITE);
                     tvNum.setTypeface(null, android.graphics.Typeface.BOLD);
                 }
 
                 if (diasConCompletados.contains(dia)) {
                     punto.setBackgroundResource(R.drawable.bg_punto_completo);
+                    punto.setBackgroundTintList(ColorStateList.valueOf(ThemeHelper.getColorPrimario(requireContext())));
                     punto.setVisibility(View.VISIBLE);
                 } else {
                     punto.setVisibility(View.INVISIBLE);
@@ -290,6 +311,7 @@ public class CalendarioFragment extends Fragment {
 
                 final int diaTocado = dia;
                 celda.setOnClickListener(v -> {
+                    VibrationHelper.vibrarClick(requireContext());
                     diaSeleccionadoActual = diaTocado;
                     actualizarCabeceraFecha(diaTocado);
                     generarCalendarioMes();
@@ -307,7 +329,7 @@ public class CalendarioFragment extends Fragment {
     }
 
     private int dpToPx(int dp) {
-        if (getContext() == null) return dp * 2;
-        return (int) (dp * getResources().getDisplayMetrics().density);
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 }

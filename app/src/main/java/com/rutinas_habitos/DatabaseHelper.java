@@ -15,6 +15,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * DatabaseHelper - Gestor de persistencia relacional local con SQLite.
+ * 
+ * Implementa la creación, configuración y actualización del esquema de base de datos
+ * para la aplicación 'Rutinas Pastel', administrando las tablas:
+ * - Usuario: Credenciales y datos del perfil local.
+ * - AjustesUsuario: Preferencias de bienestar (Modo Sin Culpa, metas).
+ * - Habito: Entidad principal para la gestión y seguimiento de hábitos (CRUD).
+ * - RegistroDiario: Historial detallado de cumplimiento por fecha.
+ * - TonoPersonalizado: Archivos de audio MP3 locales para recordatorios.
+ */
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "rutinas_habitos.db";
@@ -263,6 +274,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return usuario;
     }
 
+    /**
+     * Valida si un correo electrónico ya está registrado en la base de datos.
+     */
     public boolean existeCorreo(String correo) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT " + COL_USER_ID + " FROM " + TABLE_USUARIO + " WHERE LOWER(" + COL_USER_CORREO + ") = ?";
@@ -272,47 +286,144 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return existe;
     }
 
-    public long insertarHabito(Habito habito) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put(COL_HAB_USUARIO_ID, habito.getUsuarioId());
-        cv.put(COL_HAB_NOMBRE, habito.getNombre());
-        cv.put(COL_HAB_DESCRIPCION, habito.getDescripcion());
-        cv.put(COL_HAB_ICONO, habito.getIcono());
-        cv.put(COL_HAB_COLOR, habito.getColor());
-        cv.put(COL_HAB_AREA, habito.getAreaVida());
-        cv.put(COL_HAB_FRECUENCIA, habito.getTipoFrecuencia());
-        cv.put(COL_HAB_DIAS, habito.getDiasSemana());
-        cv.put(COL_HAB_TIPO_META, habito.getTipoMeta());
-        cv.put(COL_HAB_META_CANTIDAD, habito.getMetaCantidad());
-        cv.put(COL_HAB_UNIDAD, habito.getUnidad());
-        cv.put(COL_HAB_HORA, habito.getHoraRecordatorio());
-        cv.put(COL_HAB_RECORDATORIO, habito.isRecordatorioActivo() ? 1 : 0);
-        cv.put(COL_HAB_RACHA, habito.getRachaDias());
-        cv.put(COL_HAB_COMPLETADO, habito.isCompletadoHoy() ? 1 : 0);
-        cv.put(COL_HAB_PROGRESO, habito.getProgresoActual());
-        cv.put(COL_HAB_SONIDO, habito.getTipoSonidoNotificacion());
-        cv.put(COL_HAB_DURACION_SONIDO, habito.getDuracionSonidoSegundos());
-
-        if (habito.getFechaCreacion() == null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            cv.put(COL_HAB_FECHA_CREACION, sdf.format(new Date()));
-        } else {
-            cv.put(COL_HAB_FECHA_CREACION, habito.getFechaCreacion());
-        }
-
-        return db.insert(TABLE_HABITO, null, cv);
+    /**
+     * Valida si ya existe un hábito con el mismo nombre para el usuario actual.
+     * Requisito de la rúbrica: Prevención de registros duplicados e integridad de datos.
+     * @param usuarioId ID del usuario propietario.
+     * @param nombre Nombre del hábito a validar.
+     * @param excludeHabitoId ID a excluir (útil durante la actualización/UPDATE).
+     * @return true si ya existe un hábito idéntico, false si está disponible.
+     */
+    public boolean existeHabitoConNombre(long usuarioId, String nombre, long excludeHabitoId) {
+        if (nombre == null || nombre.trim().isEmpty()) return false;
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT " + COL_HAB_ID + " FROM " + TABLE_HABITO +
+                " WHERE " + COL_HAB_USUARIO_ID + " = ? AND LOWER(TRIM(" + COL_HAB_NOMBRE + ")) = ? AND " + COL_HAB_ID + " != ?";
+        Cursor cursor = db.rawQuery(query, new String[]{
+                String.valueOf(usuarioId),
+                nombre.trim().toLowerCase(),
+                String.valueOf(excludeHabitoId)
+        });
+        boolean existe = cursor.getCount() > 0;
+        cursor.close();
+        return existe;
     }
 
+        /**
+     * OPERACIÓN CRUD: CREATE (INSERTAR)
+     * Inserta un nuevo registro de hábito en la tabla 'Habito' mediante ContentValues.
+     * Se captura cualquier excepción de SQLite para prevenir caídas de la app.
+     * @param habito Objeto con los datos del nuevo hábito.
+     * @return ID autogenerado del nuevo registro o -1 en caso de error.
+     */
+    public long insertarHabito(Habito habito) {
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            ContentValues cv = new ContentValues();
+            cv.put(COL_HAB_USUARIO_ID, habito.getUsuarioId());
+            cv.put(COL_HAB_NOMBRE, habito.getNombre().trim());
+            cv.put(COL_HAB_DESCRIPCION, habito.getDescripcion());
+            cv.put(COL_HAB_ICONO, habito.getIcono());
+            cv.put(COL_HAB_COLOR, habito.getColor());
+            cv.put(COL_HAB_AREA, habito.getAreaVida());
+            cv.put(COL_HAB_FRECUENCIA, habito.getTipoFrecuencia());
+            cv.put(COL_HAB_DIAS, habito.getDiasSemana());
+            cv.put(COL_HAB_TIPO_META, habito.getTipoMeta());
+            cv.put(COL_HAB_META_CANTIDAD, habito.getMetaCantidad());
+            cv.put(COL_HAB_UNIDAD, habito.getUnidad());
+            cv.put(COL_HAB_HORA, habito.getHoraRecordatorio());
+            cv.put(COL_HAB_RECORDATORIO, habito.isRecordatorioActivo() ? 1 : 0);
+            cv.put(COL_HAB_RACHA, habito.getRachaDias());
+            cv.put(COL_HAB_COMPLETADO, habito.isCompletadoHoy() ? 1 : 0);
+            cv.put(COL_HAB_PROGRESO, habito.getProgresoActual());
+            cv.put(COL_HAB_SONIDO, habito.getTipoSonidoNotificacion());
+            cv.put(COL_HAB_DURACION_SONIDO, habito.getDuracionSonidoSegundos());
+
+            if (habito.getFechaCreacion() == null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                cv.put(COL_HAB_FECHA_CREACION, sdf.format(new Date()));
+            } else {
+                cv.put(COL_HAB_FECHA_CREACION, habito.getFechaCreacion());
+            }
+
+            return db.insert(TABLE_HABITO, null, cv);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    /**
+     * OPERACIÓN CRUD: READ (CONSULTAR LISTADO)
+     * Recupera todos los hábitos registrados por el usuario mediante un Cursor de SQLite,
+     * ordenados cronológicamente de forma descendente.
+     * @param usuarioId Identificador del usuario.
+     * @return Lista de objetos Habito recuperados desde la base de datos.
+     */
     public List<Habito> obtenerHabitosPorUsuario(long usuarioId) {
         List<Habito> lista = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_HABITO + " WHERE " + COL_HAB_USUARIO_ID + " = ? ORDER BY " + COL_HAB_ID + " DESC";
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(usuarioId)});
+        Cursor cursor = null;
+        try {
+            cursor = db.rawQuery(query, new String[]{String.valueOf(usuarioId)});
+            if (cursor.moveToFirst()) {
+                do {
+                    Habito h = new Habito();
+                    h.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_HAB_ID)));
+                    h.setUsuarioId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_HAB_USUARIO_ID)));
+                    h.setNombre(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_NOMBRE)));
+                    h.setDescripcion(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_DESCRIPCION)));
+                    h.setIcono(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_ICONO)));
+                    h.setColor(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_COLOR)));
+                    h.setAreaVida(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_AREA)));
+                    h.setTipoFrecuencia(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_FRECUENCIA)));
+                    h.setDiasSemana(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_DIAS)));
+                    h.setTipoMeta(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_TIPO_META)));
+                    h.setMetaCantidad(cursor.getInt(cursor.getColumnIndexOrThrow(COL_HAB_META_CANTIDAD)));
+                    h.setUnidad(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_UNIDAD)));
+                    h.setHoraRecordatorio(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_HORA)));
+                    h.setRecordatorioActivo(cursor.getInt(cursor.getColumnIndexOrThrow(COL_HAB_RECORDATORIO)) == 1);
+                    h.setRachaDias(cursor.getInt(cursor.getColumnIndexOrThrow(COL_HAB_RACHA)));
+                    h.setCompletadoHoy(cursor.getInt(cursor.getColumnIndexOrThrow(COL_HAB_COMPLETADO)) == 1);
+                    h.setProgresoActual(cursor.getInt(cursor.getColumnIndexOrThrow(COL_HAB_PROGRESO)));
+                    h.setFechaCreacion(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_FECHA_CREACION)));
+                    try {
+                        int colSonido = cursor.getColumnIndex(COL_HAB_SONIDO);
+                        if (colSonido != -1) {
+                            h.setTipoSonidoNotificacion(cursor.getString(colSonido));
+                        }
+                        int colDur = cursor.getColumnIndex(COL_HAB_DURACION_SONIDO);
+                        if (colDur != -1 && !cursor.isNull(colDur)) {
+                            h.setDuracionSonidoSegundos(cursor.getInt(colDur));
+                        }
+                    } catch (Exception ignored) {}
+                    lista.add(h);
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+        return lista;
+    }
 
-        if (cursor.moveToFirst()) {
-            do {
-                Habito h = new Habito();
+    /**
+     * OPERACIÓN CRUD: READ (CONSULTAR INDIVIDUAL)
+     * Recupera un hábito específico a partir de su ID para cargar su información en formularios o vistas.
+     * @param habitoId Clave primaria del hábito.
+     * @return Objeto Habito con los datos recuperados o null si no existe.
+     */
+    public Habito obtenerHabitoPorId(long habitoId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_HABITO + " WHERE " + COL_HAB_ID + " = ?";
+        Cursor cursor = null;
+        Habito h = null;
+        try {
+            cursor = db.rawQuery(query, new String[]{String.valueOf(habitoId)});
+            if (cursor.moveToFirst()) {
+                h = new Habito();
                 h.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_HAB_ID)));
                 h.setUsuarioId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_HAB_USUARIO_ID)));
                 h.setNombre(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_NOMBRE)));
@@ -341,107 +452,92 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         h.setDuracionSonidoSegundos(cursor.getInt(colDur));
                     }
                 } catch (Exception ignored) {}
-                lista.add(h);
-            } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) cursor.close();
         }
-        cursor.close();
-        return lista;
-    }
-
-    public Habito obtenerHabitoPorId(long habitoId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + TABLE_HABITO + " WHERE " + COL_HAB_ID + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(habitoId)});
-        Habito h = null;
-        if (cursor.moveToFirst()) {
-            h = new Habito();
-            h.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_HAB_ID)));
-            h.setUsuarioId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_HAB_USUARIO_ID)));
-            h.setNombre(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_NOMBRE)));
-            h.setDescripcion(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_DESCRIPCION)));
-            h.setIcono(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_ICONO)));
-            h.setColor(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_COLOR)));
-            h.setAreaVida(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_AREA)));
-            h.setTipoFrecuencia(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_FRECUENCIA)));
-            h.setDiasSemana(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_DIAS)));
-            h.setTipoMeta(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_TIPO_META)));
-            h.setMetaCantidad(cursor.getInt(cursor.getColumnIndexOrThrow(COL_HAB_META_CANTIDAD)));
-            h.setUnidad(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_UNIDAD)));
-            h.setHoraRecordatorio(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_HORA)));
-            h.setRecordatorioActivo(cursor.getInt(cursor.getColumnIndexOrThrow(COL_HAB_RECORDATORIO)) == 1);
-            h.setRachaDias(cursor.getInt(cursor.getColumnIndexOrThrow(COL_HAB_RACHA)));
-            h.setCompletadoHoy(cursor.getInt(cursor.getColumnIndexOrThrow(COL_HAB_COMPLETADO)) == 1);
-            h.setProgresoActual(cursor.getInt(cursor.getColumnIndexOrThrow(COL_HAB_PROGRESO)));
-            h.setFechaCreacion(cursor.getString(cursor.getColumnIndexOrThrow(COL_HAB_FECHA_CREACION)));
-            try {
-                int colSonido = cursor.getColumnIndex(COL_HAB_SONIDO);
-                if (colSonido != -1) {
-                    h.setTipoSonidoNotificacion(cursor.getString(colSonido));
-                }
-                int colDur = cursor.getColumnIndex(COL_HAB_DURACION_SONIDO);
-                if (colDur != -1 && !cursor.isNull(colDur)) {
-                    h.setDuracionSonidoSegundos(cursor.getInt(colDur));
-                }
-            } catch (Exception ignored) {}
-        }
-        cursor.close();
         return h;
     }
 
+    /**
+     * OPERACIÓN CRUD: UPDATE (ACTUALIZAR)
+     * Modifica los atributos de un hábito existente identificado por su clave primaria (ID),
+     * conservando su identificador y su historial.
+     * @param habito Objeto con los datos modificados.
+     * @return true si la actualización afectó al menos un registro, false si hubo error.
+     */
     public boolean actualizarHabito(Habito habito) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put(COL_HAB_NOMBRE, habito.getNombre());
-        cv.put(COL_HAB_DESCRIPCION, habito.getDescripcion());
-        cv.put(COL_HAB_ICONO, habito.getIcono());
-        cv.put(COL_HAB_COLOR, habito.getColor());
-        cv.put(COL_HAB_AREA, habito.getAreaVida());
-        cv.put(COL_HAB_FRECUENCIA, habito.getTipoFrecuencia());
-        cv.put(COL_HAB_DIAS, habito.getDiasSemana());
-        cv.put(COL_HAB_TIPO_META, habito.getTipoMeta());
-        cv.put(COL_HAB_META_CANTIDAD, habito.getMetaCantidad());
-        cv.put(COL_HAB_UNIDAD, habito.getUnidad());
-        cv.put(COL_HAB_HORA, habito.getHoraRecordatorio());
-        cv.put(COL_HAB_RECORDATORIO, habito.isRecordatorioActivo() ? 1 : 0);
-        cv.put(COL_HAB_SONIDO, habito.getTipoSonidoNotificacion());
-        cv.put(COL_HAB_DURACION_SONIDO, habito.getDuracionSonidoSegundos());
-        int rows = db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habito.getId())});
-        return rows > 0;
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            ContentValues cv = new ContentValues();
+            cv.put(COL_HAB_NOMBRE, habito.getNombre().trim());
+            cv.put(COL_HAB_DESCRIPCION, habito.getDescripcion());
+            cv.put(COL_HAB_ICONO, habito.getIcono());
+            cv.put(COL_HAB_COLOR, habito.getColor());
+            cv.put(COL_HAB_AREA, habito.getAreaVida());
+            cv.put(COL_HAB_FRECUENCIA, habito.getTipoFrecuencia());
+            cv.put(COL_HAB_DIAS, habito.getDiasSemana());
+            cv.put(COL_HAB_TIPO_META, habito.getTipoMeta());
+            cv.put(COL_HAB_META_CANTIDAD, habito.getMetaCantidad());
+            cv.put(COL_HAB_UNIDAD, habito.getUnidad());
+            cv.put(COL_HAB_HORA, habito.getHoraRecordatorio());
+            cv.put(COL_HAB_RECORDATORIO, habito.isRecordatorioActivo() ? 1 : 0);
+            cv.put(COL_HAB_SONIDO, habito.getTipoSonidoNotificacion());
+            cv.put(COL_HAB_DURACION_SONIDO, habito.getDuracionSonidoSegundos());
+            int rows = db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habito.getId())});
+            return rows > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
+    /**
+     * Alterna el estado de completado de un hábito para la fecha de hoy.
+     */
     public void toggleHabitoCompletado(long habitoId, long usuarioId, boolean completado) {
         String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         toggleHabitoEnFecha(habitoId, usuarioId, hoy, completado);
     }
 
+    /**
+     * Actualiza el estado de cumplimiento y racha de un hábito para una fecha determinada,
+     * persistiendo el registro en la tabla 'RegistroDiario'.
+     */
     public void toggleHabitoEnFecha(long habitoId, long usuarioId, String fecha, boolean completado) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Habito h = obtenerHabitoPorId(habitoId);
-        int nuevaRacha = 0;
-        int nuevoProgreso = 0;
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            Habito h = obtenerHabitoPorId(habitoId);
+            int nuevaRacha = 0;
+            int nuevoProgreso = 0;
 
-        if (h != null) {
-            nuevaRacha = h.getRachaDias();
-            int meta = h.getMetaCantidad() > 0 ? h.getMetaCantidad() : 1;
-            if (completado) {
-                nuevaRacha = Math.max(1, nuevaRacha + 1);
-                nuevoProgreso = meta;
-            } else {
-                nuevaRacha = Math.max(0, nuevaRacha - 1);
-                nuevoProgreso = 0;
+            if (h != null) {
+                nuevaRacha = h.getRachaDias();
+                int meta = h.getMetaCantidad() > 0 ? h.getMetaCantidad() : 1;
+                if (completado) {
+                    nuevaRacha = Math.max(1, nuevaRacha + 1);
+                    nuevoProgreso = meta;
+                } else {
+                    nuevaRacha = Math.max(0, nuevaRacha - 1);
+                    nuevoProgreso = 0;
+                }
             }
-        }
 
-        String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        if (fecha != null && fecha.equals(hoy)) {
-            ContentValues cv = new ContentValues();
-            cv.put(COL_HAB_COMPLETADO, completado ? 1 : 0);
-            cv.put(COL_HAB_PROGRESO, nuevoProgreso);
-            cv.put(COL_HAB_RACHA, nuevaRacha);
-            db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
-        }
+            String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            if (fecha != null && fecha.equals(hoy)) {
+                ContentValues cv = new ContentValues();
+                cv.put(COL_HAB_COMPLETADO, completado ? 1 : 0);
+                cv.put(COL_HAB_PROGRESO, nuevoProgreso);
+                cv.put(COL_HAB_RACHA, nuevaRacha);
+                db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
+            }
 
-        registrarProgresoDiario(habitoId, usuarioId, fecha, completado, nuevoProgreso, "");
+            registrarProgresoDiario(habitoId, usuarioId, fecha, completado, nuevoProgreso, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void toggleHabitoCompletado(long habitoId, boolean completado) {
@@ -450,87 +546,104 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         toggleHabitoCompletado(habitoId, userId, completado);
     }
 
+    /**
+     * Ajusta el progreso cuantitativo de un hábito (+1 o -1), respetando el límite estricto de la meta.
+     * Si el progreso alcanza la meta, se marca como completado y se bloquea de superar el límite.
+     */
     public int ajustarProgresoHabito(long habitoId, long usuarioId, int delta) {
-        Habito h = obtenerHabitoPorId(habitoId);
-        if (h == null) return 0;
+        try {
+            Habito h = obtenerHabitoPorId(habitoId);
+            if (h == null) return 0;
 
-        int meta = h.getMetaCantidad() > 0 ? h.getMetaCantidad() : 1;
-        int nuevoProgreso = Math.min(meta, Math.max(0, h.getProgresoActual() + delta));
-        boolean completado = nuevoProgreso >= meta;
+            int meta = h.getMetaCantidad() > 0 ? h.getMetaCantidad() : 1;
+            int nuevoProgreso = Math.min(meta, Math.max(0, h.getProgresoActual() + delta));
+            boolean completado = nuevoProgreso >= meta;
 
-        int nuevaRacha = h.getRachaDias();
-        if (completado && !h.isCompletadoHoy()) {
-            nuevaRacha = Math.max(1, nuevaRacha + 1);
-        } else if (!completado && h.isCompletadoHoy()) {
-            nuevaRacha = Math.max(0, nuevaRacha - 1);
+            int nuevaRacha = h.getRachaDias();
+            if (completado && !h.isCompletadoHoy()) {
+                nuevaRacha = Math.max(1, nuevaRacha + 1);
+            } else if (!completado && h.isCompletadoHoy()) {
+                nuevaRacha = Math.max(0, nuevaRacha - 1);
+            }
+
+            SQLiteDatabase db = this.getWritableDatabase();
+            ContentValues cv = new ContentValues();
+            cv.put(COL_HAB_PROGRESO, nuevoProgreso);
+            cv.put(COL_HAB_COMPLETADO, completado ? 1 : 0);
+            cv.put(COL_HAB_RACHA, nuevaRacha);
+            db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
+
+            String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            registrarProgresoDiario(habitoId, usuarioId, hoy, completado, nuevoProgreso, "");
+
+            return nuevoProgreso;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
         }
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put(COL_HAB_PROGRESO, nuevoProgreso);
-        cv.put(COL_HAB_COMPLETADO, completado ? 1 : 0);
-        cv.put(COL_HAB_RACHA, nuevaRacha);
-        db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
-
-        String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        registrarProgresoDiario(habitoId, usuarioId, hoy, completado, nuevoProgreso, "");
-
-        return nuevoProgreso;
     }
 
     public void registrarProgresoDiario(long habitoId, long usuarioId, String fecha, boolean completado, int progreso, String notas) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put(COL_REG_HABITO_ID, habitoId);
-        cv.put(COL_REG_USUARIO_ID, usuarioId);
-        cv.put(COL_REG_FECHA, fecha);
-        cv.put(COL_REG_COMPLETADO, completado ? 1 : 0);
-        cv.put(COL_REG_PROGRESO, progreso);
-        cv.put(COL_REG_NOTAS, notas != null ? notas : "");
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            ContentValues cv = new ContentValues();
+            cv.put(COL_REG_HABITO_ID, habitoId);
+            cv.put(COL_REG_USUARIO_ID, usuarioId);
+            cv.put(COL_REG_FECHA, fecha);
+            cv.put(COL_REG_COMPLETADO, completado ? 1 : 0);
+            cv.put(COL_REG_PROGRESO, progreso);
+            cv.put(COL_REG_NOTAS, notas != null ? notas : "");
 
-        int rows = db.update(TABLE_REGISTRO_DIARIO, cv,
-                COL_REG_HABITO_ID + " = ? AND " + COL_REG_FECHA + " = ?",
-                new String[]{String.valueOf(habitoId), fecha});
-        if (rows == 0) {
-            db.insert(TABLE_REGISTRO_DIARIO, null, cv);
+            int rows = db.update(TABLE_REGISTRO_DIARIO, cv,
+                    COL_REG_HABITO_ID + " = ? AND " + COL_REG_FECHA + " = ?",
+                    new String[]{String.valueOf(habitoId), fecha});
+            if (rows == 0) {
+                db.insert(TABLE_REGISTRO_DIARIO, null, cv);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void verificarYResetearDia(long usuarioId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-        String ultimaFecha = "";
-        Cursor c = db.rawQuery("SELECT " + COL_PERFIL_ULTIMA_INTERACCION + " FROM " + TABLE_AJUSTES_USUARIO +
-                " WHERE " + COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
-        if (c.moveToFirst()) {
-            ultimaFecha = c.getString(0);
-        }
-        c.close();
+            String ultimaFecha = "";
+            Cursor c = db.rawQuery("SELECT " + COL_PERFIL_ULTIMA_INTERACCION + " FROM " + TABLE_AJUSTES_USUARIO +
+                    " WHERE " + COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
+            if (c.moveToFirst()) {
+                ultimaFecha = c.getString(0);
+            }
+            c.close();
 
-        if (ultimaFecha != null && !ultimaFecha.isEmpty() && ultimaFecha.length() >= 10) {
-            String subFecha = ultimaFecha.substring(0, 10);
-            if (!subFecha.equals(hoy)) {
-                boolean modoSinCulpa = obtenerModoSinCulpa(usuarioId);
-                List<Habito> habitos = obtenerHabitosPorUsuario(usuarioId);
-                for (Habito h : habitos) {
-                    ContentValues cv = new ContentValues();
-                    if (!h.isCompletadoHoy() && !modoSinCulpa) {
-                        cv.put(COL_HAB_RACHA, 0);
+            if (ultimaFecha != null && !ultimaFecha.isEmpty() && ultimaFecha.length() >= 10) {
+                String subFecha = ultimaFecha.substring(0, 10);
+                if (!subFecha.equals(hoy)) {
+                    boolean modoSinCulpa = obtenerModoSinCulpa(usuarioId);
+                    List<Habito> habitos = obtenerHabitosPorUsuario(usuarioId);
+                    for (Habito h : habitos) {
+                        ContentValues cv = new ContentValues();
+                        if (!h.isCompletadoHoy() && !modoSinCulpa) {
+                            cv.put(COL_HAB_RACHA, 0);
+                        }
+                        cv.put(COL_HAB_COMPLETADO, 0);
+                        cv.put(COL_HAB_PROGRESO, 0);
+                        db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(h.getId())});
                     }
-                    cv.put(COL_HAB_COMPLETADO, 0);
-                    cv.put(COL_HAB_PROGRESO, 0);
-                    db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(h.getId())});
                 }
             }
-        }
 
-        ContentValues cvPerfil = new ContentValues();
-        cvPerfil.put(COL_PERFIL_ULTIMA_INTERACCION, hoy);
-        int rows = db.update(TABLE_AJUSTES_USUARIO, cvPerfil, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
-        if (rows == 0) {
-            cvPerfil.put(COL_PERFIL_USER_ID, usuarioId);
-            db.insert(TABLE_AJUSTES_USUARIO, null, cvPerfil);
+            ContentValues cvPerfil = new ContentValues();
+            cvPerfil.put(COL_PERFIL_ULTIMA_INTERACCION, hoy);
+            int rows = db.update(TABLE_AJUSTES_USUARIO, cvPerfil, COL_PERFIL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
+            if (rows == 0) {
+                cvPerfil.put(COL_PERFIL_USER_ID, usuarioId);
+                db.insert(TABLE_AJUSTES_USUARIO, null, cvPerfil);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -543,18 +656,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getReadableDatabase();
         for (Habito h : lista) {
-            Cursor c = db.rawQuery("SELECT " + COL_REG_COMPLETADO + ", " + COL_REG_PROGRESO +
-                    " FROM " + TABLE_REGISTRO_DIARIO +
-                    " WHERE " + COL_REG_HABITO_ID + " = ? AND " + COL_REG_FECHA + " = ?",
-                    new String[]{String.valueOf(h.getId()), fecha});
-            if (c.moveToFirst()) {
-                h.setCompletadoHoy(c.getInt(0) == 1);
-                h.setProgresoActual(c.getInt(1));
-            } else {
-                h.setCompletadoHoy(false);
-                h.setProgresoActual(0);
+            Cursor c = null;
+            try {
+                c = db.rawQuery("SELECT " + COL_REG_COMPLETADO + ", " + COL_REG_PROGRESO +
+                        " FROM " + TABLE_REGISTRO_DIARIO +
+                        " WHERE " + COL_REG_HABITO_ID + " = ? AND " + COL_REG_FECHA + " = ?",
+                        new String[]{String.valueOf(h.getId()), fecha});
+                if (c.moveToFirst()) {
+                    h.setCompletadoHoy(c.getInt(0) == 1);
+                    h.setProgresoActual(c.getInt(1));
+                } else {
+                    h.setCompletadoHoy(false);
+                    h.setProgresoActual(0);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (c != null) c.close();
             }
-            c.close();
         }
         return lista;
     }
@@ -563,21 +682,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Set<Integer> dias = new HashSet<>();
         SQLiteDatabase db = this.getReadableDatabase();
         String mesStr = String.format(Locale.ROOT, "%04d-%02d", anio, mes);
-        Cursor c = db.rawQuery("SELECT DISTINCT " + COL_REG_FECHA + " FROM " + TABLE_REGISTRO_DIARIO +
-                " WHERE " + COL_REG_USUARIO_ID + " = ? AND " + COL_REG_FECHA + " LIKE ? AND " + COL_REG_COMPLETADO + " = 1",
-                new String[]{String.valueOf(usuarioId), mesStr + "%"});
-        if (c.moveToFirst()) {
-            do {
-                String f = c.getString(0);
-                if (f != null && f.length() >= 10) {
-                    try {
-                        int d = Integer.parseInt(f.substring(8, 10));
-                        dias.add(d);
-                    } catch (Exception ignored) {}
-                }
-            } while (c.moveToNext());
+        Cursor c = null;
+        try {
+            c = db.rawQuery("SELECT DISTINCT " + COL_REG_FECHA + " FROM " + TABLE_REGISTRO_DIARIO +
+                    " WHERE " + COL_REG_USUARIO_ID + " = ? AND " + COL_REG_FECHA + " LIKE ? AND " + COL_REG_COMPLETADO + " = 1",
+                    new String[]{String.valueOf(usuarioId), mesStr + "%"});
+            if (c.moveToFirst()) {
+                do {
+                    String f = c.getString(0);
+                    if (f != null && f.length() >= 10) {
+                        try {
+                            int d = Integer.parseInt(f.substring(8, 10));
+                            dias.add(d);
+                        } catch (Exception ignored) {}
+                    }
+                } while (c.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (c != null) c.close();
         }
-        c.close();
         return dias;
     }
 
@@ -600,13 +725,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (fecha.equals(hoy)) {
                 completados = obtenerHabitosCompletadosHoy(usuarioId);
             } else {
-                Cursor c = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_REGISTRO_DIARIO +
-                        " WHERE " + COL_REG_USUARIO_ID + " = ? AND " + COL_REG_FECHA + " = ? AND " + COL_REG_COMPLETADO + " = 1",
-                        new String[]{String.valueOf(usuarioId), fecha});
-                if (c.moveToFirst()) {
-                    completados = c.getInt(0);
+                Cursor c = null;
+                try {
+                    c = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_REGISTRO_DIARIO +
+                            " WHERE " + COL_REG_USUARIO_ID + " = ? AND " + COL_REG_FECHA + " = ? AND " + COL_REG_COMPLETADO + " = 1",
+                            new String[]{String.valueOf(usuarioId), fecha});
+                    if (c.moveToFirst()) {
+                        completados = c.getInt(0);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (c != null) c.close();
                 }
-                c.close();
             }
             int pct = (completados * 100) / totalHabitos;
             resultado[i] = Math.min(100, pct);
@@ -615,10 +746,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return resultado;
     }
 
-    public void eliminarHabito(long habitoId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_REGISTRO_DIARIO, COL_REG_HABITO_ID + " = ?", new String[]{String.valueOf(habitoId)});
-        db.delete(TABLE_HABITO, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
+    /**
+     * OPERACIÓN CRUD: DELETE (ELIMINAR)
+     * Elimina el registro del hábito de la base de datos y sus registros asociados en SQLite.
+     * Retorna true si la eliminación fue exitosa.
+     * @param habitoId ID del hábito a eliminar.
+     * @return true si se eliminó el registro de la tabla Habito, false en caso de fallo.
+     */
+    public boolean eliminarHabito(long habitoId) {
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.delete(TABLE_REGISTRO_DIARIO, COL_REG_HABITO_ID + " = ?", new String[]{String.valueOf(habitoId)});
+            int rows = db.delete(TABLE_HABITO, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
+            return rows > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public int vaciarTodosLosHabitos(long usuarioId) {

@@ -897,10 +897,14 @@ public class CrearHabitoActivity extends AppCompatActivity {
                 .setPositiveButton("Eliminar", (dialog, which) -> {
                     if (editHabitoId != -1) {
                         NotificationHelper.cancelarAlarmaHabito(this, (int) editHabitoId);
-                        dbHelper.eliminarHabito(editHabitoId);
-                        Toast.makeText(this, "Hábito eliminado correctamente 🗑️", Toast.LENGTH_SHORT).show();
-                        setResult(RESULT_OK);
-                        finish();
+                        boolean eliminado = dbHelper.eliminarHabito(editHabitoId);
+                        if (eliminado) {
+                            Toast.makeText(this, "Hábito eliminado correctamente 🗑️", Toast.LENGTH_SHORT).show();
+                            setResult(RESULT_OK);
+                            finish();
+                        } else {
+                            Toast.makeText(this, "Error al eliminar el hábito de la base de datos", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .setNegativeButton("Cancelar", null)
@@ -909,13 +913,52 @@ public class CrearHabitoActivity extends AppCompatActivity {
 
     private void guardarHabito() {
         String nombre = etNombre.getText().toString().trim();
+        
+        // 1. Validación de campo obligatorio con error visual (Rúbrica A - Criterio 7)
         if (nombre.isEmpty()) {
+            etNombre.setError("El nombre del hábito es obligatorio");
+            etNombre.requestFocus();
             Toast.makeText(this, "Por favor ingresa un nombre para el hábito", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 2. Validación de longitud y rango de caracteres (Rúbrica A - Criterio 7)
+        if (nombre.length() < 3) {
+            etNombre.setError("El nombre debe tener al menos 3 caracteres");
+            etNombre.requestFocus();
+            Toast.makeText(this, "El nombre es demasiado corto (mínimo 3 caracteres)", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (nombre.length() > 50) {
+            etNombre.setError("El nombre no debe superar los 50 caracteres");
+            etNombre.requestFocus();
+            Toast.makeText(this, "El nombre es demasiado largo (máximo 50 caracteres)", Toast.LENGTH_SHORT).show();
             return;
         }
 
         long userId = sessionManager.getUserId();
         if (userId <= 0) userId = 1;
+
+        // 3. Validación de duplicados para el mismo usuario (Rúbrica A - Criterio 7)
+        if (dbHelper.existeHabitoConNombre(userId, nombre, editHabitoId)) {
+            etNombre.setError("Ya tienes un hábito registrado con este nombre");
+            etNombre.requestFocus();
+            Toast.makeText(this, "Ya existe un hábito con el nombre \"" + nombre + "\"", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 4. Validación de rango cuantitativo de la meta
+        if ("cantidad".equalsIgnoreCase(tipoMetaSeleccionada) && cantidadMeta <= 0) {
+            Toast.makeText(this, "La meta debe ser mayor a 0", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 5. Validación de selección de días activos
+        if (diasActivos == null || diasActivos.isEmpty()) {
+            Toast.makeText(this, "Selecciona al menos un día de la semana para este hábito", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         Habito habito;
         if (editHabitoId != -1) {

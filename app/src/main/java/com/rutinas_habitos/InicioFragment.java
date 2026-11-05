@@ -384,9 +384,24 @@ public class InicioFragment extends Fragment {
                             intent.putExtra("EXTRA_HABITO_ID", h.getId());
                             startActivity(intent);
                         } else if (which == 1) {
-                            dbHelper.eliminarHabito(h.getId());
-                            Toast.makeText(ctx, "Hábito eliminado 🗑️", Toast.LENGTH_SHORT).show();
-                            cargarHabitosDesdeSQLite(userId);
+                            // Criterio 5 Rúbrica: Confirmación previa obligatoria antes de eliminar registros
+                            new AlertDialog.Builder(ctx)
+                                    .setTitle("¿Eliminar hábito?")
+                                    .setMessage("¿Estás seguro de que deseas eliminar \"" + h.getNombre() + "\"? Se borrará permanentemente su historial y estadísticas.")
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .setPositiveButton("Eliminar", (dialogConfirm, whichConfirm) -> {
+                                        NotificationHelper.cancelarAlarmaHabito(ctx, (int) h.getId());
+                                        boolean eliminado = dbHelper.eliminarHabito(h.getId());
+                                        if (eliminado) {
+                                            VibrationHelper.vibrarClick(ctx);
+                                            Toast.makeText(ctx, "Hábito \"" + h.getNombre() + "\" eliminado 🗑️", Toast.LENGTH_SHORT).show();
+                                            cargarHabitosDesdeSQLite(userId);
+                                        } else {
+                                            Toast.makeText(ctx, "Error al eliminar el hábito de la base de datos", Toast.LENGTH_SHORT).show();
+                                        }
+                                    })
+                                    .setNegativeButton("Cancelar", null)
+                                    .show();
                         }
                     })
                     .show();

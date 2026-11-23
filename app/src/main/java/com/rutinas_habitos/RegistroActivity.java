@@ -71,7 +71,6 @@ public class RegistroActivity extends AppCompatActivity {
             return;
         }
 
-        // Crear usuario en Firebase Authentication
         btnCrearCuenta.setEnabled(false);
         Toast.makeText(this, "Registrando usuario en la nube... ☁️", Toast.LENGTH_SHORT).show();
 
@@ -85,7 +84,7 @@ public class RegistroActivity extends AppCompatActivity {
 
                     long userId = dbHelper.registrarUsuario(nombre, correo, password);
                     if (userId != -1) {
-                        // Sincronizar perfil en Cloud Firestore
+
                         FirebaseFirestoreHelper.getInstance().guardarPerfilUsuario(userId, nombre, correo, firebaseUid);
 
                         dbHelper.insertarHabitosPorDefecto(userId);

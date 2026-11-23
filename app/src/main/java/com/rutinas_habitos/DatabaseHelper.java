@@ -15,17 +15,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-/**
- * DatabaseHelper - Gestor de persistencia relacional local con SQLite.
- * 
- * Implementa la creación, configuración y actualización del esquema de base de datos
- * para la aplicación 'Rutinas Pastel', administrando las tablas:
- * - Usuario: Credenciales y datos del perfil local.
- * - AjustesUsuario: Preferencias de bienestar (Modo Sin Culpa, metas).
- * - Habito: Entidad principal para la gestión y seguimiento de hábitos (CRUD).
- * - RegistroDiario: Historial detallado de cumplimiento por fecha.
- * - TonoPersonalizado: Archivos de audio MP3 locales para recordatorios.
- */
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "rutinas_habitos.db";
@@ -303,9 +292,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return usuario;
     }
 
-    /**
-     * Valida si un correo electrónico ya está registrado en la base de datos.
-     */
     public boolean existeCorreo(String correo) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT " + COL_USER_ID + " FROM " + TABLE_USUARIO + " WHERE LOWER(" + COL_USER_CORREO + ") = ?";
@@ -315,14 +301,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return existe;
     }
 
-    /**
-     * Valida si ya existe un hábito con el mismo nombre para el usuario actual.
-     * Requisito de la rúbrica: Prevención de registros duplicados e integridad de datos.
-     * @param usuarioId ID del usuario propietario.
-     * @param nombre Nombre del hábito a validar.
-     * @param excludeHabitoId ID a excluir (útil durante la actualización/UPDATE).
-     * @return true si ya existe un hábito idéntico, false si está disponible.
-     */
     public boolean existeHabitoConNombre(long usuarioId, String nombre, long excludeHabitoId) {
         if (nombre == null || nombre.trim().isEmpty()) return false;
         SQLiteDatabase db = this.getReadableDatabase();
@@ -338,13 +316,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return existe;
     }
 
-        /**
-     * OPERACIÓN CRUD: CREATE (INSERTAR)
-     * Inserta un nuevo registro de hábito en la tabla 'Habito' mediante ContentValues.
-     * Se captura cualquier excepción de SQLite para prevenir caídas de la app.
-     * @param habito Objeto con los datos del nuevo hábito.
-     * @return ID autogenerado del nuevo registro o -1 en caso de error.
-     */
     public long insertarHabito(Habito habito) {
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -378,7 +349,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             long newId = db.insert(TABLE_HABITO, null, cv);
             if (newId != -1) {
                 habito.setId(newId);
-                // Sincronización en la nube con Firestore
+
                 try {
                     FirebaseFirestoreHelper.getInstance().guardarHabitoEnNube(habito.getUsuarioId(), habito, null);
                 } catch (Exception ex) {
@@ -392,13 +363,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    /**
-     * OPERACIÓN CRUD: READ (CONSULTAR LISTADO)
-     * Recupera todos los hábitos registrados por el usuario mediante un Cursor de SQLite,
-     * ordenados cronológicamente de forma descendente.
-     * @param usuarioId Identificador del usuario.
-     * @return Lista de objetos Habito recuperados desde la base de datos.
-     */
     public List<Habito> obtenerHabitosPorUsuario(long usuarioId) {
         List<Habito> lista = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -448,12 +412,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return lista;
     }
 
-    /**
-     * OPERACIÓN CRUD: READ (CONSULTAR INDIVIDUAL)
-     * Recupera un hábito específico a partir de su ID para cargar su información en formularios o vistas.
-     * @param habitoId Clave primaria del hábito.
-     * @return Objeto Habito con los datos recuperados o null si no existe.
-     */
     public Habito obtenerHabitoPorId(long habitoId) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_HABITO + " WHERE " + COL_HAB_ID + " = ?";
@@ -500,13 +458,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return h;
     }
 
-    /**
-     * OPERACIÓN CRUD: UPDATE (ACTUALIZAR)
-     * Modifica los atributos de un hábito existente identificado por su clave primaria (ID),
-     * conservando su identificador y su historial.
-     * @param habito Objeto con los datos modificados.
-     * @return true si la actualización afectó al menos un registro, false si hubo error.
-     */
     public boolean actualizarHabito(Habito habito) {
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -527,7 +478,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cv.put(COL_HAB_DURACION_SONIDO, habito.getDuracionSonidoSegundos());
             int rows = db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habito.getId())});
             if (rows > 0) {
-                // Sincronización en la nube con Firestore
+
                 try {
                     FirebaseFirestoreHelper.getInstance().guardarHabitoEnNube(habito.getUsuarioId(), habito, null);
                 } catch (Exception ex) {
@@ -541,18 +492,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    /**
-     * Alterna el estado de completado de un hábito para la fecha de hoy.
-     */
     public void toggleHabitoCompletado(long habitoId, long usuarioId, boolean completado) {
         String hoy = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         toggleHabitoEnFecha(habitoId, usuarioId, hoy, completado);
     }
 
-    /**
-     * Actualiza el estado de cumplimiento y racha de un hábito para una fecha determinada,
-     * persistiendo el registro en la tabla 'RegistroDiario'.
-     */
     public void toggleHabitoEnFecha(long habitoId, long usuarioId, String fecha, boolean completado) {
         try {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -593,10 +537,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         toggleHabitoCompletado(habitoId, userId, completado);
     }
 
-    /**
-     * Ajusta el progreso cuantitativo de un hábito (+1 o -1), respetando el límite estricto de la meta.
-     * Si el progreso alcanza la meta, se marca como completado y se bloquea de superar el límite.
-     */
     public int ajustarProgresoHabito(long habitoId, long usuarioId, int delta) {
         try {
             Habito h = obtenerHabitoPorId(habitoId);
@@ -648,7 +588,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.insert(TABLE_REGISTRO_DIARIO, null, cv);
             }
 
-            // Sincronizar registro con Cloud Firestore
             try {
                 FirebaseFirestoreHelper.getInstance().guardarRegistroDiarioEnNube(
                         usuarioId, habitoId, fecha, progreso, completado, notas);
@@ -801,13 +740,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return resultado;
     }
 
-    /**
-     * OPERACIÓN CRUD: DELETE (ELIMINAR)
-     * Elimina el registro del hábito de la base de datos y sus registros asociados en SQLite.
-     * Retorna true si la eliminación fue exitosa.
-     * @param habitoId ID del hábito a eliminar.
-     * @return true si se eliminó el registro de la tabla Habito, false en caso de fallo.
-     */
     public boolean eliminarHabito(long habitoId) {
         try {
             Habito h = obtenerHabitoPorId(habitoId);
@@ -816,9 +748,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             SQLiteDatabase db = this.getWritableDatabase();
             db.delete(TABLE_REGISTRO_DIARIO, COL_REG_HABITO_ID + " = ?", new String[]{String.valueOf(habitoId)});
             int rows = db.delete(TABLE_HABITO, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
-            
+
             if (rows > 0) {
-                // Eliminar también de Firestore en la nube
+
                 try {
                     FirebaseFirestoreHelper.getInstance().eliminarHabitoDeNube(usuarioId, habitoId, null);
                 } catch (Exception ex) {

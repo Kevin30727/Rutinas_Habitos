@@ -913,8 +913,7 @@ public class CrearHabitoActivity extends AppCompatActivity {
 
     private void guardarHabito() {
         String nombre = etNombre.getText().toString().trim();
-        
-        // 1. Validación de campo obligatorio con error visual (Rúbrica A - Criterio 7)
+
         if (nombre.isEmpty()) {
             etNombre.setError("El nombre del hábito es obligatorio");
             etNombre.requestFocus();
@@ -922,7 +921,6 @@ public class CrearHabitoActivity extends AppCompatActivity {
             return;
         }
 
-        // 2. Validación de longitud y rango de caracteres (Rúbrica A - Criterio 7)
         if (nombre.length() < 3) {
             etNombre.setError("El nombre debe tener al menos 3 caracteres");
             etNombre.requestFocus();
@@ -940,7 +938,6 @@ public class CrearHabitoActivity extends AppCompatActivity {
         long userId = sessionManager.getUserId();
         if (userId <= 0) userId = 1;
 
-        // 3. Validación de duplicados para el mismo usuario (Rúbrica A - Criterio 7)
         if (dbHelper.existeHabitoConNombre(userId, nombre, editHabitoId)) {
             etNombre.setError("Ya tienes un hábito registrado con este nombre");
             etNombre.requestFocus();
@@ -948,13 +945,11 @@ public class CrearHabitoActivity extends AppCompatActivity {
             return;
         }
 
-        // 4. Validación de rango cuantitativo de la meta
         if ("cantidad".equalsIgnoreCase(tipoMetaSeleccionada) && cantidadMeta <= 0) {
             Toast.makeText(this, "La meta debe ser mayor a 0", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 5. Validación de selección de días activos
         if (diasActivos == null || diasActivos.isEmpty()) {
             Toast.makeText(this, "Selecciona al menos un día de la semana para este hábito", Toast.LENGTH_SHORT).show();
             return;

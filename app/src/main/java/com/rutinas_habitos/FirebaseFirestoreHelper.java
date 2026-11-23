@@ -14,9 +14,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Helper singleton para gestionar la sincronización y operaciones en la nube con Cloud Firestore y Firebase Auth.
- */
 public class FirebaseFirestoreHelper {
 
     private static final String TAG = "FirebaseFirestoreHelper";
@@ -27,7 +24,7 @@ public class FirebaseFirestoreHelper {
     private FirebaseFirestoreHelper() {
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
-        // Habilitar persistencia offline automática de Firestore
+
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
                 .build();
@@ -53,9 +50,6 @@ public class FirebaseFirestoreHelper {
         return auth.getCurrentUser();
     }
 
-    /**
-     * Registra el perfil del usuario en Firestore (nombre, correo, fecha)
-     */
     public void guardarPerfilUsuario(long usuarioId, String nombre, String correo, String firebaseUid) {
         Map<String, Object> data = new HashMap<>();
         data.put("idLocal", usuarioId);
@@ -71,7 +65,6 @@ public class FirebaseFirestoreHelper {
                 .addOnFailureListener(e -> Log.e(TAG, "Error sincronizando perfil en Firestore: " + e.getMessage()));
     }
 
-    // Colecciones raíz
     public CollectionReference getHabitosRef(long usuarioId) {
         return db.collection("usuarios")
                 .document(String.valueOf(usuarioId))
@@ -93,9 +86,6 @@ public class FirebaseFirestoreHelper {
                 .document("ajustes");
     }
 
-    /**
-     * Sincronizar un hábito en Firestore
-     */
     public void guardarHabitoEnNube(long usuarioId, Habito habito, OnCompleteListener listener) {
         if (usuarioId <= 0 || habito == null) return;
 
@@ -134,9 +124,6 @@ public class FirebaseFirestoreHelper {
                 });
     }
 
-    /**
-     * Eliminar un hábito de Firestore
-     */
     public void eliminarHabitoDeNube(long usuarioId, long habitoId, OnCompleteListener listener) {
         if (usuarioId <= 0 || habitoId <= 0) return;
 
@@ -153,9 +140,6 @@ public class FirebaseFirestoreHelper {
                 });
     }
 
-    /**
-     * Sincronizar un registro diario en Firestore
-     */
     public void guardarRegistroDiarioEnNube(long usuarioId, long habitoId, String fecha, int progreso, boolean completado, String nota) {
         if (usuarioId <= 0 || habitoId <= 0 || fecha == null) return;
 
@@ -173,9 +157,6 @@ public class FirebaseFirestoreHelper {
                 .addOnFailureListener(e -> Log.e(TAG, "Error guardando registro en Firestore: " + e.getMessage()));
     }
 
-    /**
-     * Sincronizar ajustes del usuario
-     */
     public void guardarAjustesEnNube(long usuarioId, String paleta, boolean vibracion) {
         if (usuarioId <= 0) return;
 

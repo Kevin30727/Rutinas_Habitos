@@ -384,7 +384,7 @@ public class InicioFragment extends Fragment {
                             intent.putExtra("EXTRA_HABITO_ID", h.getId());
                             startActivity(intent);
                         } else if (which == 1) {
-                            // Criterio 5 Rúbrica: Confirmación previa obligatoria antes de eliminar registros
+
                             new AlertDialog.Builder(ctx)
                                     .setTitle("¿Eliminar hábito?")
                                     .setMessage("¿Estás seguro de que deseas eliminar \"" + h.getNombre() + "\"? Se borrará permanentemente su historial y estadísticas.")

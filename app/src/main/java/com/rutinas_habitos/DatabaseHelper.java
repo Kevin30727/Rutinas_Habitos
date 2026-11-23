@@ -256,6 +256,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return id;
     }
 
+    public Usuario obtenerUsuarioPorCorreo(String correo) {
+        if (correo == null) return null;
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_USUARIO + " WHERE LOWER(" + COL_USER_CORREO + ") = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{correo.trim().toLowerCase()});
+        Usuario usuario = null;
+        if (cursor.moveToFirst()) {
+            usuario = new Usuario();
+            usuario.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COL_USER_ID)));
+            usuario.setNombre(cursor.getString(cursor.getColumnIndexOrThrow(COL_USER_NOMBRE)));
+            usuario.setCorreo(cursor.getString(cursor.getColumnIndexOrThrow(COL_USER_CORREO)));
+            usuario.setPassword(cursor.getString(cursor.getColumnIndexOrThrow(COL_USER_PASSWORD)));
+            usuario.setFechaRegistro(cursor.getString(cursor.getColumnIndexOrThrow(COL_USER_FECHA)));
+        }
+        cursor.close();
+        return usuario;
+    }
+
+    public void actualizarPasswordUsuario(long usuarioId, String nuevaPassword) {
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+            ContentValues cv = new ContentValues();
+            cv.put(COL_USER_PASSWORD, nuevaPassword);
+            db.update(TABLE_USUARIO, cv, COL_USER_ID + " = ?", new String[]{String.valueOf(usuarioId)});
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public Usuario autenticarUsuario(String correo, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_USUARIO + " WHERE LOWER(" + COL_USER_CORREO + ") = ? AND " + COL_USER_PASSWORD + " = ?";

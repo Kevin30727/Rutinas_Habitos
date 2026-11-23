@@ -71,18 +71,34 @@ public class RegistroActivity extends AppCompatActivity {
             return;
         }
 
-        long userId = dbHelper.registrarUsuario(nombre, correo, password);
-        if (userId != -1) {
-            dbHelper.insertarHabitosPorDefecto(userId);
-            sessionManager.crearSesion(userId, nombre, correo);
-            Toast.makeText(this, "¡Cuenta creada con éxito! Bienvenido 🌱", Toast.LENGTH_SHORT).show();
+        // Crear usuario en Firebase Authentication
+        btnCrearCuenta.setEnabled(false);
+        Toast.makeText(this, "Registrando usuario en la nube... ☁️", Toast.LENGTH_SHORT).show();
 
-            Intent intent = new Intent(RegistroActivity.this, InicioActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
-        } else {
-            Toast.makeText(this, "Error al registrar la cuenta, intenta nuevamente", Toast.LENGTH_SHORT).show();
-        }
+        FirebaseFirestoreHelper.getInstance().getAuth()
+                .createUserWithEmailAndPassword(correo, password)
+                .addOnCompleteListener(this, task -> {
+                    btnCrearCuenta.setEnabled(true);
+                    String firebaseUid = task.isSuccessful() && task.getResult().getUser() != null
+                            ? task.getResult().getUser().getUid()
+                            : "";
+
+                    long userId = dbHelper.registrarUsuario(nombre, correo, password);
+                    if (userId != -1) {
+                        // Sincronizar perfil en Cloud Firestore
+                        FirebaseFirestoreHelper.getInstance().guardarPerfilUsuario(userId, nombre, correo, firebaseUid);
+
+                        dbHelper.insertarHabitosPorDefecto(userId);
+                        sessionManager.crearSesion(userId, nombre, correo);
+                        Toast.makeText(this, "¡Cuenta creada en Firebase! Bienvenido 🌱", Toast.LENGTH_SHORT).show();
+
+                        Intent intent = new Intent(RegistroActivity.this, InicioActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(this, "Error al registrar la cuenta, intenta nuevamente", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

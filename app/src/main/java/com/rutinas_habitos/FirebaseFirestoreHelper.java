@@ -3,6 +3,8 @@ package com.rutinas_habitos;
 import android.util.Log;
 import androidx.annotation.NonNull;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -13,16 +15,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Helper singleton para gestionar la sincronización y operaciones en la nube con Cloud Firestore.
+ * Helper singleton para gestionar la sincronización y operaciones en la nube con Cloud Firestore y Firebase Auth.
  */
 public class FirebaseFirestoreHelper {
 
     private static final String TAG = "FirebaseFirestoreHelper";
     private static FirebaseFirestoreHelper instance;
     private final FirebaseFirestore db;
+    private final FirebaseAuth auth;
 
     private FirebaseFirestoreHelper() {
         db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
         // Habilitar persistencia offline automática de Firestore
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
@@ -39,6 +43,32 @@ public class FirebaseFirestoreHelper {
 
     public FirebaseFirestore getDb() {
         return db;
+    }
+
+    public FirebaseAuth getAuth() {
+        return auth;
+    }
+
+    public FirebaseUser getCurrentUser() {
+        return auth.getCurrentUser();
+    }
+
+    /**
+     * Registra el perfil del usuario en Firestore (nombre, correo, fecha)
+     */
+    public void guardarPerfilUsuario(long usuarioId, String nombre, String correo, String firebaseUid) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("idLocal", usuarioId);
+        data.put("nombre", nombre);
+        data.put("correo", correo);
+        data.put("firebaseUid", firebaseUid != null ? firebaseUid : "");
+        data.put("creadoEn", System.currentTimeMillis());
+
+        db.collection("usuarios")
+                .document(String.valueOf(usuarioId))
+                .set(data, com.google.firebase.firestore.SetOptions.merge())
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Perfil de usuario sincronizado en Firestore"))
+                .addOnFailureListener(e -> Log.e(TAG, "Error sincronizando perfil en Firestore: " + e.getMessage()));
     }
 
     // Colecciones raíz

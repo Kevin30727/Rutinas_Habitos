@@ -52,15 +52,43 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        Usuario usuario = dbHelper.autenticarUsuario(correo, password);
-        if (usuario != null) {
-            sessionManager.crearSesion(usuario.getId(), usuario.getNombre(), usuario.getCorreo());
-            dbHelper.insertarHabitosPorDefecto(usuario.getId());
-            Toast.makeText(this, "¡Bienvenida de nuevo, " + usuario.getNombre() + "! ✨", Toast.LENGTH_SHORT).show();
-            irAInicio();
-        } else {
-            Toast.makeText(this, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show();
-        }
+        btnIniciarSesion.setEnabled(false);
+
+        // Autenticar primero contra Firebase Auth en la nube
+        FirebaseFirestoreHelper.getInstance().getAuth()
+                .signInWithEmailAndPassword(correo, password)
+                .addOnCompleteListener(this, task -> {
+                    btnIniciarSesion.setEnabled(true);
+                    if (task.isSuccessful()) {
+                        // Login exitoso en Firebase Auth
+                        Usuario usuario = dbHelper.obtenerUsuarioPorCorreo(correo);
+                        long userId;
+                        if (usuario == null) {
+                            String nombre = correo.contains("@") ? correo.split("@")[0] : "Usuario";
+                            userId = dbHelper.registrarUsuario(nombre, correo, password);
+                        } else {
+                            userId = usuario.getId();
+                            // Si la contraseña cambió en Firebase, actualizarla en el caché local
+                            dbHelper.actualizarPasswordUsuario(userId, password);
+                        }
+
+                        Usuario usuarioLogueado = dbHelper.obtenerUsuarioPorId(userId);
+                        String nombreFinal = usuarioLogueado != null ? usuarioLogueado.getNombre() : "Usuario";
+                        sessionManager.crearSesion(userId, nombreFinal, correo);
+                        Toast.makeText(this, "¡Bienvenida de nuevo, " + nombreFinal + "! ☁️✨", Toast.LENGTH_SHORT).show();
+                        irAInicio();
+                    } else {
+                        // Si falla Firebase Auth (por ejemplo offline o cuenta local antigua), probar login local SQLite
+                        Usuario usuario = dbHelper.autenticarUsuario(correo, password);
+                        if (usuario != null) {
+                            sessionManager.crearSesion(usuario.getId(), usuario.getNombre(), usuario.getCorreo());
+                            Toast.makeText(this, "¡Bienvenida de nuevo, " + usuario.getNombre() + "! ✨", Toast.LENGTH_SHORT).show();
+                            irAInicio();
+                        } else {
+                            Toast.makeText(this, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     private void ingresarDemo() {

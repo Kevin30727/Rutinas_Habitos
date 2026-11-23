@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "450346781534",
+    "project_id": "rutinas-pastel",
+    "storage_bucket": "rutinas-pastel.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:450346781534:android:8545b8f3a0ef78605a5dcf",
+        "android_client_info": {
+          "package_name": "com.example.rutinas_pastel"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5YVSGk7S0Wb__ao7ltXfp3UI4cQ3xRec"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:450346781534:android:1219951b705083225a5dcf",
+        "android_client_info": {
+          "package_name": "com.rutinas_habitos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5YVSGk7S0Wb__ao7ltXfp3UI4cQ3xRec"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

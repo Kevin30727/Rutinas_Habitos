@@ -346,7 +346,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 cv.put(COL_HAB_FECHA_CREACION, habito.getFechaCreacion());
             }
 
-            return db.insert(TABLE_HABITO, null, cv);
+            long newId = db.insert(TABLE_HABITO, null, cv);
+            if (newId != -1) {
+                habito.setId(newId);
+                // Sincronización en la nube con Firestore
+                try {
+                    FirebaseFirestoreHelper.getInstance().guardarHabitoEnNube(habito.getUsuarioId(), habito, null);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return newId;
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
@@ -487,6 +497,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cv.put(COL_HAB_SONIDO, habito.getTipoSonidoNotificacion());
             cv.put(COL_HAB_DURACION_SONIDO, habito.getDuracionSonidoSegundos());
             int rows = db.update(TABLE_HABITO, cv, COL_HAB_ID + " = ?", new String[]{String.valueOf(habito.getId())});
+            if (rows > 0) {
+                // Sincronización en la nube con Firestore
+                try {
+                    FirebaseFirestoreHelper.getInstance().guardarHabitoEnNube(habito.getUsuarioId(), habito, null);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
             return rows > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -599,6 +617,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     new String[]{String.valueOf(habitoId), fecha});
             if (rows == 0) {
                 db.insert(TABLE_REGISTRO_DIARIO, null, cv);
+            }
+
+            // Sincronizar registro con Cloud Firestore
+            try {
+                FirebaseFirestoreHelper.getInstance().guardarRegistroDiarioEnNube(
+                        usuarioId, habitoId, fecha, progreso, completado, notas);
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -755,9 +781,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     public boolean eliminarHabito(long habitoId) {
         try {
+            Habito h = obtenerHabitoPorId(habitoId);
+            long usuarioId = h != null ? h.getUsuarioId() : 1;
+
             SQLiteDatabase db = this.getWritableDatabase();
             db.delete(TABLE_REGISTRO_DIARIO, COL_REG_HABITO_ID + " = ?", new String[]{String.valueOf(habitoId)});
             int rows = db.delete(TABLE_HABITO, COL_HAB_ID + " = ?", new String[]{String.valueOf(habitoId)});
+            
+            if (rows > 0) {
+                // Eliminar también de Firestore en la nube
+                try {
+                    FirebaseFirestoreHelper.getInstance().eliminarHabitoDeNube(usuarioId, habitoId, null);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
             return rows > 0;
         } catch (Exception e) {
             e.printStackTrace();

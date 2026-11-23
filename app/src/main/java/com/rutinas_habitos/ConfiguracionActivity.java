@@ -183,6 +183,11 @@ public class ConfiguracionActivity extends AppCompatActivity {
         actualizarUIPaleta(clave);
         VibrationHelper.vibrarExito(this);
         Toast.makeText(this, "¡Paleta " + nombreAmigable + " aplicada! 🎨✨", Toast.LENGTH_SHORT).show();
+
+        // Respaldar preferencias en la nube Firestore
+        try {
+            FirebaseFirestoreHelper.getInstance().guardarAjustesEnNube(userId, clave, true);
+        } catch (Exception ignored) {}
     }
 
     private void actualizarUIPaleta(String clave) {
